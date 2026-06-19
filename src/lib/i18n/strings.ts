@@ -8,11 +8,16 @@ export type StringKey =
   | "footer.tagline" | "footer.explore" | "footer.about" | "footer.dataVia"
   | "lang.switch"
   // city landing
-  | "city.breadcrumb.home" | "city.breadcrumb.city"
+  | "city.breadcrumb.home" | "city.breadcrumb.city" | "city.breadcrumb.cities"
   | "city.heading" | "city.subheading"
   | "city.notFound" | "city.backHome"
   | "city.error" | "city.retry"
   | "city.reviewsLabel" | "city.addressUnknown"
+  // cities (index/overview)
+  | "cities.title" | "cities.heading" | "cities.intro"
+  | "cities.searchPlaceholder" | "cities.countryAll"
+  | "cities.empty" | "cities.venues" | "cities.viewCity"
+  | "cities.mapTitle" | "cities.listTitle"
   // cuisine landing
   | "cuisine.breadcrumb.cuisine"
   | "cuisine.heading"  // "{label} restaurants"
@@ -59,12 +64,20 @@ const en: Required<Pick<Dict, StringKey>> = {
   "footer.tagline": "The honest guide to restaurants, cafés and bars — built on open data and real reviews.",
   "footer.explore": "Explore", "footer.about": "About", "footer.dataVia": "Data via",
   "lang.switch": "Language",
-  "city.breadcrumb.home": "Home", "city.breadcrumb.city": "City",
+  "city.breadcrumb.home": "Home", "city.breadcrumb.city": "City", "city.breadcrumb.cities": "Cities",
   "city.heading": "Restaurants in {city}",
   "city.subheading": "Discover restaurants, cafés and bars in {city}. Sorted by rating — find what locals love.",
   "city.notFound": "City not found", "city.backHome": "Back to home",
   "city.error": "Something went wrong", "city.retry": "Try again",
   "city.reviewsLabel": "reviews", "city.addressUnknown": "Address unknown",
+  "cities.title": "All cities — PlaceResults",
+  "cities.heading": "Browse restaurants by city",
+  "cities.intro": "Explore every city in our guide. Pick a destination on the map or search the list to discover local restaurants, cafés and bars.",
+  "cities.searchPlaceholder": "Search city…",
+  "cities.countryAll": "All countries",
+  "cities.empty": "No cities match your search.",
+  "cities.venues": "venues", "cities.viewCity": "View city",
+  "cities.mapTitle": "World map", "cities.listTitle": "Cities",
   "cuisine.breadcrumb.cuisine": "Cuisine",
   "cuisine.heading": "{label} restaurants",
   "cuisine.subheading": "{label} restaurants — sorted by rating.",
@@ -117,12 +130,20 @@ const nl: Dict = {
   "footer.tagline": "De eerlijke gids voor restaurants, cafés en bars — gebouwd op open data en echte reviews.",
   "footer.explore": "Verkennen", "footer.about": "Over", "footer.dataVia": "Data via",
   "lang.switch": "Taal",
-  "city.breadcrumb.home": "Home", "city.breadcrumb.city": "Stad",
+  "city.breadcrumb.home": "Home", "city.breadcrumb.city": "Stad", "city.breadcrumb.cities": "Steden",
   "city.heading": "Restaurants in {city}",
   "city.subheading": "Ontdek restaurants, cafés en bars in {city}. Gesorteerd op beoordeling — vind de favorieten van bezoekers.",
   "city.notFound": "Stad niet gevonden", "city.backHome": "Terug naar home",
   "city.error": "Er ging iets mis", "city.retry": "Opnieuw proberen",
   "city.reviewsLabel": "reviews", "city.addressUnknown": "Adres onbekend",
+  "cities.title": "Alle steden — PlaceResults",
+  "cities.heading": "Bekijk restaurants per stad",
+  "cities.intro": "Verken elke stad in onze gids. Kies een bestemming op de kaart of zoek in de lijst om lokale restaurants, cafés en bars te ontdekken.",
+  "cities.searchPlaceholder": "Zoek stad…",
+  "cities.countryAll": "Alle landen",
+  "cities.empty": "Geen steden gevonden.",
+  "cities.venues": "locaties", "cities.viewCity": "Bekijk stad",
+  "cities.mapTitle": "Wereldkaart", "cities.listTitle": "Steden",
   "cuisine.breadcrumb.cuisine": "Keuken",
   "cuisine.heading": "{label} restaurants",
   "cuisine.subheading": "{label} restaurants — gesorteerd op beoordeling.",

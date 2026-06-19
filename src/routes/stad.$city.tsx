@@ -91,7 +91,11 @@ function CityPage() {
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
           <nav className="text-sm text-muted-foreground mb-3">
-            <Link to="/" className="hover:text-primary">Home</Link> / <span>Stad</span> / <span className="text-foreground">{city}</span>
+            <Link to="/" className="hover:text-primary">{t(DEFAULT_LOCALE, "city.breadcrumb.home")}</Link>
+            {" / "}
+            <Link to="/steden" className="hover:text-primary">{t(DEFAULT_LOCALE, "city.breadcrumb.cities")}</Link>
+            {" / "}
+            <span className="text-foreground">{city}</span>
           </nav>
           <h1 className="font-display text-4xl sm:text-5xl text-ink">Restaurants in {city}</h1>
           <p className="text-muted-foreground mt-3 max-w-2xl">
