@@ -223,7 +223,6 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
         setRadiusKm={setRadiusKm}
         geoError={geoError}
         geoLoading={geoLoading}
-        resultCount={total}
         activeFilterCount={activeFilterCount}
         clearFilters={clearFilters}
         sort={sort}
@@ -321,9 +320,6 @@ function FilterBar({
             <option value="distance" disabled={!userPos}>Dichtstbij</option>
             <option value="name">Naam (A–Z)</option>
           </select>
-          <div className="ml-auto text-sm text-muted-foreground">
-            {resultCount.toLocaleString("nl-NL")} resultaten
-          </div>
         </div>
 
         {allCuisines.length > 0 && (
@@ -530,7 +526,7 @@ function MapSection({ restaurants }: { restaurants: Restaurant[] }) {
         <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
           <div>
             <h2 className="font-display text-3xl sm:text-4xl text-ink">Op de kaart</h2>
-            <p className="text-muted-foreground mt-1">{restaurants.length} locaties in de buurt</p>
+            <p className="text-muted-foreground mt-1">Bekijk restaurants in de buurt</p>
           </div>
         </div>
         <div className="rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
@@ -598,10 +594,7 @@ function AllList({
   }
   return (
     <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-2">Alle restaurants</h2>
-      <p className="text-muted-foreground mb-8">
-        {restaurants.length.toLocaleString("nl-NL")} van {total.toLocaleString("nl-NL")} weergegeven
-      </p>
+      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {restaurants.map((r, i) => (
           <RestaurantCard key={r.id} r={r} colorIdx={i + 2} />
