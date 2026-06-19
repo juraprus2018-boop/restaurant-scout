@@ -482,32 +482,49 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           <section>
             <h2 className="text-xl font-semibold mb-3">{tr("restaurant.reviews")}</h2>
-            {user ? (
-              <form onSubmit={submitReview} className="bg-background border rounded-lg p-4 mb-4 space-y-3">
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button key={n} type="button" onClick={() => setRating(n)} aria-label={tr("restaurant.starsLabel", { n })}>
-                      <Star className={`w-6 h-6 ${n <= rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
-                    </button>
-                  ))}
+            <form onSubmit={submitReview} className="bg-background border rounded-lg p-4 mb-4 space-y-3">
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button key={n} type="button" onClick={() => setRating(n)} aria-label={tr("restaurant.starsLabel", { n })}>
+                    <Star className={`w-6 h-6 ${n <= rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
+                  </button>
+                ))}
+              </div>
+              {!user && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    required
+                    maxLength={80}
+                    placeholder="Name"
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    className="border rounded-md px-3 py-2 text-sm bg-background"
+                  />
+                  <input
+                    type="email"
+                    required
+                    maxLength={255}
+                    placeholder="Email (not shown)"
+                    value={authorEmail}
+                    onChange={(e) => setAuthorEmail(e.target.value)}
+                    className="border rounded-md px-3 py-2 text-sm bg-background"
+                  />
                 </div>
-                <Textarea placeholder={tr("restaurant.reviewPlaceholder")} value={comment} onChange={(e) => setComment(e.target.value)} />
-                <Button type="submit" disabled={submitting}>{submitting ? tr("restaurant.submitting") : tr("restaurant.submit")}</Button>
-              </form>
-            ) : (
-              <p className="text-sm text-muted-foreground mb-4">
-                {tr("restaurant.loginToReview", { link: "" }).split("{link}")[0]}
-                <Link to="/auth" className="text-primary hover:underline">{tr("restaurant.loginLink")}</Link>
-                {tr("restaurant.loginToReview", { link: "" }).split("{link}")[1] ?? ""}
-              </p>
-            )}
+              )}
+              <Textarea placeholder={tr("restaurant.reviewPlaceholder")} value={comment} onChange={(e) => setComment(e.target.value)} />
+              <Button type="submit" disabled={submitting}>{submitting ? tr("restaurant.submitting") : tr("restaurant.submit")}</Button>
+            </form>
             <div className="space-y-3">
               {reviews.map((r) => (
                 <article key={r.id} className="bg-background border rounded-lg p-4">
-                  <div className="flex gap-0.5 mb-1" aria-label={tr("restaurant.starsLabel", { n: r.rating })}>
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <Star key={n} className={`w-4 h-4 ${n <= r.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
-                    ))}
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="flex gap-0.5" aria-label={tr("restaurant.starsLabel", { n: r.rating })}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star key={n} className={`w-4 h-4 ${n <= r.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
+                      ))}
+                    </div>
+                    {r.author_name && <span className="text-sm font-medium">{r.author_name}</span>}
                   </div>
                   {r.comment && <p className="text-sm">{r.comment}</p>}
                   <p className="text-xs text-muted-foreground mt-1">{new Date(r.created_at).toLocaleDateString(locale)}</p>
