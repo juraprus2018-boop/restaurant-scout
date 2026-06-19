@@ -4,6 +4,7 @@ import { listByCuisine } from "@/lib/seo-public.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { MapPin, Star } from "lucide-react";
 import { cuisineLabel } from "@/lib/osm-labels";
+import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
 
 const cuisineQuery = (key: string) =>
   queryOptions({

@@ -15,6 +15,7 @@ import { getRestaurantBySlug } from "@/lib/restaurants-public.functions";
 import { amenityLabel, cuisineLabel, parseOpeningHours, YESNO_NL } from "@/lib/osm-labels";
 import defaultBanner from "@/assets/default-restaurant-banner.jpg";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
 
 const restaurantQuery = (slug: string) =>
   queryOptions({
@@ -171,7 +172,12 @@ function buildFaq(r: any, t: Record<string, string>): Array<{ q: string; a: stri
 }
 
 function RestaurantPage() {
-  const { slug } = Route.useParams();
+  return <RestaurantPageBody />;
+}
+
+export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug: slugOverride }: { locale?: LocaleCode; slug?: string } = {}) {
+  const params = Route.useParams();
+  const slug = slugOverride ?? params.slug;
   const { data, refetch } = useSuspenseQuery(restaurantQuery(slug));
   const restaurant = data.restaurant as any;
   const initialReviews = data.reviews as Review[];
@@ -257,7 +263,7 @@ function RestaurantPage() {
 
   return (
     <div className="min-h-screen bg-muted/20">
-      <SiteHeader />
+      <SiteHeader locale={locale} />
       <header className="bg-background border-b px-4 py-3">
 
         <nav aria-label="Kruimelpad" className="max-w-5xl mx-auto text-sm">
@@ -503,7 +509,7 @@ function RestaurantPage() {
           )}
         </aside>
       </div>
-      <SiteFooter />
+      <SiteFooter locale={locale} />
     </div>
   );
 }
