@@ -584,13 +584,6 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
   );
 }
 
-function featureKey(label: string): string {
-  return ({
-    "Bezorging": "delivery", "Afhalen": "takeaway", "Terras": "outdoor_seating",
-    "Binnen zitten": "indoor_seating", "Wifi": "internet_access", "Roken toegestaan": "smoking",
-    "Honden welkom": "dog", "Parkeren": "parking",
-  } as Record<string, string>)[label] ?? "";
-}
 
 function DetailMap({ lat, lng, name }: { lat: number; lng: number; name: string }) {
   const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
