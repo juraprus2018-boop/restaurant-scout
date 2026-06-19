@@ -545,19 +545,19 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
   );
 }
 
-function MapSection({ restaurants }: { restaurants: Restaurant[] }) {
+function MapSection() {
   return (
     <section id="kaart" className="bg-secondary/40 border-y border-border py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
           <div>
             <h2 className="font-display text-3xl sm:text-4xl text-ink">Op de kaart</h2>
-            <p className="text-muted-foreground mt-1">Bekijk restaurants in de buurt</p>
+            <p className="text-muted-foreground mt-1">Bekijk alle restaurants — gegroepeerd in clusters</p>
           </div>
         </div>
         <div className="rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
           <ClientOnly fallback={<div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>}>
-            <RestaurantMap restaurants={restaurants} />
+            <RestaurantMap />
           </ClientOnly>
         </div>
       </div>
@@ -565,31 +565,31 @@ function MapSection({ restaurants }: { restaurants: Restaurant[] }) {
   );
 }
 
-function RestaurantMap({ restaurants }: { restaurants: Restaurant[] }) {
+function RestaurantMap() {
   const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
+  const [points, setPoints] = useState<import("@/components/MapView").ClusterPoint[]>([]);
   useEffect(() => {
     import("@/components/MapView").then(setMod);
+    supabase
+      .from("restaurants")
+      .select("id,name,slug,lat,lng,address")
+      .not("lat", "is", null)
+      .not("lng", "is", null)
+      .limit(5000)
+      .then(({ data }) => {
+        if (data) setPoints(data as any);
+      });
   }, []);
   if (!mod) return <div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>;
-  const { MapContainer, TileLayer, Marker, Popup, OSM_ATTRIBUTION, OSM_TILES, coloredIcon } = mod;
-  const center: [number, number] = restaurants.length > 0 ? [restaurants[0].lat, restaurants[0].lng] : [52.3676, 4.9041];
+  const { MapContainer, TileLayer, OSM_ATTRIBUTION, OSM_TILES, ClusterLayer } = mod;
   return (
-    <MapContainer center={center} zoom={12} style={{ height: "100%", width: "100%" }}>
+    <MapContainer center={[52.3676, 4.9041]} zoom={5} style={{ height: "100%", width: "100%" }}>
       <TileLayer url={OSM_TILES} attribution={OSM_ATTRIBUTION} />
-      {restaurants.map((r) => (
-        <Marker key={r.id} position={[r.lat, r.lng]} icon={coloredIcon("green")}>
-          <Popup>
-            <div className="font-semibold">{r.name}</div>
-            <div className="text-xs">{r.address}</div>
-            <Link to="/restaurant/$slug" params={{ slug: r.slug }} className="text-xs text-primary hover:underline">
-              Bekijk →
-            </Link>
-          </Popup>
-        </Marker>
-      ))}
+      <ClusterLayer points={points} />
     </MapContainer>
   );
 }
+
 
 
 function AllList({
