@@ -194,6 +194,11 @@ const nl: Dict = {
   "wd.Fr": "Vrijdag", "wd.Sa": "Zaterdag", "wd.Su": "Zondag", "wd.PH": "Feestdagen",
   "wd.to": "t/m",
   "yn.yes": "Ja", "yn.no": "Nee", "yn.limited": "Beperkt", "yn.designated": "Speciaal voorzien", "yn.only": "Uitsluitend",
+  "action.navigate": "Navigeer", "action.call": "Bel", "action.website": "Website",
+  "action.share": "Deel", "action.save": "Bewaar", "action.saved": "Bewaard", "action.linkCopied": "Link gekopieerd!",
+  "status.openNow": "Nu open", "status.closed": "Gesloten",
+  "status.closesAt": "sluit {time}", "status.opensAt": "opent {time}",
+  "nearby.title": "Meer in {city}",
 };
 
 const de: Dict = {
