@@ -181,24 +181,57 @@ function tagImage(t: Record<string, string>): string | null {
   return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(clean)}?width=1600`;
 }
 
-function buildFaq(r: any, t: Record<string, string>): Array<{ q: string; a: string }> {
+function buildFaq(lang: LocaleCode, r: any, tg: Record<string, string>): Array<{ q: string; a: string }> {
   const faq: Array<{ q: string; a: string }> = [];
-  if (r.opening_hours) faq.push({ q: `Wat zijn de openingstijden van ${r.name}?`, a: `${r.name} is geopend: ${r.opening_hours}.` });
-  const addr = [t["addr:street"], t["addr:housenumber"]].filter(Boolean).join(" ") || r.address;
-  if (addr) faq.push({ q: `Waar ligt ${r.name}?`, a: `${r.name} bevindt zich aan ${addr}${r.city ? `, ${r.city}` : ""}.` });
-  if (r.phone) faq.push({ q: `Hoe kan ik ${r.name} bereiken?`, a: `Bel ${r.phone}${r.website ? ` of bezoek ${r.website}` : ""}.` });
-  if (YES(t.takeaway) || YES(t.delivery)) {
-    const opts = [YES(t.takeaway) && "afhalen", YES(t.delivery) && "bezorgen"].filter(Boolean).join(" en ");
-    faq.push({ q: `Kan ik bij ${r.name} ${opts}?`, a: `Ja, ${r.name} biedt ${opts} aan.` });
-  } else if (NO(t.takeaway) && NO(t.delivery)) {
-    faq.push({ q: `Kan ik bij ${r.name} afhalen of bezorgen?`, a: `Nee, ${r.name} biedt geen afhaal- of bezorgservice.` });
+  const name = r.name as string;
+  if (r.opening_hours) {
+    faq.push({
+      q: t(lang, "faq.q.hours", { name }),
+      a: t(lang, "faq.a.hours", { name, hours: r.opening_hours }),
+    });
   }
-  if (t.wheelchair) {
-    const label = { yes: "volledig rolstoeltoegankelijk", limited: "beperkt rolstoeltoegankelijk", no: "niet rolstoeltoegankelijk" }[t.wheelchair] ?? null;
-    if (label) faq.push({ q: `Is ${r.name} rolstoeltoegankelijk?`, a: `${r.name} is ${label}.` });
+  const addr = [tg["addr:street"], tg["addr:housenumber"]].filter(Boolean).join(" ") || r.address;
+  if (addr) {
+    faq.push({
+      q: t(lang, "faq.q.where", { name }),
+      a: t(lang, "faq.a.where", { name, addr, city: r.city ? `, ${r.city}` : "" }),
+    });
+  }
+  if (r.phone) {
+    faq.push({
+      q: t(lang, "faq.q.contact", { name }),
+      a: r.website
+        ? t(lang, "faq.a.contactWeb", { phone: r.phone, website: r.website })
+        : t(lang, "faq.a.contact", { phone: r.phone }),
+    });
+  }
+  if (YES(tg.takeaway) || YES(tg.delivery)) {
+    const parts = [YES(tg.takeaway) && t(lang, "faq.opt.takeaway"), YES(tg.delivery) && t(lang, "faq.opt.delivery")].filter(Boolean) as string[];
+    const opts = parts.join(` ${t(lang, "faq.opt.and")} `);
+    faq.push({
+      q: t(lang, "faq.q.takeawayDelivery", { name, opts }),
+      a: t(lang, "faq.a.takeawayDelivery", { name, opts }),
+    });
+  } else if (NO(tg.takeaway) && NO(tg.delivery)) {
+    faq.push({
+      q: t(lang, "faq.q.takeawayDelivery", { name, opts: `${t(lang, "faq.opt.takeaway")} ${t(lang, "faq.opt.and")} ${t(lang, "faq.opt.delivery")}` }),
+      a: t(lang, "faq.a.takeawayDeliveryNo", { name }),
+    });
+  }
+  if (tg.wheelchair) {
+    const stateKey = ({ yes: "faq.state.full", limited: "faq.state.limited", no: "faq.state.no" } as const)[tg.wheelchair as "yes" | "limited" | "no"];
+    if (stateKey) {
+      faq.push({
+        q: t(lang, "faq.q.wheelchair", { name }),
+        a: t(lang, "faq.a.wheelchair", { name, state: t(lang, stateKey) }),
+      });
+    }
   }
   if ((r.cuisine ?? []).length) {
-    faq.push({ q: `Welke keuken serveert ${r.name}?`, a: `${r.name} staat bekend om ${(r.cuisine as string[]).map(cuisineLabel).join(", ")}.` });
+    faq.push({
+      q: t(lang, "faq.q.cuisine", { name }),
+      a: t(lang, "faq.a.cuisine", { name, cuisines: (r.cuisine as string[]).map(cuisineLabel).join(", ") }),
+    });
   }
   return faq;
 }
