@@ -21,7 +21,8 @@ function rewritePath(pathname: string, target: LocaleCode): string {
   // Only the city landing page is localized so far.
   const isLocalizable = segs[0] === "stad" && segs.length >= 2;
   if (!isLocalizable) {
-    return target === DEFAULT_LOCALE ? "/" : `/${target}`;
+    // Homepage isn't localized yet — go to root rather than 404.
+    return "/";
   }
   if (target === DEFAULT_LOCALE) return "/" + segs.join("/");
   return "/" + target + "/" + segs.join("/");
