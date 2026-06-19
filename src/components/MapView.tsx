@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 // Fix default marker icons (Leaflet expects bundled images)
 const DefaultIcon = L.icon({
@@ -35,5 +38,41 @@ export function FlyTo({ center, zoom }: { center: [number, number]; zoom?: numbe
   useEffect(() => {
     map.flyTo(center, zoom ?? map.getZoom());
   }, [center, zoom, map]);
+  return null;
+}
+
+export type ClusterPoint = {
+  id: string;
+  name: string;
+  slug: string;
+  lat: number;
+  lng: number;
+  address?: string | null;
+};
+
+export function ClusterLayer({ points }: { points: ClusterPoint[] }) {
+  const map = useMap();
+  useEffect(() => {
+    const group = (L as any).markerClusterGroup({
+      chunkedLoading: true,
+      showCoverageOnHover: false,
+      maxClusterRadius: 60,
+    });
+    for (const p of points) {
+      const m = L.marker([p.lat, p.lng], { icon: coloredIcon("green") });
+      const safeName = String(p.name).replace(/</g, "&lt;");
+      const safeAddr = p.address ? String(p.address).replace(/</g, "&lt;") : "";
+      m.bindPopup(
+        `<div style="font-weight:600">${safeName}</div>` +
+          (safeAddr ? `<div style="font-size:12px;color:#666">${safeAddr}</div>` : "") +
+          `<a href="/restaurant/${encodeURIComponent(p.slug)}" style="font-size:12px;color:hsl(28 90% 45%);text-decoration:underline">Bekijk →</a>`,
+      );
+      group.addLayer(m);
+    }
+    map.addLayer(group);
+    return () => {
+      map.removeLayer(group);
+    };
+  }, [map, points]);
   return null;
 }
