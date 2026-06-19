@@ -5,7 +5,7 @@ function escapeXml(s: string) {
   return s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]!));
 }
 
-export const Route = createFileRoute("/sitemap-restaurants[.]xml")({
+export const Route = createFileRoute("/sitemap-restaurants.xml")({
   server: {
     handlers: {
       GET: async ({ request }) => {

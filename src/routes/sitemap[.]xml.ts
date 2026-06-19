@@ -16,7 +16,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const entries: string[] = [];
         entries.push(`<sitemap><loc>${base}/sitemap-landing.xml</loc><lastmod>${now}</lastmod></sitemap>`);
         for (let i = 1; i <= pages; i++) {
-          entries.push(`<sitemap><loc>${base}/sitemap-restaurants-${i}.xml</loc><lastmod>${now}</lastmod></sitemap>`);
+          entries.push(`<sitemap><loc>${base}/sitemap-restaurants.xml?page=${i}</loc><lastmod>${now}</lastmod></sitemap>`);
         }
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
