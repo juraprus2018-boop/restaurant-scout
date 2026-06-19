@@ -168,7 +168,7 @@ function slugifyCity(c: string): string {
   return c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-type Review = { id: string; rating: number; comment: string | null; created_at: string; user_id: string };
+type Review = { id: string; rating: number; comment: string | null; created_at: string; user_id: string | null; author_name: string | null };
 
 const YES = (v?: string) => v === "yes" || v === "designated" || v === "limited" || v === "only";
 const NO = (v?: string) => v === "no";
