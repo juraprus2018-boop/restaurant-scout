@@ -204,8 +204,12 @@ function AdminMap({
   pois: Poi[];
   onClick: (m: Marker) => void;
 }) {
-  const { MapContainer, TileLayer, Marker: M, Circle, Popup, useMapEvents, OSM_ATTRIBUTION, OSM_TILES, coloredIcon } =
-    require("@/components/MapView") as typeof import("@/components/MapView");
+  const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
+  useEffect(() => {
+    import("@/components/MapView").then(setMod);
+  }, []);
+  if (!mod) return <div className="h-full grid place-items-center text-muted-foreground bg-muted">Kaart laden...</div>;
+  const { MapContainer, TileLayer, Marker: M, Circle, Popup, useMapEvents, OSM_ATTRIBUTION, OSM_TILES, coloredIcon } = mod;
 
   function ClickHandler() {
     useMapEvents({
@@ -238,3 +242,4 @@ function AdminMap({
     </MapContainer>
   );
 }
+
