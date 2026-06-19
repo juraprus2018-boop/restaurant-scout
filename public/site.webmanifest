@@ -1,0 +1,22 @@
+{
+  "name": "PlaceResults — Restaurantgids",
+  "short_name": "PlaceResults",
+  "description": "Ontdek de beste restaurants, cafés en bistro's bij jou in de buurt.",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#2D6A4F",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "lang": "nl"
+}
