@@ -245,6 +245,7 @@ function FilterBar({
   openNow, setOpenNow, cuisines, toggleCuisine, allCuisines,
   useNearby, userPos, clearNearby, radiusKm, setRadiusKm,
   geoError, geoLoading, resultCount, activeFilterCount, clearFilters,
+  sort, setSort,
 }: {
   openNow: boolean; setOpenNow: (b: boolean) => void;
   cuisines: string[]; toggleCuisine: (c: string) => void; allCuisines: string[];
@@ -252,6 +253,7 @@ function FilterBar({
   radiusKm: number; setRadiusKm: (n: number) => void;
   geoError: string | null; geoLoading: boolean;
   resultCount: number; activeFilterCount: number; clearFilters: () => void;
+  sort: SortKey; setSort: (s: SortKey) => void;
 }) {
   return (
     <section id="filters" className="border-b border-border bg-card sticky top-16 z-30">
