@@ -13,7 +13,7 @@ export function SiteHeader({ locale = DEFAULT_LOCALE }: ChromeProps = {}) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground font-extrabold text-lg">●</span>
-          <span className="font-display text-xl text-ink">PlaceResults</span>
+          <span className="font-display text-xl text-ink">PlaceResults.com</span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-foreground/80">
           <Link to="/" hash="ontdek" className="hover:text-primary">{t(locale, "nav.restaurants")}</Link>
@@ -36,7 +36,7 @@ export function SiteFooter({ locale = DEFAULT_LOCALE }: ChromeProps = {}) {
         <div className="sm:col-span-2">
           <div className="flex items-center gap-2 text-white">
             <span className="grid place-items-center w-9 h-9 rounded-full bg-accent text-ink font-extrabold">●</span>
-            <span className="font-display text-xl">PlaceResults</span>
+            <span className="font-display text-xl">PlaceResults.com</span>
           </div>
           <p className="mt-3 max-w-sm leading-relaxed">{t(locale, "footer.tagline")}</p>
         </div>
