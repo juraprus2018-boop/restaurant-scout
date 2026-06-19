@@ -53,13 +53,31 @@ type Restaurant = {
 };
 
 const CARD_COLORS = [
-  "from-emerald-400 to-teal-500",
-  "from-amber-400 to-orange-500",
-  "from-rose-400 to-pink-500",
-  "from-sky-400 to-blue-500",
-  "from-violet-400 to-purple-500",
-  "from-lime-400 to-green-500",
+  "from-emerald-900/60 to-emerald-950/80",
+  "from-amber-900/60 to-orange-950/80",
+  "from-rose-900/60 to-pink-950/80",
+  "from-sky-900/60 to-blue-950/80",
+  "from-violet-900/60 to-purple-950/80",
+  "from-lime-900/60 to-green-950/80",
 ];
+
+// Stable Unsplash photos per venue category (OSM amenity tag)
+const CATEGORY_PHOTOS: Record<string, string> = {
+  restaurant: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=70",
+  bar: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=70",
+  pub: "https://images.unsplash.com/photo-1538488881038-e252a119ace7?auto=format&fit=crop&w=800&q=70",
+  cafe: "https://images.unsplash.com/photo-1453614512568-c4024d13c247?auto=format&fit=crop&w=800&q=70",
+  fast_food: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=70",
+  ice_cream: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=800&q=70",
+  biergarten: "https://images.unsplash.com/photo-1436076863939-06870fe779c2?auto=format&fit=crop&w=800&q=70",
+  food_court: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=70",
+  nightclub: "https://images.unsplash.com/photo-1571266028243-d220c6a0d6e8?auto=format&fit=crop&w=800&q=70",
+};
+function getCategoryPhoto(r: Restaurant): string {
+  const amenity = r.raw_osm_tags?.amenity?.toLowerCase();
+  if (amenity && CATEGORY_PHOTOS[amenity]) return CATEGORY_PHOTOS[amenity];
+  return CATEGORY_PHOTOS.restaurant;
+}
 
 
 const PAGE_SIZE = 24;
@@ -481,8 +499,16 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
       params={{ slug: r.slug }}
       className="group block rounded-2xl overflow-hidden bg-card border border-border hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
     >
-      <div className={`relative h-44 bg-gradient-to-br ${color} grid place-items-center`}>
-        <span className="font-display text-7xl text-white/95 drop-shadow">{initial}</span>
+      <div className={`relative h-44 grid place-items-center overflow-hidden`}>
+        <img
+          src={getCategoryPhoto(r)}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className={`absolute inset-0 bg-gradient-to-br ${color}`} />
+        <span className="relative font-display text-7xl text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">{initial}</span>
         <button
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 grid place-items-center hover:scale-110 transition-transform"
           onClick={(e) => { e.preventDefault(); }}
