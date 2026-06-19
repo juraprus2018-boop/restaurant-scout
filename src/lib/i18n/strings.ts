@@ -131,6 +131,11 @@ const en: Required<Pick<Dict, StringKey>> = {
   "wd.Fr": "Friday", "wd.Sa": "Saturday", "wd.Su": "Sunday", "wd.PH": "Public holidays",
   "wd.to": "to",
   "yn.yes": "Yes", "yn.no": "No", "yn.limited": "Limited", "yn.designated": "Designated", "yn.only": "Only",
+  "action.navigate": "Navigate", "action.call": "Call", "action.website": "Website",
+  "action.share": "Share", "action.save": "Save", "action.saved": "Saved", "action.linkCopied": "Link copied!",
+  "status.openNow": "Open now", "status.closed": "Closed",
+  "status.closesAt": "closes {time}", "status.opensAt": "opens {time}",
+  "nearby.title": "More in {city}",
 };
 
 const nl: Dict = {
