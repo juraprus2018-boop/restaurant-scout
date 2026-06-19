@@ -55,7 +55,15 @@ export type StringKey =
   | "wd.Mo" | "wd.Tu" | "wd.We" | "wd.Th" | "wd.Fr" | "wd.Sa" | "wd.Su" | "wd.PH"
   | "wd.to"
   // yes/no labels
-  | "yn.yes" | "yn.no" | "yn.limited" | "yn.designated" | "yn.only";
+  | "yn.yes" | "yn.no" | "yn.limited" | "yn.designated" | "yn.only"
+  // action bar
+  | "action.navigate" | "action.call" | "action.website"
+  | "action.share" | "action.save" | "action.saved" | "action.linkCopied"
+  // open/closed status
+  | "status.openNow" | "status.closed"
+  | "status.closesAt" | "status.opensAt"
+  // nearby
+  | "nearby.title";
 
 type Dict = Partial<Record<StringKey, string>>;
 
@@ -123,6 +131,11 @@ const en: Required<Pick<Dict, StringKey>> = {
   "wd.Fr": "Friday", "wd.Sa": "Saturday", "wd.Su": "Sunday", "wd.PH": "Public holidays",
   "wd.to": "to",
   "yn.yes": "Yes", "yn.no": "No", "yn.limited": "Limited", "yn.designated": "Designated", "yn.only": "Only",
+  "action.navigate": "Navigate", "action.call": "Call", "action.website": "Website",
+  "action.share": "Share", "action.save": "Save", "action.saved": "Saved", "action.linkCopied": "Link copied!",
+  "status.openNow": "Open now", "status.closed": "Closed",
+  "status.closesAt": "closes {time}", "status.opensAt": "opens {time}",
+  "nearby.title": "More in {city}",
 };
 
 const nl: Dict = {
@@ -181,6 +194,11 @@ const nl: Dict = {
   "wd.Fr": "Vrijdag", "wd.Sa": "Zaterdag", "wd.Su": "Zondag", "wd.PH": "Feestdagen",
   "wd.to": "t/m",
   "yn.yes": "Ja", "yn.no": "Nee", "yn.limited": "Beperkt", "yn.designated": "Speciaal voorzien", "yn.only": "Uitsluitend",
+  "action.navigate": "Navigeer", "action.call": "Bel", "action.website": "Website",
+  "action.share": "Deel", "action.save": "Bewaar", "action.saved": "Bewaard", "action.linkCopied": "Link gekopieerd!",
+  "status.openNow": "Nu open", "status.closed": "Gesloten",
+  "status.closesAt": "sluit {time}", "status.opensAt": "opent {time}",
+  "nearby.title": "Meer in {city}",
 };
 
 const de: Dict = {
