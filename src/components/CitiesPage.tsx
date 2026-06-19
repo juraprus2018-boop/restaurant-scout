@@ -99,7 +99,7 @@ export function CitiesPageBody({ locale = DEFAULT_LOCALE }: { locale?: LocaleCod
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="rounded-2xl overflow-hidden border border-border bg-card" style={{ height: 420 }}>
           <ClientOnly fallback={<div className="w-full h-full bg-muted animate-pulse" />}>
-            {() => <CitiesMap cities={filtered} locale={locale} />}
+            <CitiesMap cities={filtered} locale={locale} />
           </ClientOnly>
         </div>
       </section>
