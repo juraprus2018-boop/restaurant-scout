@@ -17,6 +17,9 @@ import defaultBanner from "@/assets/default-restaurant-banner.jpg";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
 import { t, parseOpeningHoursI18n, yesNoLabel } from "@/lib/i18n/strings";
+import { ActionBar } from "@/components/restaurant/ActionBar";
+import { OpenStatusBadge } from "@/components/restaurant/OpenStatusBadge";
+import { NearbyRestaurants } from "@/components/restaurant/NearbyRestaurants";
 
 const restaurantQuery = (slug: string) =>
   queryOptions({
