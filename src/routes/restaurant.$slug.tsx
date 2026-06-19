@@ -246,6 +246,9 @@ function RestaurantPage() {
   const osmUrl = restaurant.osm_id && restaurant.osm_type
     ? `https://www.openstreetmap.org/${restaurant.osm_type}/${restaurant.osm_id}`
     : null;
+  const osmEditUrl = restaurant.osm_id && restaurant.osm_type
+    ? `https://www.openstreetmap.org/edit?${restaurant.osm_type}=${restaurant.osm_id}`
+    : null;
 
   const openingRows = restaurant.opening_hours ? parseOpeningHours(restaurant.opening_hours) : [];
   const faq = buildFaq(restaurant, t);
@@ -484,9 +487,16 @@ function RestaurantPage() {
           )}
 
           {osmUrl && (
-            <a href={osmUrl} target="_blank" rel="noopener" className="block text-xs text-muted-foreground hover:text-foreground text-center">
-              Data van OpenStreetMap — bewerk op osm.org ↗
-            </a>
+            <div className="flex flex-col gap-1 text-xs text-center">
+              <a href={osmUrl} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
+                Bekijk op OpenStreetMap ↗
+              </a>
+              {osmEditUrl && (
+                <a href={osmEditUrl} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
+                  Bewerken in iD-editor ↗
+                </a>
+              )}
+            </div>
           )}
         </aside>
       </div>
