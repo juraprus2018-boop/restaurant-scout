@@ -4,6 +4,7 @@ import { listByCity } from "@/lib/seo-public.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { MapPin, Star } from "lucide-react";
 import { cuisineLabel } from "@/lib/osm-labels";
+import { LOCALES, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 
 const cityQuery = (slug: string) =>
   queryOptions({
@@ -28,7 +29,15 @@ export const Route = createFileRoute("/stad/$city")({
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
-      links: [{ rel: "canonical", href: `/stad/${params.city}` }],
+      links: [
+        { rel: "canonical", href: `/stad/${params.city}` },
+        ...LOCALES.map((l) => ({
+          rel: "alternate",
+          hreflang: l.code,
+          href: l.code === DEFAULT_LOCALE ? `/stad/${params.city}` : `/${l.code}/stad/${params.city}`,
+        })),
+        { rel: "alternate", hreflang: "x-default", href: `/stad/${params.city}` },
+      ],
     };
   },
   component: CityPage,
