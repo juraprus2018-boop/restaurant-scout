@@ -5,6 +5,7 @@ import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { MapPin, Star } from "lucide-react";
 import { cuisineLabel } from "@/lib/osm-labels";
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/i18n/locales";
+import { t } from "@/lib/i18n/strings";
 
 const cityQuery = (slug: string) =>
   queryOptions({
@@ -18,8 +19,8 @@ export const Route = createFileRoute("/stad/$city")({
   head: ({ loaderData, params }) => {
     const city = loaderData?.city ?? params.city;
     const total = loaderData?.total ?? 0;
-    const title = `Restaurants in ${city} — Top ${total.toLocaleString("nl-NL")} eetgelegenheden | PlaceResults`;
-    const desc = `Vind de beste restaurants, cafés en bars in ${city}. Bekijk ${total.toLocaleString("nl-NL")} eetgelegenheden met openingstijden, keuken en reviews.`;
+    const title = `${t(DEFAULT_LOCALE, "city.heading", { city })} — PlaceResults`.slice(0, 70);
+    const desc = t(DEFAULT_LOCALE, "city.subheading", { count: total.toLocaleString(DEFAULT_LOCALE), city }).slice(0, 158);
     return {
       meta: [
         { title },
