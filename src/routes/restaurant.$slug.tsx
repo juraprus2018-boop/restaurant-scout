@@ -503,6 +503,7 @@ function RestaurantPage() {
           )}
         </aside>
       </div>
+      <SiteFooter />
     </div>
   );
 }
