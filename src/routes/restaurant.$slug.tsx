@@ -252,6 +252,8 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
   const [user, setUser] = useState<any>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [authorEmail, setAuthorEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
 
@@ -262,20 +264,33 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
   async function submitReview(e: React.FormEvent) {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      if (!authorName.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(authorEmail.trim())) {
+        alert(tr("restaurant.guestRequired"));
+        return;
+      }
+    }
     setSubmitting(true);
-    const { error } = await supabase.from("reviews").upsert({
+    const payload: any = {
       restaurant_id: restaurant.id,
-      user_id: user.id,
       rating,
       comment: comment.trim() || null,
-    }, { onConflict: "restaurant_id,user_id" });
+    };
+    if (user) {
+      payload.user_id = user.id;
+      payload.author_name = user.user_metadata?.display_name ?? null;
+    } else {
+      payload.author_name = authorName.trim().slice(0, 80);
+      payload.author_email = authorEmail.trim().slice(0, 255);
+    }
+    const { error } = await supabase.from("reviews").insert(payload);
     setSubmitting(false);
     if (error) { alert(error.message); return; }
     setComment("");
+    if (!user) { setAuthorName(""); setAuthorEmail(""); }
     await refetch();
     const { data: rev } = await supabase
-      .from("reviews").select("id,rating,comment,created_at,user_id")
+      .from("reviews").select("id,rating,comment,created_at,user_id,author_name")
       .eq("restaurant_id", restaurant.id).order("created_at", { ascending: false });
     setReviews((rev ?? []) as Review[]);
   }
