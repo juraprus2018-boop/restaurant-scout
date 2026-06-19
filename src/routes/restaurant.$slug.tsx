@@ -12,10 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { getRestaurantBySlug } from "@/lib/restaurants-public.functions";
-import { amenityLabel, cuisineLabel, parseOpeningHours, YESNO_NL } from "@/lib/osm-labels";
+import { amenityLabel, cuisineLabel } from "@/lib/osm-labels";
 import defaultBanner from "@/assets/default-restaurant-banner.jpg";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
-import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
+import { t, parseOpeningHoursI18n, yesNoLabel } from "@/lib/i18n/strings";
 
 const restaurantQuery = (slug: string) =>
   queryOptions({
