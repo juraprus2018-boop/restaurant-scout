@@ -165,8 +165,9 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
     setCuisines((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
 
   const useNearby = () => {
-    if (!("geolocation" in navigator)) {
-      setGeoError("Locatie niet ondersteund door je browser");
+    if (typeof window === "undefined") return;
+    if (!("geolocation" in navigator) || !window.isSecureContext) {
+      setGeoError("Locatie werkt alleen op een beveiligde (https) site of in een nieuw tabblad.");
       return;
     }
     setGeoLoading(true);
@@ -177,10 +178,18 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
         setGeoLoading(false);
       },
       (err) => {
-        setGeoError(err.message || "Kon je locatie niet ophalen");
+        const msg =
+          err.code === err.PERMISSION_DENIED
+            ? "Locatietoegang geweigerd. Sta locatie toe in je browserinstellingen."
+            : err.code === err.POSITION_UNAVAILABLE
+            ? "Locatie niet beschikbaar. Probeer het opnieuw."
+            : err.code === err.TIMEOUT
+            ? "Het ophalen van je locatie duurde te lang. Probeer opnieuw."
+            : err.message || "Kon je locatie niet ophalen";
+        setGeoError(msg);
         setGeoLoading(false);
       },
-      { enableHighAccuracy: true, timeout: 8000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   };
 
