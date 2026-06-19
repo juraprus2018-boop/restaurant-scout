@@ -56,7 +56,12 @@ export const Route = createFileRoute("/keuken/$cuisine")({
 });
 
 function CuisinePage() {
-  const { cuisine: key } = Route.useParams();
+  return <CuisinePageBody />;
+}
+
+export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { locale?: LocaleCode; cuisineKey?: string } = {}) {
+  const params = Route.useParams();
+  const key = cuisineKey ?? params.cuisine;
   const { data } = useSuspenseQuery(cuisineQuery(key));
   const { cuisine, total, items } = data;
   const label = cuisineLabel(cuisine);
@@ -76,7 +81,7 @@ function CuisinePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
+      <SiteHeader locale={locale} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
@@ -117,7 +122,7 @@ function CuisinePage() {
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter locale={locale} />
     </div>
   );
 }
