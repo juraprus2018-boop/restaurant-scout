@@ -103,28 +103,34 @@ export type Database = {
       }
       reviews: {
         Row: {
+          author_email: string | null
+          author_name: string | null
           comment: string | null
           created_at: string
           id: string
           rating: number
           restaurant_id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
+          author_email?: string | null
+          author_name?: string | null
           comment?: string | null
           created_at?: string
           id?: string
           rating: number
           restaurant_id: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
+          author_email?: string | null
+          author_name?: string | null
           comment?: string | null
           created_at?: string
           id?: string
           rating?: number
           restaurant_id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
