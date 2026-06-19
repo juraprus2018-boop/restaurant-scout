@@ -212,6 +212,16 @@ export type Database = {
           count: number
         }[]
       }
+      list_cities_with_coords: {
+        Args: { _limit?: number; _min_count?: number }
+        Returns: {
+          city: string
+          count: number
+          country: string
+          lat: number
+          lng: number
+        }[]
+      }
       list_cuisines: {
         Args: { _limit?: number; _min_count?: number }
         Returns: {
