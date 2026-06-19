@@ -120,7 +120,7 @@ function Home() {
 
         <main className="flex-1 relative">
           <ClientOnly fallback={<div className="h-full flex items-center justify-center text-muted-foreground">Kaart laden...</div>}>
-            {() => <RestaurantMap restaurants={filtered} />}
+            <RestaurantMap restaurants={filtered} />
           </ClientOnly>
         </main>
       </div>

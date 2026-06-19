@@ -185,7 +185,7 @@ function AdminPage() {
 
         <main className="flex-1 relative">
           <ClientOnly fallback={<div className="h-full bg-muted" />}>
-            {() => <AdminMap marker={marker} radius={radius} pois={pois} onClick={setMarker} />}
+            <AdminMap marker={marker} radius={radius} pois={pois} onClick={setMarker} />
           </ClientOnly>
         </main>
       </div>

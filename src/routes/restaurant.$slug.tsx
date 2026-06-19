@@ -123,7 +123,7 @@ function RestaurantPage() {
 
           <Card className="overflow-hidden h-64">
             <ClientOnly fallback={<div className="h-full bg-muted" />}>
-              {() => <DetailMap lat={restaurant.lat} lng={restaurant.lng} name={restaurant.name} />}
+              <DetailMap lat={restaurant.lat} lng={restaurant.lng} name={restaurant.name} />
             </ClientOnly>
           </Card>
 
