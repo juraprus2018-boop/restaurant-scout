@@ -334,10 +334,9 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
     <div className="min-h-screen bg-muted/20">
       <SiteHeader locale={locale} />
       <header className="bg-background border-b px-4 py-3">
-
-        <nav aria-label="Kruimelpad" className="max-w-5xl mx-auto text-sm">
+        <nav aria-label={tr("restaurant.contact")} className="max-w-5xl mx-auto text-sm">
           <ol className="flex items-center gap-1 text-muted-foreground">
-            <li><Link to="/" className="hover:text-foreground flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> Home</Link></li>
+            <li><Link to="/" className="hover:text-foreground flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> {tr("city.breadcrumb.home")}</Link></li>
             {restaurant.city && (<>
               <li>/</li>
               <li>{restaurant.city}</li>
@@ -351,19 +350,19 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
       <div className="relative w-full h-72 md:h-96 bg-muted overflow-hidden">
         <img
           src={heroImg}
-          alt={`${restaurant.name}${restaurant.city ? ` in ${restaurant.city}` : ""}`}
+          alt={`${restaurant.name}${restaurant.city ? ` · ${restaurant.city}` : ""}`}
           className="w-full h-full object-cover"
           width={1600}
           height={640}
         />
-        <div className="absolute inset-0 bg-gradient-to-tags from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white max-w-5xl mx-auto">
           <h1 className="text-3xl md:text-5xl font-bold drop-shadow">{restaurant.name}</h1>
           <p className="mt-2 text-sm md:text-base opacity-90">
             {[brand, tags.amenity && amenityLabel(tags.amenity), restaurant.city].filter(Boolean).join(" · ")}
           </p>
           {usingDefaultBanner && (
-            <p className="absolute top-2 right-3 text-[10px] opacity-60">Sfeerbeeld</p>
+            <p className="absolute top-2 right-3 text-[10px] opacity-60">{tr("restaurant.stockImage")}</p>
           )}
         </div>
       </div>
@@ -375,7 +374,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
               <span className="flex items-center gap-1 text-amber-600 font-semibold">
                 <Star className="w-4 h-4 fill-current" />
                 {Number(restaurant.avg_rating).toFixed(1)}
-                <span className="text-muted-foreground font-normal">({restaurant.review_count} reviews)</span>
+                <span className="text-muted-foreground font-normal">({restaurant.review_count} {tr("city.reviewsLabel")})</span>
               </span>
             )}
             {michelin && <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium">★ {michelin} Michelin</span>}
@@ -386,17 +385,17 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {description && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-2">Over {restaurant.name}</h2>
+              <h2 className="font-semibold mb-2">{tr("restaurant.about", { name: restaurant.name })}</h2>
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{description}</p>
             </Card>
           )}
 
           {features.length > 0 && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-3">Voorzieningen</h2>
+              <h2 className="font-semibold mb-3">{tr("restaurant.features")}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
                 {features.map((f) => (
-                  <div key={f.label} className={`flex items-center gap-2 ${f.ok ? "" : "text-muted-foreground line-through"}`}>
+                  <div key={f.key} className={`flex items-center gap-2 ${f.ok ? "" : "text-muted-foreground line-through"}`}>
                     <f.icon className="w-4 h-4 shrink-0" />
                     <span>{f.label}</span>
                   </div>
@@ -407,7 +406,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {diets.length > 0 && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-3 flex items-center gap-2"><Leaf className="w-4 h-4" /> Dieetopties</h2>
+              <h2 className="font-semibold mb-3 flex items-center gap-2"><Leaf className="w-4 h-4" /> {tr("restaurant.diet")}</h2>
               <div className="flex flex-wrap gap-2 text-sm">
                 {diets.map((d) => (
                   <span key={d} className="px-2 py-1 rounded-full bg-green-100 text-green-800 capitalize">{d.replace(/_/g, " ")}</span>
@@ -418,7 +417,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {payments.length > 0 && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-3 flex items-center gap-2"><CreditCard className="w-4 h-4" /> Betaalmethoden</h2>
+              <h2 className="font-semibold mb-3 flex items-center gap-2"><CreditCard className="w-4 h-4" /> {tr("restaurant.payment")}</h2>
               <div className="flex flex-wrap gap-2 text-sm">
                 {payments.map((p) => (
                   <span key={p} className="px-2 py-1 rounded-full bg-muted capitalize">{p.replace(/_/g, " ")}</span>
@@ -429,7 +428,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {openingRows.length > 0 && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4" /> Openingstijden</h2>
+              <h2 className="font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4" /> {tr("restaurant.hours")}</h2>
               <table className="text-sm w-full">
                 <tbody>
                   {openingRows.map((row, i) => (
@@ -451,7 +450,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {faq.length > 0 && (
             <Card className="p-4">
-              <h2 className="text-xl font-semibold mb-3">Veelgestelde vragen</h2>
+              <h2 className="text-xl font-semibold mb-3">{tr("restaurant.faq")}</h2>
               <div className="divide-y">
                 {faq.map((f, i) => (
                   <details key={i} className="py-3 group">
@@ -467,37 +466,39 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
           )}
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">Reviews</h2>
+            <h2 className="text-xl font-semibold mb-3">{tr("restaurant.reviews")}</h2>
             {user ? (
               <form onSubmit={submitReview} className="bg-background border rounded-lg p-4 mb-4 space-y-3">
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((n) => (
-                    <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n} sterren`}>
+                    <button key={n} type="button" onClick={() => setRating(n)} aria-label={tr("restaurant.starsLabel", { n })}>
                       <Star className={`w-6 h-6 ${n <= rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
                     </button>
                   ))}
                 </div>
-                <Textarea placeholder="Vertel over je ervaring..." value={comment} onChange={(e) => setComment(e.target.value)} />
-                <Button type="submit" disabled={submitting}>{submitting ? "Versturen..." : "Plaats review"}</Button>
+                <Textarea placeholder={tr("restaurant.reviewPlaceholder")} value={comment} onChange={(e) => setComment(e.target.value)} />
+                <Button type="submit" disabled={submitting}>{submitting ? tr("restaurant.submitting") : tr("restaurant.submit")}</Button>
               </form>
             ) : (
               <p className="text-sm text-muted-foreground mb-4">
-                <Link to="/auth" className="text-primary hover:underline">Log in</Link> om een review te plaatsen.
+                {tr("restaurant.loginToReview", { link: "" }).split("{link}")[0]}
+                <Link to="/auth" className="text-primary hover:underline">{tr("restaurant.loginLink")}</Link>
+                {tr("restaurant.loginToReview", { link: "" }).split("{link}")[1] ?? ""}
               </p>
             )}
             <div className="space-y-3">
               {reviews.map((r) => (
                 <article key={r.id} className="bg-background border rounded-lg p-4">
-                  <div className="flex gap-0.5 mb-1" aria-label={`${r.rating} sterren`}>
+                  <div className="flex gap-0.5 mb-1" aria-label={tr("restaurant.starsLabel", { n: r.rating })}>
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Star key={n} className={`w-4 h-4 ${n <= r.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
                     ))}
                   </div>
                   {r.comment && <p className="text-sm">{r.comment}</p>}
-                  <p className="text-xs text-muted-foreground mt-1">{new Date(r.created_at).toLocaleDateString("nl-NL")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{new Date(r.created_at).toLocaleDateString(locale)}</p>
                 </article>
               ))}
-              {reviews.length === 0 && <p className="text-sm text-muted-foreground">Nog geen reviews — wees de eerste!</p>}
+              {reviews.length === 0 && <p className="text-sm text-muted-foreground">{tr("restaurant.noReviews")}</p>}
             </div>
           </section>
 
@@ -506,7 +507,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
               onClick={() => setShowAllTags((s) => !s)}
               className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2"
             >
-              <Tag className="w-4 h-4" /> {showAllTags ? "Verberg" : "Toon"} ruwe OSM-data ({Object.keys(tags).length})
+              <Tag className="w-4 h-4" /> {showAllTags ? tr("restaurant.rawHide") : tr("restaurant.rawShow")} ({Object.keys(tags).length})
             </button>
             {showAllTags && (
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono max-h-96 overflow-auto">
@@ -520,7 +521,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
         <aside className="space-y-3 text-sm">
           <Card className="p-4 space-y-3">
-            <h2 className="font-semibold text-base">Contact &amp; locatie</h2>
+            <h2 className="font-semibold text-base">{tr("restaurant.contact")}</h2>
             {(restaurant.address || restaurant.city) && (
               <div className="flex gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
@@ -540,19 +541,19 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
               <div className="flex gap-2"><Globe className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><a href={restaurant.website} target="_blank" rel="noopener nofollow" className="hover:underline truncate">{restaurant.website.replace(/^https?:\/\//, "")}</a></div>
             )}
             {capacity && (
-              <div className="flex gap-2"><Users className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>{capacity} plaatsen</span></div>
+              <div className="flex gap-2"><Users className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>{capacity} {tr("restaurant.seats")}</span></div>
             )}
             {startDate && (
-              <div className="flex gap-2"><Utensils className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>Sinds {startDate}</span></div>
+              <div className="flex gap-2"><Utensils className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>{tr("restaurant.since")} {startDate}</span></div>
             )}
             {tags.wheelchair && (
-              <div className="flex gap-2"><Accessibility className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>Rolstoel: {YESNO_NL(tags.wheelchair)}</span></div>
+              <div className="flex gap-2"><Accessibility className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>{tr("restaurant.wheelchairLabel")}: {yesNoLabel(locale, tags.wheelchair)}</span></div>
             )}
           </Card>
 
           {(facebook || instagram || twitter || wikipedia) && (
             <Card className="p-4 space-y-2">
-              <h3 className="font-semibold text-xs uppercase text-muted-foreground">Online</h3>
+              <h3 className="font-semibold text-xs uppercase text-muted-foreground">{tr("restaurant.online")}</h3>
               {facebook && <a href={facebook.startsWith("http") ? facebook : `https://facebook.com/${facebook}`} target="_blank" rel="noopener nofollow" className="flex items-center gap-2 hover:underline"><ExternalLink className="w-3 h-3" />Facebook</a>}
               {instagram && <a href={instagram.startsWith("http") ? instagram : `https://instagram.com/${instagram.replace(/^@/, "")}`} target="_blank" rel="noopener nofollow" className="flex items-center gap-2 hover:underline"><ExternalLink className="w-3 h-3" />Instagram</a>}
               {twitter && <a href={twitter.startsWith("http") ? twitter : `https://twitter.com/${twitter.replace(/^@/, "")}`} target="_blank" rel="noopener nofollow" className="flex items-center gap-2 hover:underline"><ExternalLink className="w-3 h-3" />Twitter / X</a>}
@@ -567,11 +568,11 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
           {osmUrl && (
             <div className="flex flex-col gap-1 text-xs text-center">
               <a href={osmUrl} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
-                Bekijk op OpenStreetMap ↗
+                {tr("restaurant.osmView")} ↗
               </a>
               {osmEditUrl && (
                 <a href={osmEditUrl} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
-                  Bewerken in iD-editor ↗
+                  {tr("restaurant.osmEdit")} ↗
                 </a>
               )}
             </div>
