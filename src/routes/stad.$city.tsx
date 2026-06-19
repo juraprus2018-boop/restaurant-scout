@@ -95,8 +95,7 @@ function CityPage() {
           </nav>
           <h1 className="font-display text-4xl sm:text-5xl text-ink">Restaurants in {city}</h1>
           <p className="text-muted-foreground mt-3 max-w-2xl">
-            Ontdek {total.toLocaleString("nl-NL")} restaurants, cafés en bars in {city}.
-            Gesorteerd op beoordeling — vind de favoriete plekken van bezoekers.
+            {t(DEFAULT_LOCALE, "city.subheading", { city })}
           </p>
         </div>
       </section>

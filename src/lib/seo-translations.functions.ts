@@ -26,11 +26,11 @@ async function generateWithAI(args: {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) {
     // Fallback so the page still works if AI is unavailable
-    const { displayName, total } = args.context;
+    const { displayName } = args.context;
     return {
       title: `${displayName} — PlaceResults`,
-      description: `Find restaurants, cafés and bars in ${displayName}. ${total} venues with reviews.`,
-      intro: `Discover the best places to eat in ${displayName}. ${total} restaurants ranked by visitor ratings.`,
+      description: `Find restaurants, cafés and bars in ${displayName}. Sorted by visitor ratings.`,
+      intro: `Discover the best places to eat in ${displayName}. Sorted by visitor ratings.`,
     };
   }
 
@@ -41,13 +41,13 @@ async function generateWithAI(args: {
 
   const prompt = `You write SEO landing-page copy for a restaurant directory.
 Write in ${locale.englishName} (locale code "${args.lang}"). Use natural, native phrasing — not a translation of English.
-Subject: restaurants, cafés and bars in ${subject}. We have ${args.context.total} venues listed.
+Subject: restaurants, cafés and bars in ${subject}.
 
 Return STRICT JSON with three fields and NOTHING else:
 {
   "title": "<55-60 char SEO title incl. the place name and "PlaceResults">",
   "description": "<150-160 char meta description, action-oriented>",
-  "intro": "<2-3 sentence on-page intro (max 280 chars), friendly, mentions count and that it's sorted by rating>"
+  "intro": "<2-3 sentence on-page intro (max 280 chars), friendly, no venue counts, sorted by rating>"
 }
 Do NOT include markdown, code fences, or any extra text.`;
 
@@ -111,7 +111,7 @@ export const getLandingCopy = createServerFn({ method: "GET" })
       copy = {
         title: `${data.displayName} — PlaceResults`,
         description: `Restaurants, cafés and bars in ${data.displayName}.`,
-        intro: `${data.total} venues in ${data.displayName}.`,
+        intro: `Discover the best places to eat in ${data.displayName}. Sorted by visitor ratings.`,
       };
       return copy;
     }

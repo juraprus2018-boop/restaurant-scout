@@ -105,7 +105,7 @@ export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { local
           </nav>
           <h1 className="font-display text-4xl sm:text-5xl text-ink">{t(locale, "cuisine.heading", { label })}</h1>
           <p className="text-muted-foreground mt-3 max-w-2xl">
-            {t(locale, "cuisine.subheading", { count: total.toLocaleString(locale), label })}
+            {t(locale, "cuisine.subheading", { label })}
           </p>
         </div>
       </section>
