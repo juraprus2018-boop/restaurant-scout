@@ -296,7 +296,12 @@ function MapSection({ restaurants }: { restaurants: Restaurant[] }) {
 }
 
 function RestaurantMap({ restaurants }: { restaurants: Restaurant[] }) {
-  const { MapContainer, TileLayer, Marker, Popup, OSM_ATTRIBUTION, OSM_TILES, coloredIcon } = require("@/components/MapView") as typeof import("@/components/MapView");
+  const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
+  useEffect(() => {
+    import("@/components/MapView").then(setMod);
+  }, []);
+  if (!mod) return <div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>;
+  const { MapContainer, TileLayer, Marker, Popup, OSM_ATTRIBUTION, OSM_TILES, coloredIcon } = mod;
   const center: [number, number] = restaurants.length > 0 ? [restaurants[0].lat, restaurants[0].lng] : [52.3676, 4.9041];
   return (
     <MapContainer center={center} zoom={12} style={{ height: "100%", width: "100%" }}>
@@ -315,6 +320,7 @@ function RestaurantMap({ restaurants }: { restaurants: Restaurant[] }) {
     </MapContainer>
   );
 }
+
 
 function AllList({ restaurants, loading }: { restaurants: Restaurant[]; loading: boolean }) {
   if (loading || restaurants.length === 0) return null;
