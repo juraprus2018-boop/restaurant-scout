@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientOnly } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight, Clock, Navigation2, X } from "lucide-react";
 import heroImage from "@/assets/hero-dinner.jpg";
 import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
