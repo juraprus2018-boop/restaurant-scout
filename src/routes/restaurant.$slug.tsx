@@ -580,6 +580,8 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
               </div>
             )}
           </Card>
+
+          <NearbyRestaurants locale={locale} currentId={restaurant.id} city={restaurant.city} />
         </div>
 
         <aside className="space-y-3 text-sm">
