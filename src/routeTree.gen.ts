@@ -22,6 +22,7 @@ import { Route as StadCityRouteImport } from './routes/stad.$city'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
 import { Route as KeukenCuisineRouteImport } from './routes/keuken.$cuisine'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as LangStedenRouteImport } from './routes/$lang.steden'
 import { Route as LangStadCityRouteImport } from './routes/$lang.stad.$city'
 import { Route as LangRestaurantSlugRouteImport } from './routes/$lang.restaurant.$slug'
 import { Route as LangKeukenCuisineRouteImport } from './routes/$lang.keuken.$cuisine'
@@ -91,6 +92,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const LangStedenRoute = LangStedenRouteImport.update({
+  id: '/$lang/steden',
+  path: '/$lang/steden',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LangStadCityRoute = LangStadCityRouteImport.update({
   id: '/$lang/stad/$city',
   path: '/$lang/stad/$city',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
+  '/$lang/steden': typeof LangStedenRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
+  '/$lang/steden': typeof LangStedenRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
+  '/$lang/steden': typeof LangStedenRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/steden'
+    | '/$lang/steden'
     | '/admin'
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/steden'
+    | '/$lang/steden'
     | '/admin'
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/steden'
+    | '/$lang/steden'
     | '/_authenticated/admin'
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
@@ -224,6 +236,7 @@ export interface RootRouteChildren {
   SitemapRestaurantsDotxmlRoute: typeof SitemapRestaurantsDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StedenRoute: typeof StedenRoute
+  LangStedenRoute: typeof LangStedenRoute
   KeukenCuisineRoute: typeof KeukenCuisineRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
   StadCityRoute: typeof StadCityRoute
@@ -326,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/$lang/steden': {
+      id: '/$lang/steden'
+      path: '/$lang/steden'
+      fullPath: '/$lang/steden'
+      preLoaderRoute: typeof LangStedenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$lang/stad/$city': {
       id: '/$lang/stad/$city'
       path: '/$lang/stad/$city'
@@ -370,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapRestaurantsDotxmlRoute: SitemapRestaurantsDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StedenRoute: StedenRoute,
+  LangStedenRoute: LangStedenRoute,
   KeukenCuisineRoute: KeukenCuisineRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
   StadCityRoute: StadCityRoute,
