@@ -166,6 +166,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_cities: {
+        Args: { _limit?: number; _min_count?: number }
+        Returns: {
+          city: string
+          count: number
+        }[]
+      }
+      list_cuisines: {
+        Args: { _limit?: number; _min_count?: number }
+        Returns: {
+          count: number
+          cuisine: string
+        }[]
+      }
       search_restaurants: {
         Args: {
           _city?: string
