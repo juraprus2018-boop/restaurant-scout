@@ -247,7 +247,7 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
 function FilterBar({
   openNow, setOpenNow, cuisines, toggleCuisine, allCuisines,
   useNearby, userPos, clearNearby, radiusKm, setRadiusKm,
-  geoError, geoLoading, resultCount, activeFilterCount, clearFilters,
+  geoError, geoLoading, activeFilterCount, clearFilters,
   sort, setSort,
 }: {
   openNow: boolean; setOpenNow: (b: boolean) => void;
@@ -255,7 +255,7 @@ function FilterBar({
   useNearby: () => void; userPos: { lat: number; lng: number } | null; clearNearby: () => void;
   radiusKm: number; setRadiusKm: (n: number) => void;
   geoError: string | null; geoLoading: boolean;
-  resultCount: number; activeFilterCount: number; clearFilters: () => void;
+  activeFilterCount: number; clearFilters: () => void;
   sort: SortKey; setSort: (s: SortKey) => void;
 }) {
   const [cuisinesOpen, setCuisinesOpen] = useState(false);
