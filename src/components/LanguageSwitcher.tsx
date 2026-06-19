@@ -10,19 +10,25 @@ interface Props {
 
 /**
  * Rewrites the current path to the chosen locale.
- * Only `/stad/...` pages have localized variants today.
- * For any other path, switching locale navigates to the home page
- * (avoids 404s on routes that aren't translated yet).
+ * Supports all localized routes:
+ *   /                      ⇄ /{lang}
+ *   /stad/$city            ⇄ /{lang}/stad/$city
+ *   /keuken/$cuisine       ⇄ /{lang}/keuken/$cuisine
+ *   /restaurant/$slug      ⇄ /{lang}/restaurant/$slug
+ * Other paths (e.g. /auth) fall back to the localized home.
  */
 function rewritePath(pathname: string, target: LocaleCode): string {
   const segs = pathname.split("/").filter(Boolean);
   if (segs.length && isLocale(segs[0])) segs.shift();
 
-  // Only the city landing page is localized so far.
-  const isLocalizable = segs[0] === "stad" && segs.length >= 2;
+  const LOCALIZABLE = new Set(["stad", "keuken", "restaurant"]);
+  const isLocalizable = segs.length === 0 || (segs[0] && LOCALIZABLE.has(segs[0]));
   if (!isLocalizable) {
-    // Homepage isn't localized yet — go to root rather than 404.
-    return "/";
+    // Unknown / non-localized path — go to localized home.
+    return target === DEFAULT_LOCALE ? "/" : `/${target}`;
+  }
+  if (segs.length === 0) {
+    return target === DEFAULT_LOCALE ? "/" : `/${target}`;
   }
   if (target === DEFAULT_LOCALE) return "/" + segs.join("/");
   return "/" + target + "/" + segs.join("/");
