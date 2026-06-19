@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { CookieSettingsButton } from "./CookieBanner";
 import { t } from "@/lib/i18n/strings";
 import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
 
@@ -49,12 +50,22 @@ export function SiteFooter({ locale = DEFAULT_LOCALE }: ChromeProps = {}) {
           </ul>
         </div>
         <div>
-          <h4 className="text-white font-bold mb-3">{t(locale, "footer.about")}</h4>
-          <p>{t(locale, "footer.dataVia")} <a href="https://www.openstreetmap.org" className="underline hover:text-accent">OpenStreetMap</a>.</p>
+          <h4 className="text-white font-bold mb-3">Legal</h4>
+          <ul className="space-y-2">
+            <li><Link to="/privacy" className="hover:text-accent">Privacybeleid</Link></li>
+            <li><Link to="/voorwaarden" className="hover:text-accent">Algemene voorwaarden</Link></li>
+            <li><Link to="/cookies" className="hover:text-accent">Cookiebeleid</Link></li>
+            <li>
+              <CookieSettingsButton
+                label="Cookievoorkeuren"
+                className="hover:text-accent text-left"
+              />
+            </li>
+          </ul>
         </div>
       </div>
       <div className="border-t border-white/10 py-5 text-center text-xs text-white/50">
-        © {new Date().getFullYear()} PlaceResults
+        © {new Date().getFullYear()} PlaceResults · {t(locale, "footer.dataVia")} <a href="https://www.openstreetmap.org" className="underline hover:text-accent">OpenStreetMap</a>
       </div>
     </footer>
   );

@@ -9,11 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VoorwaardenRouteImport } from './routes/voorwaarden'
 import { Route as StedenRouteImport } from './routes/steden'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapRestaurantsDotxmlRouteImport } from './routes/sitemap-restaurants[.]xml'
 import { Route as SitemapLandingDotxmlRouteImport } from './routes/sitemap-landing[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -27,6 +30,11 @@ import { Route as LangStadCityRouteImport } from './routes/$lang.stad.$city'
 import { Route as LangRestaurantSlugRouteImport } from './routes/$lang.restaurant.$slug'
 import { Route as LangKeukenCuisineRouteImport } from './routes/$lang.keuken.$cuisine'
 
+const VoorwaardenRoute = VoorwaardenRouteImport.update({
+  id: '/voorwaarden',
+  path: '/voorwaarden',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StedenRoute = StedenRouteImport.update({
   id: '/steden',
   path: '/steden',
@@ -51,6 +59,16 @@ const SitemapLandingDotxmlRoute = SitemapLandingDotxmlRouteImport.update({
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -116,11 +134,14 @@ const LangKeukenCuisineRoute = LangKeukenCuisineRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cookies': typeof CookiesRoute
+  '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/$lang/steden': typeof LangStedenRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
@@ -134,11 +155,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cookies': typeof CookiesRoute
+  '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/$lang/steden': typeof LangStedenRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
@@ -154,11 +178,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/cookies': typeof CookiesRoute
+  '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/$lang/steden': typeof LangStedenRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
@@ -174,11 +201,14 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/cookies'
+    | '/privacy'
     | '/robots.txt'
     | '/sitemap-landing.xml'
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/steden'
+    | '/voorwaarden'
     | '/$lang/steden'
     | '/admin'
     | '/keuken/$cuisine'
@@ -192,11 +222,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/cookies'
+    | '/privacy'
     | '/robots.txt'
     | '/sitemap-landing.xml'
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/steden'
+    | '/voorwaarden'
     | '/$lang/steden'
     | '/admin'
     | '/keuken/$cuisine'
@@ -211,11 +244,14 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/cookies'
+    | '/privacy'
     | '/robots.txt'
     | '/sitemap-landing.xml'
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/steden'
+    | '/voorwaarden'
     | '/$lang/steden'
     | '/_authenticated/admin'
     | '/keuken/$cuisine'
@@ -231,11 +267,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CookiesRoute: typeof CookiesRoute
+  PrivacyRoute: typeof PrivacyRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapLandingDotxmlRoute: typeof SitemapLandingDotxmlRoute
   SitemapRestaurantsDotxmlRoute: typeof SitemapRestaurantsDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StedenRoute: typeof StedenRoute
+  VoorwaardenRoute: typeof VoorwaardenRoute
   LangStedenRoute: typeof LangStedenRoute
   KeukenCuisineRoute: typeof KeukenCuisineRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
@@ -248,6 +287,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/voorwaarden': {
+      id: '/voorwaarden'
+      path: '/voorwaarden'
+      fullPath: '/voorwaarden'
+      preLoaderRoute: typeof VoorwaardenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/steden': {
       id: '/steden'
       path: '/steden'
@@ -281,6 +327,20 @@ declare module '@tanstack/react-router' {
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -385,11 +445,14 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CookiesRoute: CookiesRoute,
+  PrivacyRoute: PrivacyRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapLandingDotxmlRoute: SitemapLandingDotxmlRoute,
   SitemapRestaurantsDotxmlRoute: SitemapRestaurantsDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StedenRoute: StedenRoute,
+  VoorwaardenRoute: VoorwaardenRoute,
   LangStedenRoute: LangStedenRoute,
   KeukenCuisineRoute: KeukenCuisineRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
