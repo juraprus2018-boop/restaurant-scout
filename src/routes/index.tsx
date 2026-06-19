@@ -32,6 +32,8 @@ type Restaurant = {
   cuisine: string[] | null;
   avg_rating: number | null;
   review_count: number | null;
+  opening_hours: string | null;
+  raw_osm_tags: Record<string, string> | null;
 };
 
 const CARD_COLORS = [
