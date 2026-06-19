@@ -9,12 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SitemapRestaurantsDotxmlRouteImport } from './routes/sitemap-restaurants[.]xml'
+import { Route as SitemapLandingDotxmlRouteImport } from './routes/sitemap-landing[.]xml'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StadCityRouteImport } from './routes/stad.$city'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
+import { Route as KeukenCuisineRouteImport } from './routes/keuken.$cuisine'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapRestaurantsDotxmlRoute =
+  SitemapRestaurantsDotxmlRouteImport.update({
+    id: '/sitemap-restaurants.xml',
+    path: '/sitemap-restaurants.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const SitemapLandingDotxmlRoute = SitemapLandingDotxmlRouteImport.update({
+  id: '/sitemap-landing.xml',
+  path: '/sitemap-landing.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -29,9 +56,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StadCityRoute = StadCityRouteImport.update({
+  id: '/stad/$city',
+  path: '/stad/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RestaurantSlugRoute = RestaurantSlugRouteImport.update({
   id: '/restaurant/$slug',
   path: '/restaurant/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeukenCuisineRoute = KeukenCuisineRouteImport.update({
+  id: '/keuken/$cuisine',
+  path: '/keuken/$cuisine',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -43,46 +80,124 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
+  '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/stad/$city': typeof StadCityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
+  '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/stad/$city': typeof StadCityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
+  '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/stad/$city': typeof StadCityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin' | '/restaurant/$slug'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/robots.txt'
+    | '/sitemap-landing.xml'
+    | '/sitemap-restaurants.xml'
+    | '/sitemap.xml'
+    | '/admin'
+    | '/keuken/$cuisine'
+    | '/restaurant/$slug'
+    | '/stad/$city'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/restaurant/$slug'
+  to:
+    | '/'
+    | '/auth'
+    | '/robots.txt'
+    | '/sitemap-landing.xml'
+    | '/sitemap-restaurants.xml'
+    | '/sitemap.xml'
+    | '/admin'
+    | '/keuken/$cuisine'
+    | '/restaurant/$slug'
+    | '/stad/$city'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/robots.txt'
+    | '/sitemap-landing.xml'
+    | '/sitemap-restaurants.xml'
+    | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/keuken/$cuisine'
     | '/restaurant/$slug'
+    | '/stad/$city'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapLandingDotxmlRoute: typeof SitemapLandingDotxmlRoute
+  SitemapRestaurantsDotxmlRoute: typeof SitemapRestaurantsDotxmlRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  KeukenCuisineRoute: typeof KeukenCuisineRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
+  StadCityRoute: typeof StadCityRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-restaurants.xml': {
+      id: '/sitemap-restaurants.xml'
+      path: '/sitemap-restaurants.xml'
+      fullPath: '/sitemap-restaurants.xml'
+      preLoaderRoute: typeof SitemapRestaurantsDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-landing.xml': {
+      id: '/sitemap-landing.xml'
+      path: '/sitemap-landing.xml'
+      fullPath: '/sitemap-landing.xml'
+      preLoaderRoute: typeof SitemapLandingDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -104,11 +219,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stad/$city': {
+      id: '/stad/$city'
+      path: '/stad/$city'
+      fullPath: '/stad/$city'
+      preLoaderRoute: typeof StadCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/restaurant/$slug': {
       id: '/restaurant/$slug'
       path: '/restaurant/$slug'
       fullPath: '/restaurant/$slug'
       preLoaderRoute: typeof RestaurantSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/keuken/$cuisine': {
+      id: '/keuken/$cuisine'
+      path: '/keuken/$cuisine'
+      fullPath: '/keuken/$cuisine'
+      preLoaderRoute: typeof KeukenCuisineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -136,7 +265,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapLandingDotxmlRoute: SitemapLandingDotxmlRoute,
+  SitemapRestaurantsDotxmlRoute: SitemapRestaurantsDotxmlRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  KeukenCuisineRoute: KeukenCuisineRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
+  StadCityRoute: StadCityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
