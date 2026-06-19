@@ -8,11 +8,16 @@ export type StringKey =
   | "footer.tagline" | "footer.explore" | "footer.about" | "footer.dataVia"
   | "lang.switch"
   // city landing
-  | "city.breadcrumb.home" | "city.breadcrumb.city"
+  | "city.breadcrumb.home" | "city.breadcrumb.city" | "city.breadcrumb.cities"
   | "city.heading" | "city.subheading"
   | "city.notFound" | "city.backHome"
   | "city.error" | "city.retry"
   | "city.reviewsLabel" | "city.addressUnknown"
+  // cities (index/overview)
+  | "cities.title" | "cities.heading" | "cities.intro"
+  | "cities.searchPlaceholder" | "cities.countryAll"
+  | "cities.empty" | "cities.venues" | "cities.viewCity"
+  | "cities.mapTitle" | "cities.listTitle"
   // cuisine landing
   | "cuisine.breadcrumb.cuisine"
   | "cuisine.heading"  // "{label} restaurants"
