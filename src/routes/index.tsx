@@ -5,7 +5,7 @@ import { ClientOnly } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import { MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight, Clock, Navigation2, X } from "lucide-react";
+import { MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight, Clock, Navigation2, X, SlidersHorizontal, ChevronDown } from "lucide-react";
 import heroImage from "@/assets/hero-dinner.jpg";
 import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
