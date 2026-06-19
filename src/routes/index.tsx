@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientOnly } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight } from "lucide-react";
+
+import { MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight, Clock, Navigation2, X } from "lucide-react";
 import heroImage from "@/assets/hero-dinner.jpg";
+import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,6 +32,8 @@ type Restaurant = {
   cuisine: string[] | null;
   avg_rating: number | null;
   review_count: number | null;
+  opening_hours: string | null;
+  raw_osm_tags: Record<string, string> | null;
 };
 
 const CARD_COLORS = [
@@ -41,15 +45,34 @@ const CARD_COLORS = [
   "from-lime-400 to-green-500",
 ];
 
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
 function Home() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Filters
+  const [openNow, setOpenNow] = useState(false);
+  const [cuisines, setCuisines] = useState<string[]>([]);
+  const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [radiusKm, setRadiusKm] = useState(5);
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+
   useEffect(() => {
     supabase
       .from("restaurants")
-      .select("id,name,slug,lat,lng,city,address,cuisine,avg_rating,review_count")
+      .select("id,name,slug,lat,lng,city,address,cuisine,avg_rating,review_count,opening_hours,raw_osm_tags")
       .order("review_count", { ascending: false })
       .limit(500)
       .then(({ data }) => {
@@ -58,26 +81,110 @@ function Home() {
       });
   }, []);
 
+  const allCuisines = useMemo(() => {
+    const counts = new Map<string, number>();
+    restaurants.forEach((r) => r.cuisine?.forEach((c) => counts.set(c, (counts.get(c) ?? 0) + 1)));
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 16).map(([c]) => c);
+  }, [restaurants]);
+
+  const toggleCuisine = (c: string) =>
+    setCuisines((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+
+  const useNearby = () => {
+    if (!("geolocation" in navigator)) {
+      setGeoError("Locatie niet ondersteund door je browser");
+      return;
+    }
+    setGeoLoading(true);
+    setGeoError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGeoLoading(false);
+      },
+      (err) => {
+        setGeoError(err.message || "Kon je locatie niet ophalen");
+        setGeoLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 },
+    );
+  };
+
+  const clearFilters = () => {
+    setSearch("");
+    setOpenNow(false);
+    setCuisines([]);
+    setUserPos(null);
+  };
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return restaurants;
-    return restaurants.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.city?.toLowerCase().includes(q) ||
-        r.cuisine?.some((c) => c.toLowerCase().includes(q)),
-    );
-  }, [restaurants, search]);
+    let list = restaurants.filter((r) => {
+      if (q) {
+        const tags = r.raw_osm_tags ?? {};
+        const postcode = (tags["addr:postcode"] || "").toLowerCase();
+        const hay =
+          r.name.toLowerCase() +
+          " " +
+          (r.city ?? "").toLowerCase() +
+          " " +
+          (r.address ?? "").toLowerCase() +
+          " " +
+          postcode +
+          " " +
+          (r.cuisine ?? []).join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (cuisines.length && !r.cuisine?.some((c) => cuisines.includes(c))) return false;
+      if (openNow) {
+        const o = isOpenNow(r.opening_hours);
+        if (o !== true) return false;
+      }
+      if (userPos) {
+        const d = haversineKm(userPos.lat, userPos.lng, r.lat, r.lng);
+        if (d > radiusKm) return false;
+      }
+      return true;
+    });
+    if (userPos) {
+      list = [...list].sort(
+        (a, b) =>
+          haversineKm(userPos.lat, userPos.lng, a.lat, a.lng) -
+          haversineKm(userPos.lat, userPos.lng, b.lat, b.lng),
+      );
+    }
+    return list;
+  }, [restaurants, search, cuisines, openNow, userPos, radiusKm]);
 
   const topRated = useMemo(
     () => [...restaurants].sort((a, b) => (b.avg_rating ?? 0) - (a.avg_rating ?? 0)).slice(0, 8),
     [restaurants],
   );
 
+  const activeFilterCount =
+    (search ? 1 : 0) + (openNow ? 1 : 0) + cuisines.length + (userPos ? 1 : 0);
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <Hero search={search} setSearch={setSearch} />
+      <FilterBar
+        openNow={openNow}
+        setOpenNow={setOpenNow}
+        cuisines={cuisines}
+        toggleCuisine={toggleCuisine}
+        allCuisines={allCuisines}
+        useNearby={useNearby}
+        userPos={userPos}
+        clearNearby={() => setUserPos(null)}
+        radiusKm={radiusKm}
+        setRadiusKm={setRadiusKm}
+        geoError={geoError}
+        geoLoading={geoLoading}
+        resultCount={filtered.length}
+        activeFilterCount={activeFilterCount}
+        clearFilters={clearFilters}
+      />
       <Categories />
       <TopRated items={topRated.length ? topRated : restaurants.slice(0, 8)} loading={loading} />
       <MapSection restaurants={filtered} />
@@ -86,6 +193,91 @@ function Home() {
     </div>
   );
 }
+
+function FilterBar({
+  openNow, setOpenNow, cuisines, toggleCuisine, allCuisines,
+  useNearby, userPos, clearNearby, radiusKm, setRadiusKm,
+  geoError, geoLoading, resultCount, activeFilterCount, clearFilters,
+}: {
+  openNow: boolean; setOpenNow: (b: boolean) => void;
+  cuisines: string[]; toggleCuisine: (c: string) => void; allCuisines: string[];
+  useNearby: () => void; userPos: { lat: number; lng: number } | null; clearNearby: () => void;
+  radiusKm: number; setRadiusKm: (n: number) => void;
+  geoError: string | null; geoLoading: boolean;
+  resultCount: number; activeFilterCount: number; clearFilters: () => void;
+}) {
+  return (
+    <section id="filters" className="border-b border-border bg-card sticky top-16 z-30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant={openNow ? "default" : "outline"}
+            size="sm"
+            onClick={() => setOpenNow(!openNow)}
+            className="rounded-full gap-1.5"
+          >
+            <Clock className="w-4 h-4" /> Open nu
+          </Button>
+          <Button
+            variant={userPos ? "default" : "outline"}
+            size="sm"
+            onClick={userPos ? clearNearby : useNearby}
+            disabled={geoLoading}
+            className="rounded-full gap-1.5"
+          >
+            <Navigation2 className="w-4 h-4" />
+            {geoLoading ? "Zoeken..." : userPos ? `In de buurt (${radiusKm} km)` : "In de buurt"}
+          </Button>
+          {userPos && (
+            <select
+              value={radiusKm}
+              onChange={(e) => setRadiusKm(Number(e.target.value))}
+              className="h-9 rounded-full border border-input bg-background px-3 text-sm"
+              aria-label="Zoekradius"
+            >
+              {[1, 2, 5, 10, 25, 50].map((k) => (
+                <option key={k} value={k}>{k} km</option>
+              ))}
+            </select>
+          )}
+          {activeFilterCount > 0 && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-full gap-1 text-muted-foreground">
+              <X className="w-4 h-4" /> Wis filters ({activeFilterCount})
+            </Button>
+          )}
+          <div className="ml-auto text-sm text-muted-foreground">
+            {resultCount} resultaten
+          </div>
+        </div>
+
+        {allCuisines.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-semibold text-muted-foreground mr-1">Keuken:</span>
+            {allCuisines.map((c) => {
+              const active = cuisines.includes(c);
+              return (
+                <button
+                  key={c}
+                  onClick={() => toggleCuisine(c)}
+                  className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background border-border hover:border-primary/50"
+                  }`}
+                >
+                  {cuisineLabel(c)}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {geoError && <div className="text-xs text-destructive">{geoError}</div>}
+      </div>
+    </section>
+  );
+}
+
 
 function SiteHeader() {
   return (

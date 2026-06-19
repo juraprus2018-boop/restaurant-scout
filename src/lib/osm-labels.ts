@@ -94,3 +94,69 @@ export function parseOpeningHours(raw: string): Array<{ days: string; hours: str
       return { days: daysPart, hours: m[2] };
     });
 }
+
+// Day order matches JS getDay() shifted so Mo=0
+const DAY_CODES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+function expandDays(token: string): number[] {
+  // Supports "Mo", "Mo-Fr", "Mo,We,Fr"
+  const result = new Set<number>();
+  token.split(",").forEach((seg) => {
+    const range = seg.split("-");
+    if (range.length === 2) {
+      const a = DAY_CODES.indexOf(range[0]);
+      const b = DAY_CODES.indexOf(range[1]);
+      if (a >= 0 && b >= 0) {
+        for (let i = a; i !== (b + 1) % 7; i = (i + 1) % 7) {
+          result.add(i);
+          if (result.size > 7) break;
+        }
+      }
+    } else {
+      const i = DAY_CODES.indexOf(seg);
+      if (i >= 0) result.add(i);
+    }
+  });
+  return [...result];
+}
+
+function minutesOf(h: string): number {
+  const [hh, mm] = h.split(":").map(Number);
+  return hh * 60 + (mm || 0);
+}
+
+// Returns true/false if parseable, null if format unknown (e.g. "24/7" we handle).
+export function isOpenNow(raw: string | null | undefined, now: Date = new Date()): boolean | null {
+  if (!raw) return null;
+  const txt = raw.trim();
+  if (!txt) return null;
+  if (/^24\s*\/\s*7$/i.test(txt)) return true;
+
+  // current weekday: JS 0=Sun..6=Sat → our 0=Mo..6=Su
+  const jsDay = now.getDay();
+  const today = (jsDay + 6) % 7;
+  const yesterday = (today + 6) % 7;
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  try {
+    const parts = txt.split(";").map((s) => s.trim()).filter(Boolean);
+    for (const part of parts) {
+      const m = part.match(/^([A-Za-z,\-]+)\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/);
+      if (!m) continue;
+      const days = expandDays(m[1]);
+      const start = minutesOf(m[2]);
+      const end = minutesOf(m[3]);
+      if (end > start) {
+        if (days.includes(today) && nowMin >= start && nowMin < end) return true;
+      } else {
+        // overnight (e.g. 22:00-03:00)
+        if (days.includes(today) && nowMin >= start) return true;
+        if (days.includes(yesterday) && nowMin < end) return true;
+      }
+    }
+    return false;
+  } catch {
+    return null;
+  }
+}
+
