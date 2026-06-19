@@ -10,7 +10,13 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
+    defaultPendingComponent: () => (
+      <div className="min-h-screen grid place-items-center text-muted-foreground">
+        Laden...
+      </div>
+    ),
   });
+
 
   return router;
 };
