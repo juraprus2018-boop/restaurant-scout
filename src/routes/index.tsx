@@ -57,17 +57,23 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
 }
 
 function Home() {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [search, setSearch] = useState("");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // Filters
   const [openNow, setOpenNow] = useState(false);
   const [cuisines, setCuisines] = useState<string[]>([]);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [radiusKm, setRadiusKm] = useState(5);
+  const [sort, setSort] = useState<SortKey>("popular");
   const [geoError, setGeoError] = useState<string | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
+
+  const debouncedSearch = useDebounced(search, 300);
 
   const chipFilterCount = (openNow ? 1 : 0) + cuisines.length + (userPos ? 1 : 0);
   const prevChipCountRef = useRef(0);
@@ -77,31 +83,72 @@ function Home() {
       const el = document.getElementById("ontdek");
       if (el) {
         const rect = el.getBoundingClientRect();
-        if (rect.top > 80) {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        if (rect.top > 80) el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }
     prevChipCountRef.current = chipFilterCount;
   }, [chipFilterCount]);
 
+  // Server-side search: re-runs when any filter changes; resets to page 0.
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setPage(0);
+    const effectiveSort: SortKey = userPos && sort === "popular" ? "distance" : sort;
     supabase
-      .from("restaurants")
-      .select("id,name,slug,lat,lng,city,address,cuisine,avg_rating,review_count,opening_hours,raw_osm_tags")
-      .order("review_count", { ascending: false })
-      .limit(500)
-      .then(({ data }) => {
-        setRestaurants((data ?? []) as Restaurant[]);
+      .rpc("search_restaurants", {
+        _q: debouncedSearch || null,
+        _city: null,
+        _cuisines: cuisines.length ? cuisines : null,
+        _lat: userPos?.lat ?? null,
+        _lng: userPos?.lng ?? null,
+        _radius_km: userPos ? radiusKm : null,
+        _sort: effectiveSort,
+        _limit: PAGE_SIZE,
+        _offset: 0,
+      })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.error("[search]", error);
+          setRestaurants([]);
+          setTotal(0);
+        } else {
+          const rows = (data ?? []) as (Restaurant & { total_count: number })[];
+          const filtered = openNow ? rows.filter((r) => isOpenNow(r.opening_hours) === true) : rows;
+          setRestaurants(filtered);
+          setTotal(Number(rows[0]?.total_count ?? 0));
+        }
         setLoading(false);
       });
-  }, []);
+    return () => { cancelled = true; };
+  }, [debouncedSearch, cuisines, userPos, radiusKm, sort, openNow]);
 
-  const allCuisines = useMemo(() => {
-    const counts = new Map<string, number>();
-    restaurants.forEach((r) => r.cuisine?.forEach((c) => counts.set(c, (counts.get(c) ?? 0) + 1)));
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 16).map(([c]) => c);
-  }, [restaurants]);
+  const loadMore = async () => {
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    const effectiveSort: SortKey = userPos && sort === "popular" ? "distance" : sort;
+    const { data, error } = await supabase.rpc("search_restaurants", {
+      _q: debouncedSearch || null,
+      _city: null,
+      _cuisines: cuisines.length ? cuisines : null,
+      _lat: userPos?.lat ?? null,
+      _lng: userPos?.lng ?? null,
+      _radius_km: userPos ? radiusKm : null,
+      _sort: effectiveSort,
+      _limit: PAGE_SIZE,
+      _offset: nextPage * PAGE_SIZE,
+    });
+    if (!error && data) {
+      const rows = data as (Restaurant & { total_count: number })[];
+      const add = openNow ? rows.filter((r) => isOpenNow(r.opening_hours) === true) : rows;
+      setRestaurants((prev) => [...prev, ...add]);
+      setPage(nextPage);
+    }
+    setLoadingMore(false);
+  };
+
+  const allCuisines = POPULAR_CUISINES;
 
   const toggleCuisine = (c: string) =>
     setCuisines((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
@@ -131,54 +178,13 @@ function Home() {
     setOpenNow(false);
     setCuisines([]);
     setUserPos(null);
+    setSort("popular");
   };
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    let list = restaurants.filter((r) => {
-      if (q) {
-        const tags = r.raw_osm_tags ?? {};
-        const postcode = (tags["addr:postcode"] || "").toLowerCase();
-        const hay =
-          r.name.toLowerCase() +
-          " " +
-          (r.city ?? "").toLowerCase() +
-          " " +
-          (r.address ?? "").toLowerCase() +
-          " " +
-          postcode +
-          " " +
-          (r.cuisine ?? []).join(" ").toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      if (cuisines.length && !r.cuisine?.some((c) => cuisines.includes(c))) return false;
-      if (openNow) {
-        const o = isOpenNow(r.opening_hours);
-        if (o !== true) return false;
-      }
-      if (userPos) {
-        const d = haversineKm(userPos.lat, userPos.lng, r.lat, r.lng);
-        if (d > radiusKm) return false;
-      }
-      return true;
-    });
-    if (userPos) {
-      list = [...list].sort(
-        (a, b) =>
-          haversineKm(userPos.lat, userPos.lng, a.lat, a.lng) -
-          haversineKm(userPos.lat, userPos.lng, b.lat, b.lng),
-      );
-    }
-    return list;
-  }, [restaurants, search, cuisines, openNow, userPos, radiusKm]);
-
-  const topRated = useMemo(
-    () => [...restaurants].sort((a, b) => (b.avg_rating ?? 0) - (a.avg_rating ?? 0)).slice(0, 8),
-    [restaurants],
-  );
 
   const activeFilterCount =
     (search ? 1 : 0) + (openNow ? 1 : 0) + cuisines.length + (userPos ? 1 : 0);
+
+  const hasMore = restaurants.length < total;
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,14 +203,23 @@ function Home() {
         setRadiusKm={setRadiusKm}
         geoError={geoError}
         geoLoading={geoLoading}
-        resultCount={filtered.length}
+        resultCount={total}
         activeFilterCount={activeFilterCount}
         clearFilters={clearFilters}
+        sort={sort}
+        setSort={setSort}
       />
       <Categories />
-      <TopRated items={topRated.length ? topRated : restaurants.slice(0, 8)} loading={loading} />
-      <MapSection restaurants={filtered} />
-      <AllList restaurants={filtered} loading={loading} />
+      <TopRated items={restaurants.slice(0, 8)} loading={loading} />
+      <MapSection restaurants={restaurants} />
+      <AllList
+        restaurants={restaurants}
+        loading={loading}
+        hasMore={hasMore}
+        loadMore={loadMore}
+        loadingMore={loadingMore}
+        total={total}
+      />
       <SiteFooter />
     </div>
   );
