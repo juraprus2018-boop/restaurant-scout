@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientOnly } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
@@ -45,29 +45,43 @@ const CARD_COLORS = [
   "from-lime-400 to-green-500",
 ];
 
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const R = 6371;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
+
+const PAGE_SIZE = 24;
+const POPULAR_CUISINES = [
+  "burger", "pizza", "italian", "chinese", "japanese", "sushi", "thai",
+  "indian", "french", "mexican", "vietnamese", "mediterranean",
+  "vegetarian", "vegan", "seafood", "kebab",
+];
+
+type SortKey = "popular" | "rating" | "distance" | "name";
+
+function useDebounced<T>(value: T, ms = 300): T {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return v;
 }
 
 function Home() {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [search, setSearch] = useState("");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // Filters
   const [openNow, setOpenNow] = useState(false);
   const [cuisines, setCuisines] = useState<string[]>([]);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [radiusKm, setRadiusKm] = useState(5);
+  const [sort, setSort] = useState<SortKey>("popular");
   const [geoError, setGeoError] = useState<string | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
+
+  const debouncedSearch = useDebounced(search, 300);
 
   const chipFilterCount = (openNow ? 1 : 0) + cuisines.length + (userPos ? 1 : 0);
   const prevChipCountRef = useRef(0);
@@ -77,31 +91,70 @@ function Home() {
       const el = document.getElementById("ontdek");
       if (el) {
         const rect = el.getBoundingClientRect();
-        if (rect.top > 80) {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        if (rect.top > 80) el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }
     prevChipCountRef.current = chipFilterCount;
   }, [chipFilterCount]);
 
+  // Server-side search: re-runs when any filter changes; resets to page 0.
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setPage(0);
+    const effectiveSort: SortKey = userPos && sort === "popular" ? "distance" : sort;
     supabase
-      .from("restaurants")
-      .select("id,name,slug,lat,lng,city,address,cuisine,avg_rating,review_count,opening_hours,raw_osm_tags")
-      .order("review_count", { ascending: false })
-      .limit(500)
-      .then(({ data }) => {
-        setRestaurants((data ?? []) as Restaurant[]);
+      .rpc("search_restaurants", {
+        _q: debouncedSearch || undefined,
+        _cuisines: cuisines.length ? cuisines : undefined,
+        _lat: userPos?.lat,
+        _lng: userPos?.lng,
+        _radius_km: userPos ? radiusKm : undefined,
+        _sort: effectiveSort,
+        _limit: PAGE_SIZE,
+        _offset: 0,
+      })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.error("[search]", error);
+          setRestaurants([]);
+          setTotal(0);
+        } else {
+          const rows = (data ?? []) as (Restaurant & { total_count: number })[];
+          const filtered = openNow ? rows.filter((r) => isOpenNow(r.opening_hours) === true) : rows;
+          setRestaurants(filtered);
+          setTotal(Number(rows[0]?.total_count ?? 0));
+        }
         setLoading(false);
       });
-  }, []);
+    return () => { cancelled = true; };
+  }, [debouncedSearch, cuisines, userPos, radiusKm, sort, openNow]);
 
-  const allCuisines = useMemo(() => {
-    const counts = new Map<string, number>();
-    restaurants.forEach((r) => r.cuisine?.forEach((c) => counts.set(c, (counts.get(c) ?? 0) + 1)));
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 16).map(([c]) => c);
-  }, [restaurants]);
+  const loadMore = async () => {
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    const effectiveSort: SortKey = userPos && sort === "popular" ? "distance" : sort;
+    const { data, error } = await supabase.rpc("search_restaurants", {
+      _q: debouncedSearch || undefined,
+      _cuisines: cuisines.length ? cuisines : undefined,
+      _lat: userPos?.lat,
+      _lng: userPos?.lng,
+      _radius_km: userPos ? radiusKm : undefined,
+      _sort: effectiveSort,
+      _limit: PAGE_SIZE,
+      _offset: nextPage * PAGE_SIZE,
+    });
+    if (!error && data) {
+      const rows = data as (Restaurant & { total_count: number })[];
+      const add = openNow ? rows.filter((r) => isOpenNow(r.opening_hours) === true) : rows;
+      setRestaurants((prev) => [...prev, ...add]);
+      setPage(nextPage);
+    }
+    setLoadingMore(false);
+  };
+
+  const allCuisines = POPULAR_CUISINES;
 
   const toggleCuisine = (c: string) =>
     setCuisines((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
@@ -131,54 +184,13 @@ function Home() {
     setOpenNow(false);
     setCuisines([]);
     setUserPos(null);
+    setSort("popular");
   };
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    let list = restaurants.filter((r) => {
-      if (q) {
-        const tags = r.raw_osm_tags ?? {};
-        const postcode = (tags["addr:postcode"] || "").toLowerCase();
-        const hay =
-          r.name.toLowerCase() +
-          " " +
-          (r.city ?? "").toLowerCase() +
-          " " +
-          (r.address ?? "").toLowerCase() +
-          " " +
-          postcode +
-          " " +
-          (r.cuisine ?? []).join(" ").toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      if (cuisines.length && !r.cuisine?.some((c) => cuisines.includes(c))) return false;
-      if (openNow) {
-        const o = isOpenNow(r.opening_hours);
-        if (o !== true) return false;
-      }
-      if (userPos) {
-        const d = haversineKm(userPos.lat, userPos.lng, r.lat, r.lng);
-        if (d > radiusKm) return false;
-      }
-      return true;
-    });
-    if (userPos) {
-      list = [...list].sort(
-        (a, b) =>
-          haversineKm(userPos.lat, userPos.lng, a.lat, a.lng) -
-          haversineKm(userPos.lat, userPos.lng, b.lat, b.lng),
-      );
-    }
-    return list;
-  }, [restaurants, search, cuisines, openNow, userPos, radiusKm]);
-
-  const topRated = useMemo(
-    () => [...restaurants].sort((a, b) => (b.avg_rating ?? 0) - (a.avg_rating ?? 0)).slice(0, 8),
-    [restaurants],
-  );
 
   const activeFilterCount =
     (search ? 1 : 0) + (openNow ? 1 : 0) + cuisines.length + (userPos ? 1 : 0);
+
+  const hasMore = restaurants.length < total;
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,14 +209,23 @@ function Home() {
         setRadiusKm={setRadiusKm}
         geoError={geoError}
         geoLoading={geoLoading}
-        resultCount={filtered.length}
+        resultCount={total}
         activeFilterCount={activeFilterCount}
         clearFilters={clearFilters}
+        sort={sort}
+        setSort={setSort}
       />
       <Categories />
-      <TopRated items={topRated.length ? topRated : restaurants.slice(0, 8)} loading={loading} />
-      <MapSection restaurants={filtered} />
-      <AllList restaurants={filtered} loading={loading} />
+      <TopRated items={restaurants.slice(0, 8)} loading={loading} />
+      <MapSection restaurants={restaurants} />
+      <AllList
+        restaurants={restaurants}
+        loading={loading}
+        hasMore={hasMore}
+        loadMore={loadMore}
+        loadingMore={loadingMore}
+        total={total}
+      />
       <SiteFooter />
     </div>
   );
@@ -214,6 +235,7 @@ function FilterBar({
   openNow, setOpenNow, cuisines, toggleCuisine, allCuisines,
   useNearby, userPos, clearNearby, radiusKm, setRadiusKm,
   geoError, geoLoading, resultCount, activeFilterCount, clearFilters,
+  sort, setSort,
 }: {
   openNow: boolean; setOpenNow: (b: boolean) => void;
   cuisines: string[]; toggleCuisine: (c: string) => void; allCuisines: string[];
@@ -221,6 +243,7 @@ function FilterBar({
   radiusKm: number; setRadiusKm: (n: number) => void;
   geoError: string | null; geoLoading: boolean;
   resultCount: number; activeFilterCount: number; clearFilters: () => void;
+  sort: SortKey; setSort: (s: SortKey) => void;
 }) {
   return (
     <section id="filters" className="border-b border-border bg-card sticky top-16 z-30">
@@ -261,8 +284,19 @@ function FilterBar({
               <X className="w-4 h-4" /> Wis filters ({activeFilterCount})
             </Button>
           )}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="h-9 rounded-full border border-input bg-background px-3 text-sm"
+            aria-label="Sorteren"
+          >
+            <option value="popular">Populair</option>
+            <option value="rating">Hoogste rating</option>
+            <option value="distance" disabled={!userPos}>Dichtstbij</option>
+            <option value="name">Naam (A–Z)</option>
+          </select>
           <div className="ml-auto text-sm text-muted-foreground">
-            {resultCount} resultaten
+            {resultCount.toLocaleString("nl-NL")} resultaten
           </div>
         </div>
 
@@ -530,16 +564,50 @@ function RestaurantMap({ restaurants }: { restaurants: Restaurant[] }) {
 }
 
 
-function AllList({ restaurants, loading }: { restaurants: Restaurant[]; loading: boolean }) {
-  if (loading || restaurants.length === 0) return null;
+function AllList({
+  restaurants, loading, hasMore, loadMore, loadingMore, total,
+}: {
+  restaurants: Restaurant[]; loading: boolean;
+  hasMore: boolean; loadMore: () => void; loadingMore: boolean; total: number;
+}) {
+  if (loading) {
+    return (
+      <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-80 rounded-2xl bg-muted animate-pulse" />
+          ))}
+        </div>
+      </section>
+    );
+  }
+  if (restaurants.length === 0) {
+    return (
+      <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+        <EmptyState />
+      </section>
+    );
+  }
   return (
     <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-2">Alle restaurants</h2>
+      <p className="text-muted-foreground mb-8">
+        {restaurants.length.toLocaleString("nl-NL")} van {total.toLocaleString("nl-NL")} weergegeven
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {restaurants.slice(0, 24).map((r, i) => (
+        {restaurants.map((r, i) => (
           <RestaurantCard key={r.id} r={r} colorIdx={i + 2} />
         ))}
       </div>
+      {hasMore && (
+        <div className="mt-10 grid place-items-center">
+          <Button size="lg" onClick={loadMore} disabled={loadingMore} className="rounded-full px-8">
+            {loadingMore ? "Laden..." : "Meer laden"}
+          </Button>
+        </div>
+      )}
     </section>
   );
 }

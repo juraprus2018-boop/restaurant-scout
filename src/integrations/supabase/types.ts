@@ -166,6 +166,37 @@ export type Database = {
         }
         Returns: boolean
       }
+      search_restaurants: {
+        Args: {
+          _city?: string
+          _cuisines?: string[]
+          _lat?: number
+          _limit?: number
+          _lng?: number
+          _offset?: number
+          _q?: string
+          _radius_km?: number
+          _sort?: string
+        }
+        Returns: {
+          address: string
+          avg_rating: number
+          city: string
+          cuisine: string[]
+          distance_km: number
+          id: string
+          lat: number
+          lng: number
+          name: string
+          opening_hours: string
+          raw_osm_tags: Json
+          review_count: number
+          slug: string
+          total_count: number
+        }[]
+      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "user"
