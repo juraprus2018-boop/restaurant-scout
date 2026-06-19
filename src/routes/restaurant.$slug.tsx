@@ -33,109 +33,140 @@ export const Route = createFileRoute("/restaurant/$slug")({
     return (
       <div className="p-8 text-center space-y-4">
         <p className="text-destructive">{error.message}</p>
-        <Button onClick={() => { reset(); router.invalidate(); }}>Opnieuw proberen</Button>
+        <Button onClick={() => { reset(); router.invalidate(); }}>{t(DEFAULT_LOCALE, "city.retry")}</Button>
       </div>
     );
   },
   notFoundComponent: () => (
     <div className="p-8 text-center">
-      <h1 className="text-2xl font-bold">Restaurant niet gevonden</h1>
-      <Link to="/" className="text-primary hover:underline">← Terug naar kaart</Link>
+      <h1 className="text-2xl font-bold">{t(DEFAULT_LOCALE, "restaurant.notFound")}</h1>
+      <Link to="/" className="text-primary hover:underline">← {t(DEFAULT_LOCALE, "restaurant.backToMap")}</Link>
     </div>
   ),
-  head: ({ params, loaderData }) => {
-    const r = loaderData?.restaurant;
-    if (!r) {
-      return { meta: [{ title: "Restaurant — PlaceResults" }] };
-    }
-    const tags = (r.raw_osm_tags ?? {}) as Record<string, string>;
-    const img = tagImage(tags) ?? defaultBanner;
-    const cuisines = (r.cuisine ?? []).map(cuisineLabel).join(", ");
-    const cityPart = r.city ? ` in ${r.city}` : "";
-    const ratingPart = (r.avg_rating ?? 0) > 0 ? ` · ${Number(r.avg_rating).toFixed(1)}★ (${r.review_count})` : "";
-    const title = `${r.name}${cityPart} — Menu, openingstijden & reviews | PlaceResults`.slice(0, 70);
-    const description = `${r.name}${cityPart}${cuisines ? ` · ${cuisines}` : ""}${ratingPart}. ${
-      tags.description ?? `Bekijk openingstijden, contact, voorzieningen en reviews van bezoekers.`
-    }`.slice(0, 158);
-
-    const ldRestaurant: any = {
-      "@context": "https://schema.org",
-      "@type": "Restaurant",
-      name: r.name,
-      "@id": `/restaurant/${params.slug}`,
-      url: `/restaurant/${params.slug}`,
-      image: img,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || r.address || undefined,
-        addressLocality: r.city ?? tags["addr:city"] ?? undefined,
-        postalCode: tags["addr:postcode"] ?? undefined,
-        addressCountry: r.country ?? tags["addr:country"] ?? undefined,
-      },
-      geo: { "@type": "GeoCoordinates", latitude: r.lat, longitude: r.lng },
-      telephone: r.phone ?? undefined,
-      ...(r.website ? { sameAs: [r.website] } : {}),
-      servesCuisine: (r.cuisine ?? []).map(cuisineLabel),
-      ...(r.opening_hours ? { openingHours: r.opening_hours } : {}),
-      ...((r.avg_rating ?? 0) > 0 && (r.review_count ?? 0) > 0
-        ? {
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: Number(r.avg_rating).toFixed(1),
-              reviewCount: r.review_count,
-              bestRating: 5,
-              worstRating: 1,
-            },
-          }
-        : {}),
-    };
-
-    const ldBreadcrumbs = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: "/" },
-        ...(r.city ? [{ "@type": "ListItem", position: 2, name: r.city, item: `/?city=${encodeURIComponent(r.city)}` }] : []),
-        { "@type": "ListItem", position: r.city ? 3 : 2, name: r.name, item: `/restaurant/${params.slug}` },
-      ],
-    };
-
-    const faq = buildFaq(r, tags);
-    const ldFaq = faq.length
-      ? {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: faq.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }
-      : null;
-
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "restaurant.restaurant" },
-        { property: "og:url", content: `/restaurant/${params.slug}` },
-        { property: "og:image", content: img },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: title },
-        { name: "twitter:description", content: description },
-        { name: "twitter:image", content: img },
-      ],
-      links: [{ rel: "canonical", href: `/restaurant/${params.slug}` }],
-      scripts: [
-        { type: "application/ld+json", children: JSON.stringify(ldRestaurant) },
-        { type: "application/ld+json", children: JSON.stringify(ldBreadcrumbs) },
-        ...(ldFaq ? [{ type: "application/ld+json", children: JSON.stringify(ldFaq) }] : []),
-      ],
-    };
-  },
+  head: ({ params, loaderData }) => buildRestaurantHead(DEFAULT_LOCALE, params.slug, loaderData?.restaurant, /* withAlternates */ true),
 });
+
+export function buildRestaurantHead(
+  lang: LocaleCode,
+  slug: string,
+  r: any | undefined,
+  withAlternates: boolean,
+) {
+  const basePath = lang === DEFAULT_LOCALE ? `/restaurant/${slug}` : `/${lang}/restaurant/${slug}`;
+  const alternates = withAlternates
+    ? [
+        ...LOCALES.map((l) => ({
+          rel: "alternate",
+          hreflang: l.code,
+          href: l.code === DEFAULT_LOCALE ? `/restaurant/${slug}` : `/${l.code}/restaurant/${slug}`,
+        })),
+        { rel: "alternate", hreflang: "x-default", href: `/restaurant/${slug}` },
+      ]
+    : [];
+  if (!r) {
+    return {
+      meta: [{ title: "PlaceResults" }, { property: "og:locale", content: lang }],
+      links: [{ rel: "canonical", href: basePath }, ...alternates],
+    };
+  }
+  const tags = (r.raw_osm_tags ?? {}) as Record<string, string>;
+  const img = tagImage(tags) ?? defaultBanner;
+  const cuisines = (r.cuisine ?? []).map(cuisineLabel).join(", ");
+  const cityPart = r.city ? ` · ${r.city}` : "";
+  const ratingPart = (r.avg_rating ?? 0) > 0 ? ` · ${Number(r.avg_rating).toFixed(1)}★ (${r.review_count})` : "";
+  const titleBase = `${r.name}${cityPart} — ${t(lang, "restaurant.titleSuffix")}`;
+  const title = `${titleBase} | PlaceResults`.slice(0, 70);
+  const description = `${r.name}${cityPart}${cuisines ? ` · ${cuisines}` : ""}${ratingPart}. ${
+    tags[`description:${lang}`] ?? tags.description ?? t(lang, "restaurant.descFallback")
+  }`.slice(0, 158);
+
+  const ldRestaurant: any = {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    name: r.name,
+    "@id": basePath,
+    url: basePath,
+    image: img,
+    inLanguage: lang,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || r.address || undefined,
+      addressLocality: r.city ?? tags["addr:city"] ?? undefined,
+      postalCode: tags["addr:postcode"] ?? undefined,
+      addressCountry: r.country ?? tags["addr:country"] ?? undefined,
+    },
+    geo: { "@type": "GeoCoordinates", latitude: r.lat, longitude: r.lng },
+    telephone: r.phone ?? undefined,
+    ...(r.website ? { sameAs: [r.website] } : {}),
+    servesCuisine: (r.cuisine ?? []).map(cuisineLabel),
+    ...(r.opening_hours ? { openingHours: r.opening_hours } : {}),
+    ...((r.avg_rating ?? 0) > 0 && (r.review_count ?? 0) > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(r.avg_rating).toFixed(1),
+            reviewCount: r.review_count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
+  };
+
+  const ldBreadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: t(lang, "city.breadcrumb.home"), item: lang === DEFAULT_LOCALE ? "/" : `/${lang}` },
+      ...(r.city ? [{ "@type": "ListItem", position: 2, name: r.city, item: lang === DEFAULT_LOCALE ? `/stad/${slugifyCity(r.city)}` : `/${lang}/stad/${slugifyCity(r.city)}` }] : []),
+      { "@type": "ListItem", position: r.city ? 3 : 2, name: r.name, item: basePath },
+    ],
+  };
+
+  const faq = buildFaq(lang, r, tags);
+  const ldFaq = faq.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        inLanguage: lang,
+        mainEntity: faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }
+    : null;
+
+  return {
+    meta: [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "restaurant.restaurant" },
+      { property: "og:url", content: basePath },
+      { property: "og:image", content: img },
+      { property: "og:locale", content: lang },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+      { name: "twitter:image", content: img },
+    ],
+    links: [
+      { rel: "canonical", href: basePath },
+      ...alternates,
+    ],
+    scripts: [
+      { type: "application/ld+json", children: JSON.stringify(ldRestaurant) },
+      { type: "application/ld+json", children: JSON.stringify(ldBreadcrumbs) },
+      ...(ldFaq ? [{ type: "application/ld+json", children: JSON.stringify(ldFaq) }] : []),
+    ],
+  };
+}
+
+function slugifyCity(c: string): string {
+  return c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 
 type Review = { id: string; rating: number; comment: string | null; created_at: string; user_id: string };
 
