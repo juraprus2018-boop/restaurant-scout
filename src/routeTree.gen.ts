@@ -16,11 +16,14 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LangIndexRouteImport } from './routes/$lang.index'
 import { Route as StadCityRouteImport } from './routes/stad.$city'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
 import { Route as KeukenCuisineRouteImport } from './routes/keuken.$cuisine'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as LangStadCityRouteImport } from './routes/$lang.stad.$city'
+import { Route as LangRestaurantSlugRouteImport } from './routes/$lang.restaurant.$slug'
+import { Route as LangKeukenCuisineRouteImport } from './routes/$lang.keuken.$cuisine'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -57,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LangIndexRoute = LangIndexRouteImport.update({
+  id: '/$lang/',
+  path: '/$lang/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StadCityRoute = StadCityRouteImport.update({
   id: '/stad/$city',
   path: '/stad/$city',
@@ -82,6 +90,16 @@ const LangStadCityRoute = LangStadCityRouteImport.update({
   path: '/$lang/stad/$city',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LangRestaurantSlugRoute = LangRestaurantSlugRouteImport.update({
+  id: '/$lang/restaurant/$slug',
+  path: '/$lang/restaurant/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LangKeukenCuisineRoute = LangKeukenCuisineRouteImport.update({
+  id: '/$lang/keuken/$cuisine',
+  path: '/$lang/keuken/$cuisine',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -94,6 +112,9 @@ export interface FileRoutesByFullPath {
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/stad/$city': typeof StadCityRoute
+  '/$lang/': typeof LangIndexRoute
+  '/$lang/keuken/$cuisine': typeof LangKeukenCuisineRoute
+  '/$lang/restaurant/$slug': typeof LangRestaurantSlugRoute
   '/$lang/stad/$city': typeof LangStadCityRoute
 }
 export interface FileRoutesByTo {
@@ -107,6 +128,9 @@ export interface FileRoutesByTo {
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/stad/$city': typeof StadCityRoute
+  '/$lang': typeof LangIndexRoute
+  '/$lang/keuken/$cuisine': typeof LangKeukenCuisineRoute
+  '/$lang/restaurant/$slug': typeof LangRestaurantSlugRoute
   '/$lang/stad/$city': typeof LangStadCityRoute
 }
 export interface FileRoutesById {
@@ -122,6 +146,9 @@ export interface FileRoutesById {
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/stad/$city': typeof StadCityRoute
+  '/$lang/': typeof LangIndexRoute
+  '/$lang/keuken/$cuisine': typeof LangKeukenCuisineRoute
+  '/$lang/restaurant/$slug': typeof LangRestaurantSlugRoute
   '/$lang/stad/$city': typeof LangStadCityRoute
 }
 export interface FileRouteTypes {
@@ -137,6 +164,9 @@ export interface FileRouteTypes {
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
     | '/stad/$city'
+    | '/$lang/'
+    | '/$lang/keuken/$cuisine'
+    | '/$lang/restaurant/$slug'
     | '/$lang/stad/$city'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -150,6 +180,9 @@ export interface FileRouteTypes {
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
     | '/stad/$city'
+    | '/$lang'
+    | '/$lang/keuken/$cuisine'
+    | '/$lang/restaurant/$slug'
     | '/$lang/stad/$city'
   id:
     | '__root__'
@@ -164,6 +197,9 @@ export interface FileRouteTypes {
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
     | '/stad/$city'
+    | '/$lang/'
+    | '/$lang/keuken/$cuisine'
+    | '/$lang/restaurant/$slug'
     | '/$lang/stad/$city'
   fileRoutesById: FileRoutesById
 }
@@ -178,6 +214,9 @@ export interface RootRouteChildren {
   KeukenCuisineRoute: typeof KeukenCuisineRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
   StadCityRoute: typeof StadCityRoute
+  LangIndexRoute: typeof LangIndexRoute
+  LangKeukenCuisineRoute: typeof LangKeukenCuisineRoute
+  LangRestaurantSlugRoute: typeof LangRestaurantSlugRoute
   LangStadCityRoute: typeof LangStadCityRoute
 }
 
@@ -232,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$lang/': {
+      id: '/$lang/'
+      path: '/$lang'
+      fullPath: '/$lang/'
+      preLoaderRoute: typeof LangIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stad/$city': {
       id: '/stad/$city'
       path: '/stad/$city'
@@ -267,6 +313,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LangStadCityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$lang/restaurant/$slug': {
+      id: '/$lang/restaurant/$slug'
+      path: '/$lang/restaurant/$slug'
+      fullPath: '/$lang/restaurant/$slug'
+      preLoaderRoute: typeof LangRestaurantSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$lang/keuken/$cuisine': {
+      id: '/$lang/keuken/$cuisine'
+      path: '/$lang/keuken/$cuisine'
+      fullPath: '/$lang/keuken/$cuisine'
+      preLoaderRoute: typeof LangKeukenCuisineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -292,6 +352,9 @@ const rootRouteChildren: RootRouteChildren = {
   KeukenCuisineRoute: KeukenCuisineRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
   StadCityRoute: StadCityRoute,
+  LangIndexRoute: LangIndexRoute,
+  LangKeukenCuisineRoute: LangKeukenCuisineRoute,
+  LangRestaurantSlugRoute: LangRestaurantSlugRoute,
   LangStadCityRoute: LangStadCityRoute,
 }
 export const routeTree = rootRouteImport

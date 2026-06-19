@@ -4,6 +4,7 @@ import { listByCuisine } from "@/lib/seo-public.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { MapPin, Star } from "lucide-react";
 import { cuisineLabel } from "@/lib/osm-labels";
+import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
 
 const cuisineQuery = (key: string) =>
   queryOptions({
@@ -55,7 +56,12 @@ export const Route = createFileRoute("/keuken/$cuisine")({
 });
 
 function CuisinePage() {
-  const { cuisine: key } = Route.useParams();
+  const { cuisine } = Route.useParams();
+  return <CuisinePageBody cuisineKey={cuisine} />;
+}
+
+export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { locale?: LocaleCode; cuisineKey: string }) {
+  const key = cuisineKey;
   const { data } = useSuspenseQuery(cuisineQuery(key));
   const { cuisine, total, items } = data;
   const label = cuisineLabel(cuisine);
@@ -75,7 +81,7 @@ function CuisinePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
+      <SiteHeader locale={locale} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
@@ -116,7 +122,7 @@ function CuisinePage() {
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter locale={locale} />
     </div>
   );
 }

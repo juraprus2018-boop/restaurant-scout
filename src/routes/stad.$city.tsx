@@ -84,6 +84,7 @@ function CityPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
