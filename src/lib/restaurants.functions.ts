@@ -66,31 +66,38 @@ out center tags;`;
       }
       const json = (await res.json()) as { elements: any[] };
       return json.elements
-    .map((el) => {
-      const t = el.tags ?? {};
-      if (!t.name) return null;
-      const lat = el.lat ?? el.center?.lat;
-      const lng = el.lon ?? el.center?.lon;
-      if (lat == null || lng == null) return null;
-      return {
-        osm_id: el.id,
-        osm_type: el.type,
-        name: t.name,
-        lat,
-        lng,
-        amenity: t.amenity,
-        cuisine: t.cuisine ? t.cuisine.split(";").map((s: string) => s.trim()) : [],
-        phone: t.phone ?? t["contact:phone"] ?? null,
-        website: t.website ?? t["contact:website"] ?? null,
-        opening_hours: t.opening_hours ?? null,
-        address: buildAddress(t),
-        city: t["addr:city"] ?? null,
-        country: t["addr:country"] ?? null,
-        tags: t,
-      } as OsmPoi;
-    })
-    .filter(Boolean) as OsmPoi[];
+        .map((el) => {
+          const t = el.tags ?? {};
+          if (!t.name) return null;
+          const lat = el.lat ?? el.center?.lat;
+          const lng = el.lon ?? el.center?.lon;
+          if (lat == null || lng == null) return null;
+          return {
+            osm_id: el.id,
+            osm_type: el.type,
+            name: t.name,
+            lat,
+            lng,
+            amenity: t.amenity,
+            cuisine: t.cuisine ? t.cuisine.split(";").map((s: string) => s.trim()) : [],
+            phone: t.phone ?? t["contact:phone"] ?? null,
+            website: t.website ?? t["contact:website"] ?? null,
+            opening_hours: t.opening_hours ?? null,
+            address: buildAddress(t),
+            city: t["addr:city"] ?? null,
+            country: t["addr:country"] ?? null,
+            tags: t,
+          } as OsmPoi;
+        })
+        .filter(Boolean) as OsmPoi[];
+    } catch (e) {
+      lastErr = e;
+      continue;
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error("Overpass: all endpoints failed");
 }
+
 
 export const previewArea = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
