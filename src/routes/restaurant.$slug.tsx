@@ -168,7 +168,7 @@ function slugifyCity(c: string): string {
   return c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-type Review = { id: string; rating: number; comment: string | null; created_at: string; user_id: string };
+type Review = { id: string; rating: number; comment: string | null; created_at: string; user_id: string | null; author_name: string | null };
 
 const YES = (v?: string) => v === "yes" || v === "designated" || v === "limited" || v === "only";
 const NO = (v?: string) => v === "no";
@@ -252,6 +252,8 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
   const [user, setUser] = useState<any>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [authorEmail, setAuthorEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
 
@@ -262,20 +264,33 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
   async function submitReview(e: React.FormEvent) {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      if (!authorName.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(authorEmail.trim())) {
+        alert("Please fill in your name and a valid email address.");
+        return;
+      }
+    }
     setSubmitting(true);
-    const { error } = await supabase.from("reviews").upsert({
+    const payload: any = {
       restaurant_id: restaurant.id,
-      user_id: user.id,
       rating,
       comment: comment.trim() || null,
-    }, { onConflict: "restaurant_id,user_id" });
+    };
+    if (user) {
+      payload.user_id = user.id;
+      payload.author_name = user.user_metadata?.display_name ?? null;
+    } else {
+      payload.author_name = authorName.trim().slice(0, 80);
+      payload.author_email = authorEmail.trim().slice(0, 255);
+    }
+    const { error } = await supabase.from("reviews").insert(payload);
     setSubmitting(false);
     if (error) { alert(error.message); return; }
     setComment("");
+    if (!user) { setAuthorName(""); setAuthorEmail(""); }
     await refetch();
     const { data: rev } = await supabase
-      .from("reviews").select("id,rating,comment,created_at,user_id")
+      .from("reviews").select("id,rating,comment,created_at,user_id,author_name")
       .eq("restaurant_id", restaurant.id).order("created_at", { ascending: false });
     setReviews((rev ?? []) as Review[]);
   }
@@ -467,32 +482,49 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           <section>
             <h2 className="text-xl font-semibold mb-3">{tr("restaurant.reviews")}</h2>
-            {user ? (
-              <form onSubmit={submitReview} className="bg-background border rounded-lg p-4 mb-4 space-y-3">
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button key={n} type="button" onClick={() => setRating(n)} aria-label={tr("restaurant.starsLabel", { n })}>
-                      <Star className={`w-6 h-6 ${n <= rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
-                    </button>
-                  ))}
+            <form onSubmit={submitReview} className="bg-background border rounded-lg p-4 mb-4 space-y-3">
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button key={n} type="button" onClick={() => setRating(n)} aria-label={tr("restaurant.starsLabel", { n })}>
+                    <Star className={`w-6 h-6 ${n <= rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
+                  </button>
+                ))}
+              </div>
+              {!user && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    required
+                    maxLength={80}
+                    placeholder="Name"
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    className="border rounded-md px-3 py-2 text-sm bg-background"
+                  />
+                  <input
+                    type="email"
+                    required
+                    maxLength={255}
+                    placeholder="Email (not shown)"
+                    value={authorEmail}
+                    onChange={(e) => setAuthorEmail(e.target.value)}
+                    className="border rounded-md px-3 py-2 text-sm bg-background"
+                  />
                 </div>
-                <Textarea placeholder={tr("restaurant.reviewPlaceholder")} value={comment} onChange={(e) => setComment(e.target.value)} />
-                <Button type="submit" disabled={submitting}>{submitting ? tr("restaurant.submitting") : tr("restaurant.submit")}</Button>
-              </form>
-            ) : (
-              <p className="text-sm text-muted-foreground mb-4">
-                {tr("restaurant.loginToReview", { link: "" }).split("{link}")[0]}
-                <Link to="/auth" className="text-primary hover:underline">{tr("restaurant.loginLink")}</Link>
-                {tr("restaurant.loginToReview", { link: "" }).split("{link}")[1] ?? ""}
-              </p>
-            )}
+              )}
+              <Textarea placeholder={tr("restaurant.reviewPlaceholder")} value={comment} onChange={(e) => setComment(e.target.value)} />
+              <Button type="submit" disabled={submitting}>{submitting ? tr("restaurant.submitting") : tr("restaurant.submit")}</Button>
+            </form>
             <div className="space-y-3">
               {reviews.map((r) => (
                 <article key={r.id} className="bg-background border rounded-lg p-4">
-                  <div className="flex gap-0.5 mb-1" aria-label={tr("restaurant.starsLabel", { n: r.rating })}>
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <Star key={n} className={`w-4 h-4 ${n <= r.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
-                    ))}
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="flex gap-0.5" aria-label={tr("restaurant.starsLabel", { n: r.rating })}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star key={n} className={`w-4 h-4 ${n <= r.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
+                      ))}
+                    </div>
+                    {r.author_name && <span className="text-sm font-medium">{r.author_name}</span>}
                   </div>
                   {r.comment && <p className="text-sm">{r.comment}</p>}
                   <p className="text-xs text-muted-foreground mt-1">{new Date(r.created_at).toLocaleDateString(locale)}</p>

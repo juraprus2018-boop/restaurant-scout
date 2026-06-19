@@ -19,7 +19,7 @@ export const getRestaurantBySlug = createServerFn({ method: "GET" })
     if (!r) throw notFound();
     const { data: reviews } = await sb
       .from("reviews")
-      .select("id,rating,comment,created_at,user_id")
+      .select("id,rating,comment,created_at,user_id,author_name")
       .eq("restaurant_id", r.id)
       .order("created_at", { ascending: false })
       .limit(50);
