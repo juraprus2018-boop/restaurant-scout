@@ -27,8 +27,8 @@ export function coloredIcon(color: "red" | "orange" | "green" | "blue") {
 }
 
 export { MapContainer, TileLayer, Marker, Popup, Circle, useMap, useMapEvents };
-export const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-export const OSM_TILES = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+export const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+export const OSM_TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
 export function FlyTo({ center, zoom }: { center: [number, number]; zoom?: number }) {
   const map = useMap();
