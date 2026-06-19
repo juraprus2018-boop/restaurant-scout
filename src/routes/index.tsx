@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientOnly } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
@@ -68,6 +68,22 @@ function Home() {
   const [radiusKm, setRadiusKm] = useState(5);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
+
+  const chipFilterCount = (openNow ? 1 : 0) + cuisines.length + (userPos ? 1 : 0);
+  const prevChipCountRef = useRef(0);
+
+  useEffect(() => {
+    if (chipFilterCount > 0 && prevChipCountRef.current === 0) {
+      const el = document.getElementById("ontdek");
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (rect.top > 80) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    }
+    prevChipCountRef.current = chipFilterCount;
+  }, [chipFilterCount]);
 
   useEffect(() => {
     supabase
