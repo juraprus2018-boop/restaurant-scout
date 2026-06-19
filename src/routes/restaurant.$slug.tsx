@@ -246,6 +246,9 @@ function RestaurantPage() {
   const osmUrl = restaurant.osm_id && restaurant.osm_type
     ? `https://www.openstreetmap.org/${restaurant.osm_type}/${restaurant.osm_id}`
     : null;
+  const osmEditUrl = restaurant.osm_id && restaurant.osm_type
+    ? `https://www.openstreetmap.org/edit?${restaurant.osm_type}=${restaurant.osm_id}`
+    : null;
 
   const openingRows = restaurant.opening_hours ? parseOpeningHours(restaurant.opening_hours) : [];
   const faq = buildFaq(restaurant, t);
