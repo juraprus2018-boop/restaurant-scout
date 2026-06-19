@@ -30,60 +30,58 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
-  --color-gold: var(--gold);
-  --color-cream: var(--cream);
+  --color-rating: var(--rating);
   --color-ink: var(--ink);
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-cream: var(--cream);
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.975 0.012 75);
-  --foreground: oklch(0.22 0.03 40);
-  --card: oklch(0.99 0.008 80);
-  --card-foreground: oklch(0.22 0.03 40);
-  --popover: oklch(0.99 0.008 80);
-  --popover-foreground: oklch(0.22 0.03 40);
-  --primary: oklch(0.55 0.16 35);
-  --primary-foreground: oklch(0.98 0.01 80);
-  --secondary: oklch(0.93 0.025 75);
-  --secondary-foreground: oklch(0.25 0.04 40);
-  --muted: oklch(0.94 0.018 75);
-  --muted-foreground: oklch(0.48 0.03 50);
-  --accent: oklch(0.72 0.12 70);
-  --accent-foreground: oklch(0.2 0.03 40);
-  --destructive: oklch(0.55 0.22 28);
-  --destructive-foreground: oklch(0.98 0.01 80);
-  --border: oklch(0.88 0.02 70);
-  --input: oklch(0.9 0.02 70);
-  --ring: oklch(0.55 0.16 35);
-  --gold: oklch(0.72 0.14 75);
-  --cream: oklch(0.97 0.018 80);
-  --ink: oklch(0.18 0.025 40);
+  --radius: 0.75rem;
+  /* TripAdvisor-inspired: crisp white, deep green primary, sunny rating */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.16 0.02 240);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.16 0.02 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.16 0.02 240);
+  --primary: oklch(0.42 0.12 165); /* deep travel green */
+  --primary-foreground: oklch(0.99 0.005 160);
+  --secondary: oklch(0.96 0.012 165);
+  --secondary-foreground: oklch(0.25 0.05 165);
+  --muted: oklch(0.97 0.005 240);
+  --muted-foreground: oklch(0.5 0.02 240);
+  --accent: oklch(0.78 0.16 145); /* leafy bright green accent */
+  --accent-foreground: oklch(0.15 0.03 165);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.99 0.005 160);
+  --border: oklch(0.92 0.005 240);
+  --input: oklch(0.94 0.005 240);
+  --ring: oklch(0.42 0.12 165);
+  --rating: oklch(0.78 0.16 145);
+  --ink: oklch(0.14 0.02 240);
+  --cream: oklch(0.99 0.005 160);
 }
 
 .dark {
-  --background: oklch(0.18 0.02 40);
-  --foreground: oklch(0.96 0.012 80);
-  --card: oklch(0.22 0.025 40);
-  --card-foreground: oklch(0.96 0.012 80);
-  --popover: oklch(0.22 0.025 40);
-  --popover-foreground: oklch(0.96 0.012 80);
-  --primary: oklch(0.65 0.17 38);
-  --primary-foreground: oklch(0.15 0.02 40);
-  --secondary: oklch(0.28 0.03 45);
-  --secondary-foreground: oklch(0.96 0.012 80);
-  --muted: oklch(0.28 0.03 45);
-  --muted-foreground: oklch(0.72 0.02 60);
-  --accent: oklch(0.75 0.13 75);
-  --accent-foreground: oklch(0.18 0.02 40);
-  --destructive: oklch(0.65 0.2 28);
-  --destructive-foreground: oklch(0.98 0.01 80);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.65 0.17 38);
+  --background: oklch(0.14 0.02 240);
+  --foreground: oklch(0.97 0.005 240);
+  --card: oklch(0.2 0.02 240);
+  --card-foreground: oklch(0.97 0.005 240);
+  --popover: oklch(0.2 0.02 240);
+  --popover-foreground: oklch(0.97 0.005 240);
+  --primary: oklch(0.78 0.16 145);
+  --primary-foreground: oklch(0.14 0.02 240);
+  --secondary: oklch(0.26 0.02 240);
+  --secondary-foreground: oklch(0.97 0.005 240);
+  --muted: oklch(0.26 0.02 240);
+  --muted-foreground: oklch(0.72 0.01 240);
+  --accent: oklch(0.78 0.16 145);
+  --accent-foreground: oklch(0.14 0.02 240);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.78 0.16 145);
 }
 
 @layer base {
@@ -92,10 +90,11 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    font-optical-sizing: auto;
+    font-weight: 800;
     letter-spacing: -0.02em;
   }
 }
