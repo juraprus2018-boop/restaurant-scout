@@ -10,16 +10,21 @@ interface Props {
 
 /**
  * Rewrites the current path to the chosen locale.
- * Rules:
- *  - default locale (nl) lives at root (`/stad/zadar`)
- *  - other locales live under `/{lang}/...` (`/hr/stad/zadar`)
+ * Only `/stad/...` pages have localized variants today.
+ * For any other path, switching locale navigates to the home page
+ * (avoids 404s on routes that aren't translated yet).
  */
 function rewritePath(pathname: string, target: LocaleCode): string {
   const segs = pathname.split("/").filter(Boolean);
-  // strip existing locale prefix if present
   if (segs.length && isLocale(segs[0])) segs.shift();
+
+  // Only the city landing page is localized so far.
+  const isLocalizable = segs[0] === "stad" && segs.length >= 2;
+  if (!isLocalizable) {
+    return target === DEFAULT_LOCALE ? "/" : `/${target}`;
+  }
   if (target === DEFAULT_LOCALE) return "/" + segs.join("/");
-  return "/" + target + (segs.length ? "/" + segs.join("/") : "");
+  return "/" + target + "/" + segs.join("/");
 }
 
 export function LanguageSwitcher({ current }: Props) {
