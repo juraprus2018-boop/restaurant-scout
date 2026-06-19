@@ -118,11 +118,20 @@ export const previewArea = createServerFn({ method: "POST" })
 
     const pois = await fetchOverpass(data.lat, data.lng, data.radius);
     const ids = pois.map((p) => p.osm_id);
-    const { data: existing } = await context.supabase
-      .from("restaurants")
-      .select("osm_id")
-      .in("osm_id", ids);
-    const existingSet = new Set((existing ?? []).map((r: any) => Number(r.osm_id)));
+    const existingSet = new Set<number>();
+    const CHUNK = 100;
+    for (let i = 0; i < ids.length; i += CHUNK) {
+      const chunk = ids.slice(i, i + CHUNK);
+      const { data: existing, error } = await context.supabase
+        .from("restaurants")
+        .select("osm_id")
+        .in("osm_id", chunk);
+      if (error) {
+        console.error("[previewArea] existing lookup error:", error.message);
+        throw new Error(error.message);
+      }
+      for (const r of existing ?? []) existingSet.add(Number((r as any).osm_id));
+    }
     return {
       pois: pois.map((p) => ({ ...p, exists: existingSet.has(p.osm_id) })),
       total: pois.length,
