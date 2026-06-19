@@ -20,6 +20,7 @@ import { Route as StadCityRouteImport } from './routes/stad.$city'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
 import { Route as KeukenCuisineRouteImport } from './routes/keuken.$cuisine'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as LangStadCityRouteImport } from './routes/$lang.stad.$city'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -76,6 +77,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const LangStadCityRoute = LangStadCityRouteImport.update({
+  id: '/$lang/stad/$city',
+  path: '/$lang/stad/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/stad/$city': typeof StadCityRoute
+  '/$lang/stad/$city': typeof LangStadCityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/stad/$city': typeof StadCityRoute
+  '/$lang/stad/$city': typeof LangStadCityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/keuken/$cuisine': typeof KeukenCuisineRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/stad/$city': typeof StadCityRoute
+  '/$lang/stad/$city': typeof LangStadCityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
     | '/stad/$city'
+    | '/$lang/stad/$city'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
     | '/stad/$city'
+    | '/$lang/stad/$city'
   id:
     | '__root__'
     | '/'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/keuken/$cuisine'
     | '/restaurant/$slug'
     | '/stad/$city'
+    | '/$lang/stad/$city'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   KeukenCuisineRoute: typeof KeukenCuisineRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
   StadCityRoute: typeof StadCityRoute
+  LangStadCityRoute: typeof LangStadCityRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/$lang/stad/$city': {
+      id: '/$lang/stad/$city'
+      path: '/$lang/stad/$city'
+      fullPath: '/$lang/stad/$city'
+      preLoaderRoute: typeof LangStadCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -272,6 +292,7 @@ const rootRouteChildren: RootRouteChildren = {
   KeukenCuisineRoute: KeukenCuisineRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
   StadCityRoute: StadCityRoute,
+  LangStadCityRoute: LangStadCityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

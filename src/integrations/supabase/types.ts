@@ -136,6 +136,39 @@ export type Database = {
           },
         ]
       }
+      seo_translations: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          intro: string
+          key: string
+          lang: string
+          scope: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          intro: string
+          key: string
+          lang: string
+          scope: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          intro?: string
+          key?: string
+          lang?: string
+          scope?: string
+          title?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
