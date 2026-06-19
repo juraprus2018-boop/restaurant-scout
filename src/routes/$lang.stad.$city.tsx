@@ -116,7 +116,15 @@ function LocalizedCityPage() {
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
           <nav className="text-sm text-muted-foreground mb-3">
-            <Link to="/" className="hover:text-primary">{t(lang, "city.breadcrumb.home")}</Link> / <span>{t(lang, "city.breadcrumb.city")}</span> / <span className="text-foreground">{city}</span>
+            <Link to="/" className="hover:text-primary">{t(lang, "city.breadcrumb.home")}</Link>
+            {" / "}
+            {lang === DEFAULT_LOCALE ? (
+              <Link to="/steden" className="hover:text-primary">{t(lang, "city.breadcrumb.cities")}</Link>
+            ) : (
+              <Link to="/$lang/steden" params={{ lang }} className="hover:text-primary">{t(lang, "city.breadcrumb.cities")}</Link>
+            )}
+            {" / "}
+            <span className="text-foreground">{city}</span>
           </nav>
           <h1 className="font-display text-4xl sm:text-5xl text-ink">{t(lang, "city.heading", { city })}</h1>
           <p className="text-muted-foreground mt-3 max-w-2xl">
