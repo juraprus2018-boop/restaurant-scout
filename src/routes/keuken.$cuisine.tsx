@@ -4,7 +4,8 @@ import { listByCuisine } from "@/lib/seo-public.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { MapPin, Star } from "lucide-react";
 import { cuisineLabel } from "@/lib/osm-labels";
-import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
+import { t } from "@/lib/i18n/strings";
 
 const cuisineQuery = (key: string) =>
   queryOptions({
@@ -15,32 +16,16 @@ const cuisineQuery = (key: string) =>
 
 export const Route = createFileRoute("/keuken/$cuisine")({
   loader: ({ params, context }) => context.queryClient.ensureQueryData(cuisineQuery(params.cuisine)),
-  head: ({ loaderData, params }) => {
-    const label = loaderData ? cuisineLabel(loaderData.cuisine) : params.cuisine;
-    const total = loaderData?.total ?? 0;
-    const title = `${label} restaurants — Top ${total.toLocaleString("nl-NL")} adressen | PlaceResults`;
-    const desc = `Vind de beste ${label.toLowerCase()} restaurants. ${total.toLocaleString("nl-NL")} adressen met reviews, openingstijden en locatie.`;
-    return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-      links: [{ rel: "canonical", href: `/keuken/${params.cuisine}` }],
-    };
-  },
+  head: ({ loaderData, params }) => buildCuisineHead(DEFAULT_LOCALE, params.cuisine, loaderData),
   component: CuisinePage,
   errorComponent: ({ error, reset }) => {
     const router = useRouter();
     return (
       <div className="min-h-screen grid place-items-center p-6 text-center">
         <div>
-          <h1 className="font-display text-2xl mb-2">Er ging iets mis</h1>
+          <h1 className="font-display text-2xl mb-2">{t(DEFAULT_LOCALE, "city.error")}</h1>
           <p className="text-muted-foreground mb-4">{error.message}</p>
-          <button onClick={() => { reset(); router.invalidate(); }} className="text-primary underline">Opnieuw proberen</button>
+          <button onClick={() => { reset(); router.invalidate(); }} className="text-primary underline">{t(DEFAULT_LOCALE, "city.retry")}</button>
         </div>
       </div>
     );
@@ -48,12 +33,41 @@ export const Route = createFileRoute("/keuken/$cuisine")({
   notFoundComponent: () => (
     <div className="min-h-screen grid place-items-center p-6 text-center">
       <div>
-        <h1 className="font-display text-3xl mb-2">Keuken niet gevonden</h1>
-        <Link to="/" className="text-primary underline">Terug naar home</Link>
+        <h1 className="font-display text-3xl mb-2">{t(DEFAULT_LOCALE, "cuisine.notFound")}</h1>
+        <Link to="/" className="text-primary underline">{t(DEFAULT_LOCALE, "city.backHome")}</Link>
       </div>
     </div>
   ),
 });
+
+export function buildCuisineHead(lang: LocaleCode, cuisineSlug: string, loaderData: any) {
+  const label = loaderData ? cuisineLabel(loaderData.cuisine) : cuisineSlug;
+  const total = loaderData?.total ?? 0;
+  const path = lang === DEFAULT_LOCALE ? `/keuken/${cuisineSlug}` : `/${lang}/keuken/${cuisineSlug}`;
+  const title = `${t(lang, "cuisine.heading", { label })} — PlaceResults`.slice(0, 70);
+  const desc = t(lang, "cuisine.subheading", { count: total.toLocaleString(lang), label }).slice(0, 158);
+  return {
+    meta: [
+      { title },
+      { name: "description", content: desc },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: path },
+      { property: "og:locale", content: lang },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [
+      { rel: "canonical", href: path },
+      ...LOCALES.map((l) => ({
+        rel: "alternate",
+        hreflang: l.code,
+        href: l.code === DEFAULT_LOCALE ? `/keuken/${cuisineSlug}` : `/${l.code}/keuken/${cuisineSlug}`,
+      })),
+      { rel: "alternate", hreflang: "x-default", href: `/keuken/${cuisineSlug}` },
+    ],
+  };
+}
 
 function CuisinePage() {
   const { cuisine } = Route.useParams();
@@ -61,15 +75,15 @@ function CuisinePage() {
 }
 
 export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { locale?: LocaleCode; cuisineKey: string }) {
-  const key = cuisineKey;
-  const { data } = useSuspenseQuery(cuisineQuery(key));
+  const { data } = useSuspenseQuery(cuisineQuery(cuisineKey));
   const { cuisine, total, items } = data;
   const label = cuisineLabel(cuisine);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${label} restaurants`,
+    name: t(locale, "cuisine.heading", { label }),
+    inLanguage: locale,
     numberOfItems: total,
     itemListElement: items.slice(0, 20).map((r: any, i: number) => ({
       "@type": "ListItem",
@@ -87,11 +101,11 @@ export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { local
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
           <nav className="text-sm text-muted-foreground mb-3">
-            <Link to="/" className="hover:text-primary">Home</Link> / <span>Keuken</span> / <span className="text-foreground">{label}</span>
+            <Link to="/" className="hover:text-primary">{t(locale, "city.breadcrumb.home")}</Link> / <span>{t(locale, "cuisine.breadcrumb.cuisine")}</span> / <span className="text-foreground">{label}</span>
           </nav>
-          <h1 className="font-display text-4xl sm:text-5xl text-ink">{label} restaurants</h1>
+          <h1 className="font-display text-4xl sm:text-5xl text-ink">{t(locale, "cuisine.heading", { label })}</h1>
           <p className="text-muted-foreground mt-3 max-w-2xl">
-            {total.toLocaleString("nl-NL")} {label.toLowerCase()} restaurants — gesorteerd op beoordeling.
+            {t(locale, "cuisine.subheading", { count: total.toLocaleString(locale), label })}
           </p>
         </div>
       </section>
@@ -110,12 +124,12 @@ export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { local
                 <div className="flex items-center gap-1 mt-1.5 text-sm">
                   <Star className="w-4 h-4 fill-rating text-rating" />
                   <span className="font-semibold">{Number(r.avg_rating).toFixed(1)}</span>
-                  <span className="text-muted-foreground">· {r.review_count} reviews</span>
+                  <span className="text-muted-foreground">· {r.review_count} {t(locale, "city.reviewsLabel")}</span>
                 </div>
               )}
               <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1.5 line-clamp-1">
                 <MapPin className="w-3.5 h-3.5 shrink-0" />
-                {r.address || r.city || "Adres onbekend"}
+                {r.address || r.city || t(locale, "city.addressUnknown")}
               </p>
             </Link>
           ))}
@@ -126,3 +140,4 @@ export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { local
     </div>
   );
 }
+

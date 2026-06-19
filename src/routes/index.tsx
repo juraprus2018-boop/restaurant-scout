@@ -9,7 +9,9 @@ import { MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight, Clo
 import heroImage from "@/assets/hero-dinner.jpg";
 import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
-import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
+
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,6 +20,18 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Vind restaurants, cafés en bars met echte reviews en ratings. Plan jouw volgende eetafspraak met PlaceResults." },
       { property: "og:title", content: "PlaceResults — Restaurantgids met reviews" },
       { property: "og:description", content: "Vind restaurants, cafés en bars met echte reviews." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/" },
+      { property: "og:locale", content: "nl" },
+    ],
+    links: [
+      { rel: "canonical", href: "/" },
+      ...LOCALES.map((l) => ({
+        rel: "alternate",
+        hreflang: l.code,
+        href: l.code === "nl" ? "/" : `/${l.code}`,
+      })),
+      { rel: "alternate", hreflang: "x-default", href: "/" },
     ],
   }),
   component: Home,

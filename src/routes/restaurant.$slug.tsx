@@ -12,10 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { getRestaurantBySlug } from "@/lib/restaurants-public.functions";
-import { amenityLabel, cuisineLabel, parseOpeningHours, YESNO_NL } from "@/lib/osm-labels";
+import { amenityLabel, cuisineLabel } from "@/lib/osm-labels";
 import defaultBanner from "@/assets/default-restaurant-banner.jpg";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
-import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
+import { t, parseOpeningHoursI18n, yesNoLabel } from "@/lib/i18n/strings";
 
 const restaurantQuery = (slug: string) =>
   queryOptions({
@@ -32,109 +33,140 @@ export const Route = createFileRoute("/restaurant/$slug")({
     return (
       <div className="p-8 text-center space-y-4">
         <p className="text-destructive">{error.message}</p>
-        <Button onClick={() => { reset(); router.invalidate(); }}>Opnieuw proberen</Button>
+        <Button onClick={() => { reset(); router.invalidate(); }}>{t(DEFAULT_LOCALE, "city.retry")}</Button>
       </div>
     );
   },
   notFoundComponent: () => (
     <div className="p-8 text-center">
-      <h1 className="text-2xl font-bold">Restaurant niet gevonden</h1>
-      <Link to="/" className="text-primary hover:underline">← Terug naar kaart</Link>
+      <h1 className="text-2xl font-bold">{t(DEFAULT_LOCALE, "restaurant.notFound")}</h1>
+      <Link to="/" className="text-primary hover:underline">← {t(DEFAULT_LOCALE, "restaurant.backToMap")}</Link>
     </div>
   ),
-  head: ({ params, loaderData }) => {
-    const r = loaderData?.restaurant;
-    if (!r) {
-      return { meta: [{ title: "Restaurant — PlaceResults" }] };
-    }
-    const tags = (r.raw_osm_tags ?? {}) as Record<string, string>;
-    const img = tagImage(tags) ?? defaultBanner;
-    const cuisines = (r.cuisine ?? []).map(cuisineLabel).join(", ");
-    const cityPart = r.city ? ` in ${r.city}` : "";
-    const ratingPart = (r.avg_rating ?? 0) > 0 ? ` · ${Number(r.avg_rating).toFixed(1)}★ (${r.review_count})` : "";
-    const title = `${r.name}${cityPart} — Menu, openingstijden & reviews | PlaceResults`.slice(0, 70);
-    const description = `${r.name}${cityPart}${cuisines ? ` · ${cuisines}` : ""}${ratingPart}. ${
-      tags.description ?? `Bekijk openingstijden, contact, voorzieningen en reviews van bezoekers.`
-    }`.slice(0, 158);
-
-    const ldRestaurant: any = {
-      "@context": "https://schema.org",
-      "@type": "Restaurant",
-      name: r.name,
-      "@id": `/restaurant/${params.slug}`,
-      url: `/restaurant/${params.slug}`,
-      image: img,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || r.address || undefined,
-        addressLocality: r.city ?? tags["addr:city"] ?? undefined,
-        postalCode: tags["addr:postcode"] ?? undefined,
-        addressCountry: r.country ?? tags["addr:country"] ?? undefined,
-      },
-      geo: { "@type": "GeoCoordinates", latitude: r.lat, longitude: r.lng },
-      telephone: r.phone ?? undefined,
-      ...(r.website ? { sameAs: [r.website] } : {}),
-      servesCuisine: (r.cuisine ?? []).map(cuisineLabel),
-      ...(r.opening_hours ? { openingHours: r.opening_hours } : {}),
-      ...((r.avg_rating ?? 0) > 0 && (r.review_count ?? 0) > 0
-        ? {
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: Number(r.avg_rating).toFixed(1),
-              reviewCount: r.review_count,
-              bestRating: 5,
-              worstRating: 1,
-            },
-          }
-        : {}),
-    };
-
-    const ldBreadcrumbs = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: "/" },
-        ...(r.city ? [{ "@type": "ListItem", position: 2, name: r.city, item: `/?city=${encodeURIComponent(r.city)}` }] : []),
-        { "@type": "ListItem", position: r.city ? 3 : 2, name: r.name, item: `/restaurant/${params.slug}` },
-      ],
-    };
-
-    const faq = buildFaq(r, tags);
-    const ldFaq = faq.length
-      ? {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: faq.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }
-      : null;
-
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "restaurant.restaurant" },
-        { property: "og:url", content: `/restaurant/${params.slug}` },
-        { property: "og:image", content: img },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: title },
-        { name: "twitter:description", content: description },
-        { name: "twitter:image", content: img },
-      ],
-      links: [{ rel: "canonical", href: `/restaurant/${params.slug}` }],
-      scripts: [
-        { type: "application/ld+json", children: JSON.stringify(ldRestaurant) },
-        { type: "application/ld+json", children: JSON.stringify(ldBreadcrumbs) },
-        ...(ldFaq ? [{ type: "application/ld+json", children: JSON.stringify(ldFaq) }] : []),
-      ],
-    };
-  },
+  head: ({ params, loaderData }) => buildRestaurantHead(DEFAULT_LOCALE, params.slug, loaderData?.restaurant, /* withAlternates */ true),
 });
+
+export function buildRestaurantHead(
+  lang: LocaleCode,
+  slug: string,
+  r: any | undefined,
+  withAlternates: boolean,
+) {
+  const basePath = lang === DEFAULT_LOCALE ? `/restaurant/${slug}` : `/${lang}/restaurant/${slug}`;
+  const alternates = withAlternates
+    ? [
+        ...LOCALES.map((l) => ({
+          rel: "alternate",
+          hreflang: l.code,
+          href: l.code === DEFAULT_LOCALE ? `/restaurant/${slug}` : `/${l.code}/restaurant/${slug}`,
+        })),
+        { rel: "alternate", hreflang: "x-default", href: `/restaurant/${slug}` },
+      ]
+    : [];
+  if (!r) {
+    return {
+      meta: [{ title: "PlaceResults" }, { property: "og:locale", content: lang }],
+      links: [{ rel: "canonical", href: basePath }, ...alternates],
+    };
+  }
+  const tags = (r.raw_osm_tags ?? {}) as Record<string, string>;
+  const img = tagImage(tags) ?? defaultBanner;
+  const cuisines = (r.cuisine ?? []).map(cuisineLabel).join(", ");
+  const cityPart = r.city ? ` · ${r.city}` : "";
+  const ratingPart = (r.avg_rating ?? 0) > 0 ? ` · ${Number(r.avg_rating).toFixed(1)}★ (${r.review_count})` : "";
+  const titleBase = `${r.name}${cityPart} — ${t(lang, "restaurant.titleSuffix")}`;
+  const title = `${titleBase} | PlaceResults`.slice(0, 70);
+  const description = `${r.name}${cityPart}${cuisines ? ` · ${cuisines}` : ""}${ratingPart}. ${
+    tags[`description:${lang}`] ?? tags.description ?? t(lang, "restaurant.descFallback")
+  }`.slice(0, 158);
+
+  const ldRestaurant: any = {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    name: r.name,
+    "@id": basePath,
+    url: basePath,
+    image: img,
+    inLanguage: lang,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || r.address || undefined,
+      addressLocality: r.city ?? tags["addr:city"] ?? undefined,
+      postalCode: tags["addr:postcode"] ?? undefined,
+      addressCountry: r.country ?? tags["addr:country"] ?? undefined,
+    },
+    geo: { "@type": "GeoCoordinates", latitude: r.lat, longitude: r.lng },
+    telephone: r.phone ?? undefined,
+    ...(r.website ? { sameAs: [r.website] } : {}),
+    servesCuisine: (r.cuisine ?? []).map(cuisineLabel),
+    ...(r.opening_hours ? { openingHours: r.opening_hours } : {}),
+    ...((r.avg_rating ?? 0) > 0 && (r.review_count ?? 0) > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(r.avg_rating).toFixed(1),
+            reviewCount: r.review_count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
+  };
+
+  const ldBreadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: t(lang, "city.breadcrumb.home"), item: lang === DEFAULT_LOCALE ? "/" : `/${lang}` },
+      ...(r.city ? [{ "@type": "ListItem", position: 2, name: r.city, item: lang === DEFAULT_LOCALE ? `/stad/${slugifyCity(r.city)}` : `/${lang}/stad/${slugifyCity(r.city)}` }] : []),
+      { "@type": "ListItem", position: r.city ? 3 : 2, name: r.name, item: basePath },
+    ],
+  };
+
+  const faq = buildFaq(lang, r, tags);
+  const ldFaq = faq.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        inLanguage: lang,
+        mainEntity: faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }
+    : null;
+
+  return {
+    meta: [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "restaurant.restaurant" },
+      { property: "og:url", content: basePath },
+      { property: "og:image", content: img },
+      { property: "og:locale", content: lang },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+      { name: "twitter:image", content: img },
+    ],
+    links: [
+      { rel: "canonical", href: basePath },
+      ...alternates,
+    ],
+    scripts: [
+      { type: "application/ld+json", children: JSON.stringify(ldRestaurant) },
+      { type: "application/ld+json", children: JSON.stringify(ldBreadcrumbs) },
+      ...(ldFaq ? [{ type: "application/ld+json", children: JSON.stringify(ldFaq) }] : []),
+    ],
+  };
+}
+
+function slugifyCity(c: string): string {
+  return c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 
 type Review = { id: string; rating: number; comment: string | null; created_at: string; user_id: string };
 
@@ -149,24 +181,57 @@ function tagImage(t: Record<string, string>): string | null {
   return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(clean)}?width=1600`;
 }
 
-function buildFaq(r: any, t: Record<string, string>): Array<{ q: string; a: string }> {
+function buildFaq(lang: LocaleCode, r: any, tg: Record<string, string>): Array<{ q: string; a: string }> {
   const faq: Array<{ q: string; a: string }> = [];
-  if (r.opening_hours) faq.push({ q: `Wat zijn de openingstijden van ${r.name}?`, a: `${r.name} is geopend: ${r.opening_hours}.` });
-  const addr = [t["addr:street"], t["addr:housenumber"]].filter(Boolean).join(" ") || r.address;
-  if (addr) faq.push({ q: `Waar ligt ${r.name}?`, a: `${r.name} bevindt zich aan ${addr}${r.city ? `, ${r.city}` : ""}.` });
-  if (r.phone) faq.push({ q: `Hoe kan ik ${r.name} bereiken?`, a: `Bel ${r.phone}${r.website ? ` of bezoek ${r.website}` : ""}.` });
-  if (YES(t.takeaway) || YES(t.delivery)) {
-    const opts = [YES(t.takeaway) && "afhalen", YES(t.delivery) && "bezorgen"].filter(Boolean).join(" en ");
-    faq.push({ q: `Kan ik bij ${r.name} ${opts}?`, a: `Ja, ${r.name} biedt ${opts} aan.` });
-  } else if (NO(t.takeaway) && NO(t.delivery)) {
-    faq.push({ q: `Kan ik bij ${r.name} afhalen of bezorgen?`, a: `Nee, ${r.name} biedt geen afhaal- of bezorgservice.` });
+  const name = r.name as string;
+  if (r.opening_hours) {
+    faq.push({
+      q: t(lang, "faq.q.hours", { name }),
+      a: t(lang, "faq.a.hours", { name, hours: r.opening_hours }),
+    });
   }
-  if (t.wheelchair) {
-    const label = { yes: "volledig rolstoeltoegankelijk", limited: "beperkt rolstoeltoegankelijk", no: "niet rolstoeltoegankelijk" }[t.wheelchair] ?? null;
-    if (label) faq.push({ q: `Is ${r.name} rolstoeltoegankelijk?`, a: `${r.name} is ${label}.` });
+  const addr = [tg["addr:street"], tg["addr:housenumber"]].filter(Boolean).join(" ") || r.address;
+  if (addr) {
+    faq.push({
+      q: t(lang, "faq.q.where", { name }),
+      a: t(lang, "faq.a.where", { name, addr, city: r.city ? `, ${r.city}` : "" }),
+    });
+  }
+  if (r.phone) {
+    faq.push({
+      q: t(lang, "faq.q.contact", { name }),
+      a: r.website
+        ? t(lang, "faq.a.contactWeb", { phone: r.phone, website: r.website })
+        : t(lang, "faq.a.contact", { phone: r.phone }),
+    });
+  }
+  if (YES(tg.takeaway) || YES(tg.delivery)) {
+    const parts = [YES(tg.takeaway) && t(lang, "faq.opt.takeaway"), YES(tg.delivery) && t(lang, "faq.opt.delivery")].filter(Boolean) as string[];
+    const opts = parts.join(` ${t(lang, "faq.opt.and")} `);
+    faq.push({
+      q: t(lang, "faq.q.takeawayDelivery", { name, opts }),
+      a: t(lang, "faq.a.takeawayDelivery", { name, opts }),
+    });
+  } else if (NO(tg.takeaway) && NO(tg.delivery)) {
+    faq.push({
+      q: t(lang, "faq.q.takeawayDelivery", { name, opts: `${t(lang, "faq.opt.takeaway")} ${t(lang, "faq.opt.and")} ${t(lang, "faq.opt.delivery")}` }),
+      a: t(lang, "faq.a.takeawayDeliveryNo", { name }),
+    });
+  }
+  if (tg.wheelchair) {
+    const stateKey = ({ yes: "faq.state.full", limited: "faq.state.limited", no: "faq.state.no" } as const)[tg.wheelchair as "yes" | "limited" | "no"];
+    if (stateKey) {
+      faq.push({
+        q: t(lang, "faq.q.wheelchair", { name }),
+        a: t(lang, "faq.a.wheelchair", { name, state: t(lang, stateKey) }),
+      });
+    }
   }
   if ((r.cuisine ?? []).length) {
-    faq.push({ q: `Welke keuken serveert ${r.name}?`, a: `${r.name} staat bekend om ${(r.cuisine as string[]).map(cuisineLabel).join(", ")}.` });
+    faq.push({
+      q: t(lang, "faq.q.cuisine", { name }),
+      a: t(lang, "faq.a.cuisine", { name, cuisines: (r.cuisine as string[]).map(cuisineLabel).join(", ") }),
+    });
   }
   return faq;
 }
@@ -180,6 +245,8 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
   const { data, refetch } = useSuspenseQuery(restaurantQuery(slug));
   const restaurant = data.restaurant as any;
   const initialReviews = data.reviews as Review[];
+  const tr = (k: Parameters<typeof t>[1], vars?: Record<string, string | number>) => t(locale, k, vars);
+
 
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [user, setUser] = useState<any>(null);
@@ -213,41 +280,44 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
     setReviews((rev ?? []) as Review[]);
   }
 
-  const t: Record<string, string> = restaurant.raw_osm_tags ?? {};
-  const description = t.description || t["description:nl"] || t["description:en"] || null;
-  const brand = t.brand || t.operator || null;
-  const email = t.email || t["contact:email"] || null;
-  const facebook = t["contact:facebook"] || t.facebook || null;
-  const instagram = t["contact:instagram"] || t.instagram || null;
-  const twitter = t["contact:twitter"] || t.twitter || null;
-  const heroImg = tagImage(t) ?? defaultBanner;
-  const usingDefaultBanner = !tagImage(t);
-  const wikipedia = t.wikipedia
-    ? `https://${t.wikipedia.split(":")[0] || "en"}.wikipedia.org/wiki/${encodeURIComponent(t.wikipedia.split(":").slice(1).join(":"))}`
+  const tags: Record<string, string> = restaurant.raw_osm_tags ?? {};
+  const description = tags.description || tags["description:nl"] || tags["description:en"] || null;
+  const brand = tags.brand || tags.operator || null;
+  const email = tags.email || tags["contact:email"] || null;
+  const facebook = tags["contact:facebook"] || tags.facebook || null;
+  const instagram = tags["contact:instagram"] || tags.instagram || null;
+  const twitter = tags["contact:twitter"] || tags.twitter || null;
+  const heroImg = tagImage(tags) ?? defaultBanner;
+  const usingDefaultBanner = !tagImage(tags);
+  const wikipedia = tags.wikipedia
+    ? `https://${tags.wikipedia.split(":")[0] || "en"}.wikipedia.org/wiki/${encodeURIComponent(tags.wikipedia.split(":").slice(1).join(":"))}`
     : null;
-  const capacity = t.capacity || t["capacity:persons"] || null;
-  const michelin = t["michelin_stars"] || t["michelin:stars"] || null;
-  const startDate = t.start_date || null;
-  const note = t.note || null;
+  const capacity = tags.capacity || tags["capacity:persons"] || null;
+  const michelin = tags["michelin_stars"] || tags["michelin:stars"] || null;
+  const startDate = tags.start_date || null;
+  const note = tags.note || null;
 
   const diets: string[] = [];
-  for (const [k, v] of Object.entries(t)) if (k.startsWith("diet:") && YES(v)) diets.push(k.replace("diet:", ""));
+  for (const [k, v] of Object.entries(tags)) if (k.startsWith("diet:") && YES(v)) diets.push(k.replace("diet:", ""));
   const payments: string[] = [];
-  for (const [k, v] of Object.entries(t)) if (k.startsWith("payment:") && YES(v)) payments.push(k.replace("payment:", ""));
+  for (const [k, v] of Object.entries(tags)) if (k.startsWith("payment:") && YES(v)) payments.push(k.replace("payment:", ""));
 
-  const features: Array<{ icon: any; label: string; ok: boolean }> = [
-    { icon: Truck, label: "Bezorging", ok: YES(t.delivery) },
-    { icon: ShoppingBag, label: "Afhalen", ok: YES(t.takeaway) },
-    { icon: Sun, label: "Terras", ok: YES(t.outdoor_seating) },
-    { icon: Home, label: "Binnen zitten", ok: YES(t.indoor_seating) },
-    { icon: Accessibility, label: t.wheelchair === "limited" ? "Beperkt rolstoeltoegankelijk" : "Rolstoeltoegankelijk", ok: YES(t.wheelchair) },
-    { icon: Wifi, label: "Wifi", ok: YES(t.internet_access) || t.internet_access === "wlan" },
-    { icon: Cigarette, label: "Roken toegestaan", ok: YES(t.smoking) },
-    { icon: Baby, label: "Kindvriendelijk", ok: YES(t["kids_area"]) || YES(t["child_friendly"]) },
-    { icon: Dog, label: "Honden welkom", ok: YES(t.dog) },
-    { icon: ParkingCircle, label: "Parkeren", ok: YES(t.parking) },
-    { icon: CreditCard, label: "Kaart betalen", ok: payments.length > 0 },
-  ].filter((f) => f.ok || NO(t[featureKey(f.label)] ?? ""));
+  const featureDefs: Array<{ icon: any; key: string; tagKey: string; ok: boolean }> = [
+    { icon: Truck, key: "feat.delivery", tagKey: "delivery", ok: YES(tags.delivery) },
+    { icon: ShoppingBag, key: "feat.takeaway", tagKey: "takeaway", ok: YES(tags.takeaway) },
+    { icon: Sun, key: "feat.terrace", tagKey: "outdoor_seating", ok: YES(tags.outdoor_seating) },
+    { icon: Home, key: "feat.indoor", tagKey: "indoor_seating", ok: YES(tags.indoor_seating) },
+    { icon: Accessibility, key: tags.wheelchair === "limited" ? "feat.wheelchairLimited" : "feat.wheelchair", tagKey: "wheelchair", ok: YES(tags.wheelchair) },
+    { icon: Wifi, key: "feat.wifi", tagKey: "internet_access", ok: YES(tags.internet_access) || tags.internet_access === "wlan" },
+    { icon: Cigarette, key: "feat.smoking", tagKey: "smoking", ok: YES(tags.smoking) },
+    { icon: Baby, key: "feat.kids", tagKey: "kids_area", ok: YES(tags["kids_area"]) || YES(tags["child_friendly"]) },
+    { icon: Dog, key: "feat.dogs", tagKey: "dog", ok: YES(tags.dog) },
+    { icon: ParkingCircle, key: "feat.parking", tagKey: "parking", ok: YES(tags.parking) },
+    { icon: CreditCard, key: "feat.card", tagKey: "", ok: payments.length > 0 },
+  ];
+  const features = featureDefs
+    .filter((f) => f.ok || (f.tagKey && NO(tags[f.tagKey] ?? "")))
+    .map((f) => ({ ...f, label: tr(f.key as any) }));
 
   const osmUrl = restaurant.osm_id && restaurant.osm_type
     ? `https://www.openstreetmap.org/${restaurant.osm_type}/${restaurant.osm_id}`
@@ -256,18 +326,17 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
     ? `https://www.openstreetmap.org/edit?${restaurant.osm_type}=${restaurant.osm_id}`
     : null;
 
-  const openingRows = restaurant.opening_hours ? parseOpeningHours(restaurant.opening_hours) : [];
-  const faq = buildFaq(restaurant, t);
+  const openingRows = restaurant.opening_hours ? parseOpeningHoursI18n(restaurant.opening_hours, locale) : [];
+  const faq = buildFaq(locale, restaurant, tags);
   const cuisines = (restaurant.cuisine ?? []).map(cuisineLabel);
 
   return (
     <div className="min-h-screen bg-muted/20">
       <SiteHeader locale={locale} />
       <header className="bg-background border-b px-4 py-3">
-
-        <nav aria-label="Kruimelpad" className="max-w-5xl mx-auto text-sm">
+        <nav aria-label={tr("restaurant.contact")} className="max-w-5xl mx-auto text-sm">
           <ol className="flex items-center gap-1 text-muted-foreground">
-            <li><Link to="/" className="hover:text-foreground flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> Home</Link></li>
+            <li><Link to="/" className="hover:text-foreground flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> {tr("city.breadcrumb.home")}</Link></li>
             {restaurant.city && (<>
               <li>/</li>
               <li>{restaurant.city}</li>
@@ -281,7 +350,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
       <div className="relative w-full h-72 md:h-96 bg-muted overflow-hidden">
         <img
           src={heroImg}
-          alt={`${restaurant.name}${restaurant.city ? ` in ${restaurant.city}` : ""}`}
+          alt={`${restaurant.name}${restaurant.city ? ` · ${restaurant.city}` : ""}`}
           className="w-full h-full object-cover"
           width={1600}
           height={640}
@@ -290,10 +359,10 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white max-w-5xl mx-auto">
           <h1 className="text-3xl md:text-5xl font-bold drop-shadow">{restaurant.name}</h1>
           <p className="mt-2 text-sm md:text-base opacity-90">
-            {[brand, t.amenity && amenityLabel(t.amenity), restaurant.city].filter(Boolean).join(" · ")}
+            {[brand, tags.amenity && amenityLabel(tags.amenity), restaurant.city].filter(Boolean).join(" · ")}
           </p>
           {usingDefaultBanner && (
-            <p className="absolute top-2 right-3 text-[10px] opacity-60">Sfeerbeeld</p>
+            <p className="absolute top-2 right-3 text-[10px] opacity-60">{tr("restaurant.stockImage")}</p>
           )}
         </div>
       </div>
@@ -305,7 +374,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
               <span className="flex items-center gap-1 text-amber-600 font-semibold">
                 <Star className="w-4 h-4 fill-current" />
                 {Number(restaurant.avg_rating).toFixed(1)}
-                <span className="text-muted-foreground font-normal">({restaurant.review_count} reviews)</span>
+                <span className="text-muted-foreground font-normal">({restaurant.review_count} {tr("city.reviewsLabel")})</span>
               </span>
             )}
             {michelin && <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium">★ {michelin} Michelin</span>}
@@ -316,17 +385,17 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {description && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-2">Over {restaurant.name}</h2>
+              <h2 className="font-semibold mb-2">{tr("restaurant.about", { name: restaurant.name })}</h2>
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{description}</p>
             </Card>
           )}
 
           {features.length > 0 && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-3">Voorzieningen</h2>
+              <h2 className="font-semibold mb-3">{tr("restaurant.features")}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
                 {features.map((f) => (
-                  <div key={f.label} className={`flex items-center gap-2 ${f.ok ? "" : "text-muted-foreground line-through"}`}>
+                  <div key={f.key} className={`flex items-center gap-2 ${f.ok ? "" : "text-muted-foreground line-through"}`}>
                     <f.icon className="w-4 h-4 shrink-0" />
                     <span>{f.label}</span>
                   </div>
@@ -337,7 +406,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {diets.length > 0 && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-3 flex items-center gap-2"><Leaf className="w-4 h-4" /> Dieetopties</h2>
+              <h2 className="font-semibold mb-3 flex items-center gap-2"><Leaf className="w-4 h-4" /> {tr("restaurant.diet")}</h2>
               <div className="flex flex-wrap gap-2 text-sm">
                 {diets.map((d) => (
                   <span key={d} className="px-2 py-1 rounded-full bg-green-100 text-green-800 capitalize">{d.replace(/_/g, " ")}</span>
@@ -348,7 +417,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {payments.length > 0 && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-3 flex items-center gap-2"><CreditCard className="w-4 h-4" /> Betaalmethoden</h2>
+              <h2 className="font-semibold mb-3 flex items-center gap-2"><CreditCard className="w-4 h-4" /> {tr("restaurant.payment")}</h2>
               <div className="flex flex-wrap gap-2 text-sm">
                 {payments.map((p) => (
                   <span key={p} className="px-2 py-1 rounded-full bg-muted capitalize">{p.replace(/_/g, " ")}</span>
@@ -359,7 +428,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {openingRows.length > 0 && (
             <Card className="p-4">
-              <h2 className="font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4" /> Openingstijden</h2>
+              <h2 className="font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4" /> {tr("restaurant.hours")}</h2>
               <table className="text-sm w-full">
                 <tbody>
                   {openingRows.map((row, i) => (
@@ -381,7 +450,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
           {faq.length > 0 && (
             <Card className="p-4">
-              <h2 className="text-xl font-semibold mb-3">Veelgestelde vragen</h2>
+              <h2 className="text-xl font-semibold mb-3">{tr("restaurant.faq")}</h2>
               <div className="divide-y">
                 {faq.map((f, i) => (
                   <details key={i} className="py-3 group">
@@ -397,37 +466,39 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
           )}
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">Reviews</h2>
+            <h2 className="text-xl font-semibold mb-3">{tr("restaurant.reviews")}</h2>
             {user ? (
               <form onSubmit={submitReview} className="bg-background border rounded-lg p-4 mb-4 space-y-3">
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((n) => (
-                    <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n} sterren`}>
+                    <button key={n} type="button" onClick={() => setRating(n)} aria-label={tr("restaurant.starsLabel", { n })}>
                       <Star className={`w-6 h-6 ${n <= rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
                     </button>
                   ))}
                 </div>
-                <Textarea placeholder="Vertel over je ervaring..." value={comment} onChange={(e) => setComment(e.target.value)} />
-                <Button type="submit" disabled={submitting}>{submitting ? "Versturen..." : "Plaats review"}</Button>
+                <Textarea placeholder={tr("restaurant.reviewPlaceholder")} value={comment} onChange={(e) => setComment(e.target.value)} />
+                <Button type="submit" disabled={submitting}>{submitting ? tr("restaurant.submitting") : tr("restaurant.submit")}</Button>
               </form>
             ) : (
               <p className="text-sm text-muted-foreground mb-4">
-                <Link to="/auth" className="text-primary hover:underline">Log in</Link> om een review te plaatsen.
+                {tr("restaurant.loginToReview", { link: "" }).split("{link}")[0]}
+                <Link to="/auth" className="text-primary hover:underline">{tr("restaurant.loginLink")}</Link>
+                {tr("restaurant.loginToReview", { link: "" }).split("{link}")[1] ?? ""}
               </p>
             )}
             <div className="space-y-3">
               {reviews.map((r) => (
                 <article key={r.id} className="bg-background border rounded-lg p-4">
-                  <div className="flex gap-0.5 mb-1" aria-label={`${r.rating} sterren`}>
+                  <div className="flex gap-0.5 mb-1" aria-label={tr("restaurant.starsLabel", { n: r.rating })}>
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Star key={n} className={`w-4 h-4 ${n <= r.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
                     ))}
                   </div>
                   {r.comment && <p className="text-sm">{r.comment}</p>}
-                  <p className="text-xs text-muted-foreground mt-1">{new Date(r.created_at).toLocaleDateString("nl-NL")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{new Date(r.created_at).toLocaleDateString(locale)}</p>
                 </article>
               ))}
-              {reviews.length === 0 && <p className="text-sm text-muted-foreground">Nog geen reviews — wees de eerste!</p>}
+              {reviews.length === 0 && <p className="text-sm text-muted-foreground">{tr("restaurant.noReviews")}</p>}
             </div>
           </section>
 
@@ -436,11 +507,11 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
               onClick={() => setShowAllTags((s) => !s)}
               className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2"
             >
-              <Tag className="w-4 h-4" /> {showAllTags ? "Verberg" : "Toon"} ruwe OSM-data ({Object.keys(t).length})
+              <Tag className="w-4 h-4" /> {showAllTags ? tr("restaurant.rawHide") : tr("restaurant.rawShow")} ({Object.keys(tags).length})
             </button>
             {showAllTags && (
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono max-h-96 overflow-auto">
-                {Object.entries(t).sort().map(([k, v]) => (
+                {Object.entries(tags).sort().map(([k, v]) => (
                   <div key={k} className="truncate"><span className="text-muted-foreground">{k}=</span><span>{v}</span></div>
                 ))}
               </div>
@@ -450,7 +521,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
 
         <aside className="space-y-3 text-sm">
           <Card className="p-4 space-y-3">
-            <h2 className="font-semibold text-base">Contact &amp; locatie</h2>
+            <h2 className="font-semibold text-base">{tr("restaurant.contact")}</h2>
             {(restaurant.address || restaurant.city) && (
               <div className="flex gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
@@ -470,19 +541,19 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
               <div className="flex gap-2"><Globe className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><a href={restaurant.website} target="_blank" rel="noopener nofollow" className="hover:underline truncate">{restaurant.website.replace(/^https?:\/\//, "")}</a></div>
             )}
             {capacity && (
-              <div className="flex gap-2"><Users className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>{capacity} plaatsen</span></div>
+              <div className="flex gap-2"><Users className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>{capacity} {tr("restaurant.seats")}</span></div>
             )}
             {startDate && (
-              <div className="flex gap-2"><Utensils className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>Sinds {startDate}</span></div>
+              <div className="flex gap-2"><Utensils className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>{tr("restaurant.since")} {startDate}</span></div>
             )}
-            {t.wheelchair && (
-              <div className="flex gap-2"><Accessibility className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>Rolstoel: {YESNO_NL(t.wheelchair)}</span></div>
+            {tags.wheelchair && (
+              <div className="flex gap-2"><Accessibility className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>{tr("restaurant.wheelchairLabel")}: {yesNoLabel(locale, tags.wheelchair)}</span></div>
             )}
           </Card>
 
           {(facebook || instagram || twitter || wikipedia) && (
             <Card className="p-4 space-y-2">
-              <h3 className="font-semibold text-xs uppercase text-muted-foreground">Online</h3>
+              <h3 className="font-semibold text-xs uppercase text-muted-foreground">{tr("restaurant.online")}</h3>
               {facebook && <a href={facebook.startsWith("http") ? facebook : `https://facebook.com/${facebook}`} target="_blank" rel="noopener nofollow" className="flex items-center gap-2 hover:underline"><ExternalLink className="w-3 h-3" />Facebook</a>}
               {instagram && <a href={instagram.startsWith("http") ? instagram : `https://instagram.com/${instagram.replace(/^@/, "")}`} target="_blank" rel="noopener nofollow" className="flex items-center gap-2 hover:underline"><ExternalLink className="w-3 h-3" />Instagram</a>}
               {twitter && <a href={twitter.startsWith("http") ? twitter : `https://twitter.com/${twitter.replace(/^@/, "")}`} target="_blank" rel="noopener nofollow" className="flex items-center gap-2 hover:underline"><ExternalLink className="w-3 h-3" />Twitter / X</a>}
@@ -497,11 +568,11 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
           {osmUrl && (
             <div className="flex flex-col gap-1 text-xs text-center">
               <a href={osmUrl} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
-                Bekijk op OpenStreetMap ↗
+                {tr("restaurant.osmView")} ↗
               </a>
               {osmEditUrl && (
                 <a href={osmEditUrl} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
-                  Bewerken in iD-editor ↗
+                  {tr("restaurant.osmEdit")} ↗
                 </a>
               )}
             </div>
@@ -513,13 +584,6 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
   );
 }
 
-function featureKey(label: string): string {
-  return ({
-    "Bezorging": "delivery", "Afhalen": "takeaway", "Terras": "outdoor_seating",
-    "Binnen zitten": "indoor_seating", "Wifi": "internet_access", "Roken toegestaan": "smoking",
-    "Honden welkom": "dog", "Parkeren": "parking",
-  } as Record<string, string>)[label] ?? "";
-}
 
 function DetailMap({ lat, lng, name }: { lat: number; lng: number; name: string }) {
   const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
