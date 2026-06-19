@@ -176,8 +176,9 @@ function RestaurantPage() {
 }
 
 export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug: slugOverride }: { locale?: LocaleCode; slug?: string } = {}) {
-  const params = Route.useParams();
-  const slug = slugOverride ?? params.slug;
+  // When called from the localized route, slug is passed in explicitly.
+  // For the NL route, fall back to Route.useParams().
+  const slug = slugOverride ?? Route.useParams().slug;
   const { data, refetch } = useSuspenseQuery(restaurantQuery(slug));
   const restaurant = data.restaurant as any;
   const initialReviews = data.reviews as Review[];
