@@ -18,7 +18,11 @@ export type OsmPoi = {
   tags: Record<string, string>;
 };
 
-const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.openstreetmap.ru/api/interpreter",
+];
 
 function buildAddress(t: Record<string, string>) {
   const parts = [t["addr:street"], t["addr:housenumber"]].filter(Boolean).join(" ");
@@ -44,39 +48,56 @@ async function fetchOverpass(lat: number, lng: number, radius: number): Promise<
   way["amenity"~"^(restaurant|cafe|fast_food|bar|pub|ice_cream|food_court|bistro)$"](around:${radius},${lat},${lng});
 );
 out center tags;`;
-  const res = await fetch(OVERPASS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: "data=" + encodeURIComponent(query),
-  });
-  if (!res.ok) throw new Error(`Overpass error ${res.status}`);
-  const json = (await res.json()) as { elements: any[] };
-  return json.elements
-    .map((el) => {
-      const t = el.tags ?? {};
-      if (!t.name) return null;
-      const lat = el.lat ?? el.center?.lat;
-      const lng = el.lon ?? el.center?.lon;
-      if (lat == null || lng == null) return null;
-      return {
-        osm_id: el.id,
-        osm_type: el.type,
-        name: t.name,
-        lat,
-        lng,
-        amenity: t.amenity,
-        cuisine: t.cuisine ? t.cuisine.split(";").map((s: string) => s.trim()) : [],
-        phone: t.phone ?? t["contact:phone"] ?? null,
-        website: t.website ?? t["contact:website"] ?? null,
-        opening_hours: t.opening_hours ?? null,
-        address: buildAddress(t),
-        city: t["addr:city"] ?? null,
-        country: t["addr:country"] ?? null,
-        tags: t,
-      } as OsmPoi;
-    })
-    .filter(Boolean) as OsmPoi[];
+  let lastErr: unknown = null;
+  for (const url of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "application/json",
+          "User-Agent": "eetgids/1.0 (contact: info@eetgids.example)",
+        },
+        body: "data=" + encodeURIComponent(query),
+      });
+      if (!res.ok) {
+        lastErr = new Error(`Overpass error ${res.status} from ${url}`);
+        continue;
+      }
+      const json = (await res.json()) as { elements: any[] };
+      return json.elements
+        .map((el) => {
+          const t = el.tags ?? {};
+          if (!t.name) return null;
+          const lat = el.lat ?? el.center?.lat;
+          const lng = el.lon ?? el.center?.lon;
+          if (lat == null || lng == null) return null;
+          return {
+            osm_id: el.id,
+            osm_type: el.type,
+            name: t.name,
+            lat,
+            lng,
+            amenity: t.amenity,
+            cuisine: t.cuisine ? t.cuisine.split(";").map((s: string) => s.trim()) : [],
+            phone: t.phone ?? t["contact:phone"] ?? null,
+            website: t.website ?? t["contact:website"] ?? null,
+            opening_hours: t.opening_hours ?? null,
+            address: buildAddress(t),
+            city: t["addr:city"] ?? null,
+            country: t["addr:country"] ?? null,
+            tags: t,
+          } as OsmPoi;
+        })
+        .filter(Boolean) as OsmPoi[];
+    } catch (e) {
+      lastErr = e;
+      continue;
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error("Overpass: all endpoints failed");
 }
+
 
 export const previewArea = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
