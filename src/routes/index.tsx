@@ -9,9 +9,9 @@ import { MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight, Clo
 import heroImage from "@/assets/hero-dinner.jpg";
 import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
-import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
 
-import { LOCALES } from "@/lib/i18n/locales";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
