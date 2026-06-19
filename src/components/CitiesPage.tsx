@@ -162,9 +162,10 @@ export function CitiesPageBody({ locale = DEFAULT_LOCALE }: { locale?: LocaleCod
 }
 
 function CitiesMap({ cities, locale }: { cities: CityRow[]; locale: LocaleCode }) {
-  // Lazy import leaflet bits only on the client
-  const Map = require("@/components/MapView") as typeof import("@/components/MapView");
-  const { MapContainer, TileLayer, Marker, Popup, OSM_TILES, OSM_ATTRIBUTION } = Map;
+  const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
+  useEffect(() => { import("@/components/MapView").then(setMod); }, []);
+  if (!mod) return <div className="w-full h-full bg-muted animate-pulse" />;
+  const { MapContainer, TileLayer, Marker, Popup, OSM_TILES, OSM_ATTRIBUTION } = mod;
   const center: [number, number] = cities.length
     ? [cities.reduce((s, c) => s + c.lat, 0) / cities.length, cities.reduce((s, c) => s + c.lng, 0) / cities.length]
     : [50, 10];
