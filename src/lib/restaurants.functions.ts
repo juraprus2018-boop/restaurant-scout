@@ -48,14 +48,24 @@ async function fetchOverpass(lat: number, lng: number, radius: number): Promise<
   way["amenity"~"^(restaurant|cafe|fast_food|bar|pub|ice_cream|food_court|bistro)$"](around:${radius},${lat},${lng});
 );
 out center tags;`;
-  const res = await fetch(OVERPASS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: "data=" + encodeURIComponent(query),
-  });
-  if (!res.ok) throw new Error(`Overpass error ${res.status}`);
-  const json = (await res.json()) as { elements: any[] };
-  return json.elements
+  let lastErr: unknown = null;
+  for (const url of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "application/json",
+          "User-Agent": "eetgids/1.0 (contact: info@eetgids.example)",
+        },
+        body: "data=" + encodeURIComponent(query),
+      });
+      if (!res.ok) {
+        lastErr = new Error(`Overpass error ${res.status} from ${url}`);
+        continue;
+      }
+      const json = (await res.json()) as { elements: any[] };
+      return json.elements
     .map((el) => {
       const t = el.tags ?? {};
       if (!t.name) return null;
