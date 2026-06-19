@@ -42,15 +42,17 @@ function slugify(name: string, osmId: number) {
 }
 
 async function fetchOverpass(lat: number, lng: number, radius: number): Promise<OsmPoi[]> {
-  const query = `[out:json][timeout:25];
+  const query = `[out:json][timeout:15];
 (
   node["amenity"~"^(restaurant|cafe|fast_food|bar|pub|ice_cream|food_court|bistro)$"](around:${radius},${lat},${lng});
   way["amenity"~"^(restaurant|cafe|fast_food|bar|pub|ice_cream|food_court|bistro)$"](around:${radius},${lat},${lng});
 );
 out center tags;`;
+  console.log(`[overpass] fetching radius=${radius}m around ${lat},${lng}`);
   let lastErr: unknown = null;
   for (const url of OVERPASS_ENDPOINTS) {
     try {
+      const t0 = Date.now();
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -60,11 +62,14 @@ out center tags;`;
         },
         body: "data=" + encodeURIComponent(query),
       });
+      console.log(`[overpass] ${url} → ${res.status} in ${Date.now() - t0}ms`);
       if (!res.ok) {
-        lastErr = new Error(`Overpass error ${res.status} from ${url}`);
+        const bodySnippet = await res.text().then((t) => t.slice(0, 200)).catch(() => "");
+        lastErr = new Error(`Overpass ${res.status} from ${new URL(url).hostname}: ${bodySnippet}`);
         continue;
       }
       const json = (await res.json()) as { elements: any[] };
+      console.log(`[overpass] got ${json.elements?.length ?? 0} elements`);
       return json.elements
         .map((el) => {
           const t = el.tags ?? {};
@@ -90,13 +95,15 @@ out center tags;`;
           } as OsmPoi;
         })
         .filter(Boolean) as OsmPoi[];
-    } catch (e) {
+    } catch (e: any) {
+      console.error(`[overpass] ${url} threw:`, e?.message || e);
       lastErr = e;
       continue;
     }
   }
-  throw lastErr instanceof Error ? lastErr : new Error("Overpass: all endpoints failed");
+  throw lastErr instanceof Error ? lastErr : new Error("Overpass: alle endpoints faalden");
 }
+
 
 
 export const previewArea = createServerFn({ method: "POST" })
