@@ -294,8 +294,19 @@ function FilterBar({
               <X className="w-4 h-4" /> Wis filters ({activeFilterCount})
             </Button>
           )}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="h-9 rounded-full border border-input bg-background px-3 text-sm"
+            aria-label="Sorteren"
+          >
+            <option value="popular">Populair</option>
+            <option value="rating">Hoogste rating</option>
+            <option value="distance" disabled={!userPos}>Dichtstbij</option>
+            <option value="name">Naam (A–Z)</option>
+          </select>
           <div className="ml-auto text-sm text-muted-foreground">
-            {resultCount} resultaten
+            {resultCount.toLocaleString("nl-NL")} resultaten
           </div>
         </div>
 
