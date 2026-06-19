@@ -353,11 +353,25 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
       <SiteHeader locale={locale} />
       <header className="bg-background border-b px-4 py-3">
         <nav aria-label={tr("restaurant.contact")} className="max-w-5xl mx-auto text-sm">
-          <ol className="flex items-center gap-1 text-muted-foreground">
+          <ol className="flex items-center gap-1 text-muted-foreground flex-wrap">
             <li><Link to="/" className="hover:text-foreground flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> {tr("city.breadcrumb.home")}</Link></li>
+            <li>/</li>
+            <li>
+              {locale === DEFAULT_LOCALE ? (
+                <Link to="/steden" className="hover:text-foreground">{tr("city.breadcrumb.cities")}</Link>
+              ) : (
+                <Link to="/$lang/steden" params={{ lang: locale }} className="hover:text-foreground">{tr("city.breadcrumb.cities")}</Link>
+              )}
+            </li>
             {restaurant.city && (<>
               <li>/</li>
-              <li>{restaurant.city}</li>
+              <li>
+                {locale === DEFAULT_LOCALE ? (
+                  <Link to="/stad/$city" params={{ city: slugifyCity(restaurant.city) }} className="hover:text-foreground">{restaurant.city}</Link>
+                ) : (
+                  <Link to="/$lang/stad/$city" params={{ lang: locale, city: slugifyCity(restaurant.city) }} className="hover:text-foreground">{restaurant.city}</Link>
+                )}
+              </li>
             </>)}
             <li>/</li>
             <li className="text-foreground font-medium truncate">{restaurant.name}</li>
