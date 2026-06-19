@@ -248,7 +248,7 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
       />
       <Categories />
       <TopRated items={restaurants.slice(0, 8)} loading={loading} />
-      <MapSection restaurants={restaurants} />
+      <MapSection />
       <AllList
         restaurants={restaurants}
         loading={loading}
