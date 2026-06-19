@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LocaleProvider } from "../lib/i18n/context";
 import { DEFAULT_LOCALE, isLocale } from "../lib/i18n/locales";
+import { CookieBanner } from "../components/CookieBanner";
 
 function NotFoundComponent() {
   return (
