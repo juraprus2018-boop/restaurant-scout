@@ -91,7 +91,8 @@ export function SiteFooter({ locale = DEFAULT_LOCALE }: ChromeProps = {}) {
         <div>
           <h4 className="text-white font-bold mb-3">{t(locale, "footer.explore")}</h4>
           <ul className="space-y-2">
-            <li><Link to="/" hash="ontdek" className="hover:text-accent">{t(locale, "nav.restaurants")}</Link></li>
+            <li><Link to="/" className="hover:text-accent">{t(locale, "nav.restaurants")}</Link></li>
+            <li><Link to="/steden" className="hover:text-accent">{t(locale, "cities.title")}</Link></li>
             <li><Link to="/" hash="kaart" className="hover:text-accent">{t(locale, "nav.map")}</Link></li>
             <li><Link to="/" hash="top" className="hover:text-accent">{t(locale, "nav.topRated")}</Link></li>
           </ul>
