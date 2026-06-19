@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { getRestaurantBySlug } from "@/lib/restaurants-public.functions";
 import { amenityLabel, cuisineLabel, parseOpeningHours, YESNO_NL } from "@/lib/osm-labels";
 import defaultBanner from "@/assets/default-restaurant-banner.jpg";
+import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 
 const restaurantQuery = (slug: string) =>
   queryOptions({
