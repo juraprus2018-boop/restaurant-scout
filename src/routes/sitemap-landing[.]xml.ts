@@ -23,6 +23,9 @@ export const Route = createFileRoute("/sitemap-landing.xml")({
         const now = new Date().toISOString();
         const urls: string[] = [
           `<url><loc>${base}/</loc><lastmod>${now}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+          `<url><loc>${base}/privacy</loc><lastmod>${now}</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>`,
+          `<url><loc>${base}/voorwaarden</loc><lastmod>${now}</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>`,
+          `<url><loc>${base}/cookies</loc><lastmod>${now}</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>`,
         ];
 
         // Cities overview page: one <url> per locale with hreflang alternates.
