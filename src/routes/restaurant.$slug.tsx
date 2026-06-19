@@ -257,7 +257,9 @@ function RestaurantPage() {
 
   return (
     <div className="min-h-screen bg-muted/20">
+      <SiteHeader />
       <header className="bg-background border-b px-4 py-3">
+
         <nav aria-label="Kruimelpad" className="max-w-5xl mx-auto text-sm">
           <ol className="flex items-center gap-1 text-muted-foreground">
             <li><Link to="/" className="hover:text-foreground flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> Home</Link></li>
