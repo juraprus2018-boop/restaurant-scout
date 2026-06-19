@@ -146,12 +146,11 @@ function Home() {
     const nextPage = page + 1;
     const effectiveSort: SortKey = userPos && sort === "popular" ? "distance" : sort;
     const { data, error } = await supabase.rpc("search_restaurants", {
-      _q: debouncedSearch || null,
-      _city: null,
-      _cuisines: cuisines.length ? cuisines : null,
-      _lat: userPos?.lat ?? null,
-      _lng: userPos?.lng ?? null,
-      _radius_km: userPos ? radiusKm : null,
+      _q: debouncedSearch || undefined,
+      _cuisines: cuisines.length ? cuisines : undefined,
+      _lat: userPos?.lat,
+      _lng: userPos?.lng,
+      _radius_km: userPos ? radiusKm : undefined,
       _sort: effectiveSort,
       _limit: PAGE_SIZE,
       _offset: nextPage * PAGE_SIZE,
