@@ -574,16 +574,50 @@ function RestaurantMap({ restaurants }: { restaurants: Restaurant[] }) {
 }
 
 
-function AllList({ restaurants, loading }: { restaurants: Restaurant[]; loading: boolean }) {
-  if (loading || restaurants.length === 0) return null;
+function AllList({
+  restaurants, loading, hasMore, loadMore, loadingMore, total,
+}: {
+  restaurants: Restaurant[]; loading: boolean;
+  hasMore: boolean; loadMore: () => void; loadingMore: boolean; total: number;
+}) {
+  if (loading) {
+    return (
+      <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-80 rounded-2xl bg-muted animate-pulse" />
+          ))}
+        </div>
+      </section>
+    );
+  }
+  if (restaurants.length === 0) {
+    return (
+      <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+        <EmptyState />
+      </section>
+    );
+  }
   return (
     <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-2">Alle restaurants</h2>
+      <p className="text-muted-foreground mb-8">
+        {restaurants.length.toLocaleString("nl-NL")} van {total.toLocaleString("nl-NL")} weergegeven
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {restaurants.slice(0, 24).map((r, i) => (
+        {restaurants.map((r, i) => (
           <RestaurantCard key={r.id} r={r} colorIdx={i + 2} />
         ))}
       </div>
+      {hasMore && (
+        <div className="mt-10 grid place-items-center">
+          <Button size="lg" onClick={loadMore} disabled={loadingMore} className="rounded-full px-8">
+            {loadingMore ? "Laden..." : "Meer laden"}
+          </Button>
+        </div>
+      )}
     </section>
   );
 }
