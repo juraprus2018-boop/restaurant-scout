@@ -300,19 +300,22 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
   const payments: string[] = [];
   for (const [k, v] of Object.entries(t)) if (k.startsWith("payment:") && YES(v)) payments.push(k.replace("payment:", ""));
 
-  const features: Array<{ icon: any; label: string; ok: boolean }> = [
-    { icon: Truck, label: "Bezorging", ok: YES(t.delivery) },
-    { icon: ShoppingBag, label: "Afhalen", ok: YES(t.takeaway) },
-    { icon: Sun, label: "Terras", ok: YES(t.outdoor_seating) },
-    { icon: Home, label: "Binnen zitten", ok: YES(t.indoor_seating) },
-    { icon: Accessibility, label: t.wheelchair === "limited" ? "Beperkt rolstoeltoegankelijk" : "Rolstoeltoegankelijk", ok: YES(t.wheelchair) },
-    { icon: Wifi, label: "Wifi", ok: YES(t.internet_access) || t.internet_access === "wlan" },
-    { icon: Cigarette, label: "Roken toegestaan", ok: YES(t.smoking) },
-    { icon: Baby, label: "Kindvriendelijk", ok: YES(t["kids_area"]) || YES(t["child_friendly"]) },
-    { icon: Dog, label: "Honden welkom", ok: YES(t.dog) },
-    { icon: ParkingCircle, label: "Parkeren", ok: YES(t.parking) },
-    { icon: CreditCard, label: "Kaart betalen", ok: payments.length > 0 },
-  ].filter((f) => f.ok || NO(t[featureKey(f.label)] ?? ""));
+  const featureDefs: Array<{ icon: any; key: string; tagKey: string; ok: boolean }> = [
+    { icon: Truck, key: "feat.delivery", tagKey: "delivery", ok: YES(t.delivery) },
+    { icon: ShoppingBag, key: "feat.takeaway", tagKey: "takeaway", ok: YES(t.takeaway) },
+    { icon: Sun, key: "feat.terrace", tagKey: "outdoor_seating", ok: YES(t.outdoor_seating) },
+    { icon: Home, key: "feat.indoor", tagKey: "indoor_seating", ok: YES(t.indoor_seating) },
+    { icon: Accessibility, key: t.wheelchair === "limited" ? "feat.wheelchairLimited" : "feat.wheelchair", tagKey: "wheelchair", ok: YES(t.wheelchair) },
+    { icon: Wifi, key: "feat.wifi", tagKey: "internet_access", ok: YES(t.internet_access) || t.internet_access === "wlan" },
+    { icon: Cigarette, key: "feat.smoking", tagKey: "smoking", ok: YES(t.smoking) },
+    { icon: Baby, key: "feat.kids", tagKey: "kids_area", ok: YES(t["kids_area"]) || YES(t["child_friendly"]) },
+    { icon: Dog, key: "feat.dogs", tagKey: "dog", ok: YES(t.dog) },
+    { icon: ParkingCircle, key: "feat.parking", tagKey: "parking", ok: YES(t.parking) },
+    { icon: CreditCard, key: "feat.card", tagKey: "", ok: payments.length > 0 },
+  ];
+  const features = featureDefs
+    .filter((f) => f.ok || (f.tagKey && NO(t[f.tagKey] ?? "")))
+    .map((f) => ({ ...f, label: tr(f.key as any) }));
 
   const osmUrl = restaurant.osm_id && restaurant.osm_type
     ? `https://www.openstreetmap.org/${restaurant.osm_type}/${restaurant.osm_id}`
@@ -321,8 +324,8 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
     ? `https://www.openstreetmap.org/edit?${restaurant.osm_type}=${restaurant.osm_id}`
     : null;
 
-  const openingRows = restaurant.opening_hours ? parseOpeningHours(restaurant.opening_hours) : [];
-  const faq = buildFaq(restaurant, t);
+  const openingRows = restaurant.opening_hours ? parseOpeningHoursI18n(restaurant.opening_hours, locale) : [];
+  const faq = buildFaq(locale, restaurant, t);
   const cuisines = (restaurant.cuisine ?? []).map(cuisineLabel);
 
   return (
