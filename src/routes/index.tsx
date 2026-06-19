@@ -499,8 +499,16 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
       params={{ slug: r.slug }}
       className="group block rounded-2xl overflow-hidden bg-card border border-border hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
     >
-      <div className={`relative h-44 bg-gradient-to-br ${color} grid place-items-center`}>
-        <span className="font-display text-7xl text-white/95 drop-shadow">{initial}</span>
+      <div className={`relative h-44 grid place-items-center overflow-hidden`}>
+        <img
+          src={getCategoryPhoto(r)}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className={`absolute inset-0 bg-gradient-to-br ${color}`} />
+        <span className="relative font-display text-7xl text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">{initial}</span>
         <button
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 grid place-items-center hover:scale-110 transition-transform"
           onClick={(e) => { e.preventDefault(); }}
