@@ -56,6 +56,24 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+const PAGE_SIZE = 24;
+const POPULAR_CUISINES = [
+  "burger", "pizza", "italian", "chinese", "japanese", "sushi", "thai",
+  "indian", "french", "mexican", "vietnamese", "mediterranean",
+  "vegetarian", "vegan", "seafood", "kebab",
+];
+
+type SortKey = "popular" | "rating" | "distance" | "name";
+
+function useDebounced<T>(value: T, ms = 300): T {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return v;
+}
+
 function Home() {
   const [search, setSearch] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
