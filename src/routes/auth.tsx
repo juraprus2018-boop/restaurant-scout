@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Inloggen — EetGids" }] }),
+  head: () => ({ meta: [{ title: "Inloggen — PlaceResults" }] }),
   component: AuthPage,
 });
 

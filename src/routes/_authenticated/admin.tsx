@@ -12,7 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Trash2, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin — EetGids" }] }),
+  head: () => ({ meta: [{ title: "Admin — PlaceResults" }] }),
   component: AdminPage,
 });
 
@@ -118,7 +118,7 @@ function AdminPage() {
       <Toaster />
       <header className="border-b bg-background px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-lg font-bold">🍽️ EetGids Admin</Link>
+          <Link to="/" className="text-lg font-bold">🍽️ PlaceResults Admin</Link>
           <span className="text-xs text-muted-foreground">Klik op de kaart → importeer restaurants uit OSM</span>
         </div>
         <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="w-4 h-4 mr-1" /> Uitloggen</Button>

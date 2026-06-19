@@ -12,9 +12,9 @@ import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "EetGids — Ontdek de beste restaurants" },
-      { name: "description", content: "Vind restaurants, cafés en bars met echte reviews en ratings. Plan jouw volgende eetafspraak met EetGids." },
-      { property: "og:title", content: "EetGids — Restaurantgids met reviews" },
+      { title: "PlaceResults — Ontdek de beste restaurants" },
+      { name: "description", content: "Vind restaurants, cafés en bars met echte reviews en ratings. Plan jouw volgende eetafspraak met PlaceResults." },
+      { property: "og:title", content: "PlaceResults — Restaurantgids met reviews" },
       { property: "og:description", content: "Vind restaurants, cafés en bars met echte reviews." },
     ],
   }),
@@ -285,7 +285,7 @@ function SiteHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground font-extrabold text-lg">●</span>
-          <span className="font-display text-xl text-ink">eetgids</span>
+          <span className="font-display text-xl text-ink">PlaceResults</span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-foreground/80">
           <a href="#ontdek" className="hover:text-primary">Restaurants</a>
@@ -550,7 +550,7 @@ function SiteFooter() {
         <div className="sm:col-span-2">
           <div className="flex items-center gap-2 text-white">
             <span className="grid place-items-center w-9 h-9 rounded-full bg-accent text-ink font-extrabold">●</span>
-            <span className="font-display text-xl">eetgids</span>
+            <span className="font-display text-xl">PlaceResults</span>
           </div>
           <p className="mt-3 max-w-sm leading-relaxed">
             De eerlijke gids voor restaurants, cafés en bars — gebouwd op open data en echte reviews.
@@ -570,7 +570,7 @@ function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/10 py-5 text-center text-xs text-white/50">
-        © {new Date().getFullYear()} EetGids
+        © {new Date().getFullYear()} PlaceResults
       </div>
     </footer>
   );

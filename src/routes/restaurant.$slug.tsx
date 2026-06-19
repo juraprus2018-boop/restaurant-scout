@@ -43,14 +43,14 @@ export const Route = createFileRoute("/restaurant/$slug")({
   head: ({ params, loaderData }) => {
     const r = loaderData?.restaurant;
     if (!r) {
-      return { meta: [{ title: "Restaurant — Eetgids" }] };
+      return { meta: [{ title: "Restaurant — PlaceResults" }] };
     }
     const tags = (r.raw_osm_tags ?? {}) as Record<string, string>;
     const img = tagImage(tags) ?? defaultBanner;
     const cuisines = (r.cuisine ?? []).map(cuisineLabel).join(", ");
     const cityPart = r.city ? ` in ${r.city}` : "";
     const ratingPart = (r.avg_rating ?? 0) > 0 ? ` · ${Number(r.avg_rating).toFixed(1)}★ (${r.review_count})` : "";
-    const title = `${r.name}${cityPart} — Menu, openingstijden & reviews | Eetgids`.slice(0, 70);
+    const title = `${r.name}${cityPart} — Menu, openingstijden & reviews | PlaceResults`.slice(0, 70);
     const description = `${r.name}${cityPart}${cuisines ? ` · ${cuisines}` : ""}${ratingPart}. ${
       tags.description ?? `Bekijk openingstijden, contact, voorzieningen en reviews van bezoekers.`
     }`.slice(0, 158);
