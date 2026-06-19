@@ -266,7 +266,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
     e.preventDefault();
     if (!user) {
       if (!authorName.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(authorEmail.trim())) {
-        alert(tr("restaurant.guestRequired"));
+        alert("Please fill in your name and a valid email address.");
         return;
       }
     }
