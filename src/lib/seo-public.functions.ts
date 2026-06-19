@@ -30,6 +30,24 @@ export const listCitiesPublic = createServerFn({ method: "GET" })
     }));
   });
 
+export const listCitiesWithCoords = createServerFn({ method: "GET" })
+  .inputValidator((d: { limit?: number; minCount?: number }) => d)
+  .handler(async ({ data }) => {
+    const sb = publicClient();
+    const { data: rows } = await (sb as any).rpc("list_cities_with_coords", {
+      _min_count: data.minCount ?? 1,
+      _limit: data.limit ?? 5000,
+    });
+    return ((rows ?? []) as any[]).map((r) => ({
+      city: r.city as string,
+      slug: citySlug(r.city),
+      country: (r.country as string | null) ?? "",
+      count: Number(r.count),
+      lat: Number(r.lat),
+      lng: Number(r.lng),
+    }));
+  });
+
 export const listCuisinesPublic = createServerFn({ method: "GET" })
   .inputValidator((d: { limit?: number; minCount?: number }) => d)
   .handler(async ({ data }) => {
