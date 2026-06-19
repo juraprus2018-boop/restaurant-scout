@@ -259,9 +259,10 @@ function FilterBar({
   resultCount: number; activeFilterCount: number; clearFilters: () => void;
   sort: SortKey; setSort: (s: SortKey) => void;
 }) {
+  const [cuisinesOpen, setCuisinesOpen] = useState(false);
   return (
     <section id="filters" className="border-b border-border bg-card sticky top-16 z-30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant={openNow ? "default" : "outline"}
@@ -293,9 +294,20 @@ function FilterBar({
               ))}
             </select>
           )}
+          <Button
+            variant={cuisines.length > 0 ? "default" : "outline"}
+            size="sm"
+            onClick={() => setCuisinesOpen((v) => !v)}
+            className="rounded-full gap-1.5 sm:hidden"
+            aria-expanded={cuisinesOpen}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Keuken{cuisines.length > 0 ? ` (${cuisines.length})` : ""}
+            <ChevronDown className={`w-4 h-4 transition-transform ${cuisinesOpen ? "rotate-180" : ""}`} />
+          </Button>
           {activeFilterCount > 0 && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-full gap-1 text-muted-foreground">
-              <X className="w-4 h-4" /> Wis filters ({activeFilterCount})
+              <X className="w-4 h-4" /> Wis ({activeFilterCount})
             </Button>
           )}
           <select
@@ -315,7 +327,7 @@ function FilterBar({
         </div>
 
         {allCuisines.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className={`${cuisinesOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-1.5`}>
             <span className="text-xs font-semibold text-muted-foreground mr-1">Keuken:</span>
             {allCuisines.map((c) => {
               const active = cuisines.includes(c);
