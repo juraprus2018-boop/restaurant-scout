@@ -99,19 +99,8 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
 
   const debouncedSearch = useDebounced(search, 300);
 
-  const chipFilterCount = (openNow ? 1 : 0) + cuisines.length + (userPos ? 1 : 0);
-  const prevChipCountRef = useRef(0);
+  // (no auto-scroll on filter change — caused jumpy UX on mobile)
 
-  useEffect(() => {
-    if (chipFilterCount > 0 && prevChipCountRef.current === 0) {
-      const el = document.getElementById("ontdek");
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        if (rect.top > 80) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }
-    prevChipCountRef.current = chipFilterCount;
-  }, [chipFilterCount]);
 
   // Server-side search: re-runs when any filter changes; resets to page 0.
   useEffect(() => {
