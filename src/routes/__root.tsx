@@ -132,6 +132,7 @@ function RootComponent() {
       <LocaleProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <CookieBanner />
       </LocaleProvider>
     </QueryClientProvider>
   );
