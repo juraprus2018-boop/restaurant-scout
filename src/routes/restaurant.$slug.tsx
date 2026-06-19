@@ -278,43 +278,43 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
     setReviews((rev ?? []) as Review[]);
   }
 
-  const t: Record<string, string> = restaurant.raw_osm_tags ?? {};
-  const description = t.description || t["description:nl"] || t["description:en"] || null;
-  const brand = t.brand || t.operator || null;
-  const email = t.email || t["contact:email"] || null;
-  const facebook = t["contact:facebook"] || t.facebook || null;
-  const instagram = t["contact:instagram"] || t.instagram || null;
-  const twitter = t["contact:twitter"] || t.twitter || null;
-  const heroImg = tagImage(t) ?? defaultBanner;
-  const usingDefaultBanner = !tagImage(t);
-  const wikipedia = t.wikipedia
-    ? `https://${t.wikipedia.split(":")[0] || "en"}.wikipedia.org/wiki/${encodeURIComponent(t.wikipedia.split(":").slice(1).join(":"))}`
+  const tags: Record<string, string> = restaurant.raw_osm_tags ?? {};
+  const description = tags.description || tags["description:nl"] || tags["description:en"] || null;
+  const brand = tags.brand || tags.operator || null;
+  const email = tags.email || tags["contact:email"] || null;
+  const facebook = tags["contact:facebook"] || tags.facebook || null;
+  const instagram = tags["contact:instagram"] || tags.instagram || null;
+  const twitter = tags["contact:twitter"] || tags.twitter || null;
+  const heroImg = tagImage(tags) ?? defaultBanner;
+  const usingDefaultBanner = !tagImage(tags);
+  const wikipedia = tags.wikipedia
+    ? `https://${tags.wikipedia.split(":")[0] || "en"}.wikipedia.org/wiki/${encodeURIComponent(tags.wikipedia.split(":").slice(1).join(":"))}`
     : null;
-  const capacity = t.capacity || t["capacity:persons"] || null;
-  const michelin = t["michelin_stars"] || t["michelin:stars"] || null;
-  const startDate = t.start_date || null;
-  const note = t.note || null;
+  const capacity = tags.capacity || tags["capacity:persons"] || null;
+  const michelin = tags["michelin_stars"] || tags["michelin:stars"] || null;
+  const startDate = tags.start_date || null;
+  const note = tags.note || null;
 
   const diets: string[] = [];
-  for (const [k, v] of Object.entries(t)) if (k.startsWith("diet:") && YES(v)) diets.push(k.replace("diet:", ""));
+  for (const [k, v] of Object.entries(tags)) if (k.startsWith("diet:") && YES(v)) diets.push(k.replace("diet:", ""));
   const payments: string[] = [];
-  for (const [k, v] of Object.entries(t)) if (k.startsWith("payment:") && YES(v)) payments.push(k.replace("payment:", ""));
+  for (const [k, v] of Object.entries(tags)) if (k.startsWith("payment:") && YES(v)) payments.push(k.replace("payment:", ""));
 
   const featureDefs: Array<{ icon: any; key: string; tagKey: string; ok: boolean }> = [
-    { icon: Truck, key: "feat.delivery", tagKey: "delivery", ok: YES(t.delivery) },
-    { icon: ShoppingBag, key: "feat.takeaway", tagKey: "takeaway", ok: YES(t.takeaway) },
-    { icon: Sun, key: "feat.terrace", tagKey: "outdoor_seating", ok: YES(t.outdoor_seating) },
-    { icon: Home, key: "feat.indoor", tagKey: "indoor_seating", ok: YES(t.indoor_seating) },
-    { icon: Accessibility, key: t.wheelchair === "limited" ? "feat.wheelchairLimited" : "feat.wheelchair", tagKey: "wheelchair", ok: YES(t.wheelchair) },
-    { icon: Wifi, key: "feat.wifi", tagKey: "internet_access", ok: YES(t.internet_access) || t.internet_access === "wlan" },
-    { icon: Cigarette, key: "feat.smoking", tagKey: "smoking", ok: YES(t.smoking) },
-    { icon: Baby, key: "feat.kids", tagKey: "kids_area", ok: YES(t["kids_area"]) || YES(t["child_friendly"]) },
-    { icon: Dog, key: "feat.dogs", tagKey: "dog", ok: YES(t.dog) },
-    { icon: ParkingCircle, key: "feat.parking", tagKey: "parking", ok: YES(t.parking) },
+    { icon: Truck, key: "feat.delivery", tagKey: "delivery", ok: YES(tags.delivery) },
+    { icon: ShoppingBag, key: "feat.takeaway", tagKey: "takeaway", ok: YES(tags.takeaway) },
+    { icon: Sun, key: "feat.terrace", tagKey: "outdoor_seating", ok: YES(tags.outdoor_seating) },
+    { icon: Home, key: "feat.indoor", tagKey: "indoor_seating", ok: YES(tags.indoor_seating) },
+    { icon: Accessibility, key: tags.wheelchair === "limited" ? "feat.wheelchairLimited" : "feat.wheelchair", tagKey: "wheelchair", ok: YES(tags.wheelchair) },
+    { icon: Wifi, key: "feat.wifi", tagKey: "internet_access", ok: YES(tags.internet_access) || tags.internet_access === "wlan" },
+    { icon: Cigarette, key: "feat.smoking", tagKey: "smoking", ok: YES(tags.smoking) },
+    { icon: Baby, key: "feat.kids", tagKey: "kids_area", ok: YES(tags["kids_area"]) || YES(tags["child_friendly"]) },
+    { icon: Dog, key: "feat.dogs", tagKey: "dog", ok: YES(tags.dog) },
+    { icon: ParkingCircle, key: "feat.parking", tagKey: "parking", ok: YES(tags.parking) },
     { icon: CreditCard, key: "feat.card", tagKey: "", ok: payments.length > 0 },
   ];
   const features = featureDefs
-    .filter((f) => f.ok || (f.tagKey && NO(t[f.tagKey] ?? "")))
+    .filter((f) => f.ok || (f.tagKey && NO(tags[f.tagKey] ?? "")))
     .map((f) => ({ ...f, label: tr(f.key as any) }));
 
   const osmUrl = restaurant.osm_id && restaurant.osm_type
@@ -325,7 +325,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
     : null;
 
   const openingRows = restaurant.opening_hours ? parseOpeningHoursI18n(restaurant.opening_hours, locale) : [];
-  const faq = buildFaq(locale, restaurant, t);
+  const faq = buildFaq(locale, restaurant, tags);
   const cuisines = (restaurant.cuisine ?? []).map(cuisineLabel);
 
   return (
@@ -354,11 +354,11 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
           width={1600}
           height={640}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-tags from-black/70 via-black/20 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white max-w-5xl mx-auto">
           <h1 className="text-3xl md:text-5xl font-bold drop-shadow">{restaurant.name}</h1>
           <p className="mt-2 text-sm md:text-base opacity-90">
-            {[brand, t.amenity && amenityLabel(t.amenity), restaurant.city].filter(Boolean).join(" · ")}
+            {[brand, tags.amenity && amenityLabel(tags.amenity), restaurant.city].filter(Boolean).join(" · ")}
           </p>
           {usingDefaultBanner && (
             <p className="absolute top-2 right-3 text-[10px] opacity-60">Sfeerbeeld</p>
@@ -504,11 +504,11 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
               onClick={() => setShowAllTags((s) => !s)}
               className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2"
             >
-              <Tag className="w-4 h-4" /> {showAllTags ? "Verberg" : "Toon"} ruwe OSM-data ({Object.keys(t).length})
+              <Tag className="w-4 h-4" /> {showAllTags ? "Verberg" : "Toon"} ruwe OSM-data ({Object.keys(tags).length})
             </button>
             {showAllTags && (
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono max-h-96 overflow-auto">
-                {Object.entries(t).sort().map(([k, v]) => (
+                {Object.entries(tags).sort().map(([k, v]) => (
                   <div key={k} className="truncate"><span className="text-muted-foreground">{k}=</span><span>{v}</span></div>
                 ))}
               </div>
@@ -543,8 +543,8 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
             {startDate && (
               <div className="flex gap-2"><Utensils className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>Sinds {startDate}</span></div>
             )}
-            {t.wheelchair && (
-              <div className="flex gap-2"><Accessibility className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>Rolstoel: {YESNO_NL(t.wheelchair)}</span></div>
+            {tags.wheelchair && (
+              <div className="flex gap-2"><Accessibility className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /><span>Rolstoel: {YESNO_NL(tags.wheelchair)}</span></div>
             )}
           </Card>
 
