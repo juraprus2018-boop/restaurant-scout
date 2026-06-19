@@ -55,7 +55,15 @@ export type StringKey =
   | "wd.Mo" | "wd.Tu" | "wd.We" | "wd.Th" | "wd.Fr" | "wd.Sa" | "wd.Su" | "wd.PH"
   | "wd.to"
   // yes/no labels
-  | "yn.yes" | "yn.no" | "yn.limited" | "yn.designated" | "yn.only";
+  | "yn.yes" | "yn.no" | "yn.limited" | "yn.designated" | "yn.only"
+  // action bar
+  | "action.navigate" | "action.call" | "action.website"
+  | "action.share" | "action.save" | "action.saved" | "action.linkCopied"
+  // open/closed status
+  | "status.openNow" | "status.closed"
+  | "status.closesAt" | "status.opensAt"
+  // nearby
+  | "nearby.title";
 
 type Dict = Partial<Record<StringKey, string>>;
 
