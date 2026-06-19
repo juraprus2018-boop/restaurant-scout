@@ -16,6 +16,7 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StadCityRouteImport } from './routes/stad.$city'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
@@ -54,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StadCityRoute = StadCityRouteImport.update({
+  id: '/stad/$city',
+  path: '/stad/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RestaurantSlugRoute = RestaurantSlugRouteImport.update({
   id: '/restaurant/$slug',
   path: '/restaurant/$slug',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/stad/$city': typeof StadCityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/stad/$city': typeof StadCityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/stad/$city': typeof StadCityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/restaurant/$slug'
+    | '/stad/$city'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/restaurant/$slug'
+    | '/stad/$city'
   id:
     | '__root__'
     | '/'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/restaurant/$slug'
+    | '/stad/$city'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   SitemapRestaurantsDotxmlRoute: typeof SitemapRestaurantsDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
+  StadCityRoute: typeof StadCityRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stad/$city': {
+      id: '/stad/$city'
+      path: '/stad/$city'
+      fullPath: '/stad/$city'
+      preLoaderRoute: typeof StadCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/restaurant/$slug': {
       id: '/restaurant/$slug'
       path: '/restaurant/$slug'
@@ -230,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapRestaurantsDotxmlRoute: SitemapRestaurantsDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
+  StadCityRoute: StadCityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
