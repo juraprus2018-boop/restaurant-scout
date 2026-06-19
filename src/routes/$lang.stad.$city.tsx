@@ -119,7 +119,9 @@ function LocalizedCityPage() {
             <Link to="/" className="hover:text-primary">{t(lang, "city.breadcrumb.home")}</Link> / <span>{t(lang, "city.breadcrumb.city")}</span> / <span className="text-foreground">{city}</span>
           </nav>
           <h1 className="font-display text-4xl sm:text-5xl text-ink">{t(lang, "city.heading", { city })}</h1>
-          <p className="text-muted-foreground mt-3 max-w-2xl">{copy.intro}</p>
+          <p className="text-muted-foreground mt-3 max-w-2xl">
+            {copy.intro && !/\d/.test(copy.intro) ? copy.intro : t(lang, "city.subheading", { city })}
+          </p>
         </div>
       </section>
 
