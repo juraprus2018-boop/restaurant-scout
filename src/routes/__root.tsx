@@ -4,13 +4,16 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { LocaleProvider } from "../lib/i18n/context";
+import { DEFAULT_LOCALE, isLocale } from "../lib/i18n/locales";
 
 function NotFoundComponent() {
   return (
@@ -99,8 +102,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // Derive `<html lang>` from the URL so search engines and assistive
+  // tech see the correct language on every localized page.
+  const location = useLocation();
+  const htmlLang = useMemo(() => {
+    const first = location.pathname.split("/").filter(Boolean)[0];
+    return isLocale(first) ? first : DEFAULT_LOCALE;
+  }, [location.pathname]);
+
   return (
-    <html lang="en">
+    <html lang={htmlLang}>
       <head>
         <HeadContent />
       </head>
@@ -117,8 +128,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <LocaleProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </LocaleProvider>
     </QueryClientProvider>
   );
 }
