@@ -25,6 +25,18 @@ export const Route = createFileRoute("/sitemap-landing.xml")({
           `<url><loc>${base}/</loc><lastmod>${now}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`,
         ];
 
+        // Cities overview page: one <url> per locale with hreflang alternates.
+        for (const l of LOCALES) {
+          const stedenPath = (code: string) => (code === DEFAULT_LOCALE ? "/steden" : `/${code}/steden`);
+          const alts = LOCALES.map(
+            (a) => `<xhtml:link rel="alternate" hreflang="${a.code}" href="${base}${stedenPath(a.code)}"/>`,
+          ).join("");
+          const xdefault = `<xhtml:link rel="alternate" hreflang="x-default" href="${base}${stedenPath(DEFAULT_LOCALE)}"/>`;
+          urls.push(
+            `<url><loc>${base}${stedenPath(l.code)}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority>${alts}${xdefault}</url>`,
+          );
+        }
+
         // City pages: one <url> per locale, with hreflang alternates to every other locale.
         for (const c of cities) {
           for (const l of LOCALES) {
