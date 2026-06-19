@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapRestaurantsDotxmlRouteImport } from './routes/sitemap-restaurants[.]xml'
+import { Route as SitemapLandingDotxmlRouteImport } from './routes/sitemap-landing[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -29,6 +30,11 @@ const SitemapRestaurantsDotxmlRoute =
     path: '/sitemap-restaurants.xml',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SitemapLandingDotxmlRoute = SitemapLandingDotxmlRouteImport.update({
+  id: '/sitemap-landing.xml',
+  path: '/sitemap-landing.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-landing.xml': typeof SitemapLandingDotxmlRoute
   '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/robots.txt'
+    | '/sitemap-landing.xml'
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/admin'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/robots.txt'
+    | '/sitemap-landing.xml'
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/admin'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/robots.txt'
+    | '/sitemap-landing.xml'
     | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/_authenticated/admin'
@@ -124,6 +136,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapLandingDotxmlRoute: typeof SitemapLandingDotxmlRoute
   SitemapRestaurantsDotxmlRoute: typeof SitemapRestaurantsDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
@@ -143,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap-restaurants.xml'
       fullPath: '/sitemap-restaurants.xml'
       preLoaderRoute: typeof SitemapRestaurantsDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-landing.xml': {
+      id: '/sitemap-landing.xml'
+      path: '/sitemap-landing.xml'
+      fullPath: '/sitemap-landing.xml'
+      preLoaderRoute: typeof SitemapLandingDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -206,6 +226,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapLandingDotxmlRoute: SitemapLandingDotxmlRoute,
   SitemapRestaurantsDotxmlRoute: SitemapRestaurantsDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
