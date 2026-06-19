@@ -298,7 +298,7 @@ function RestaurantPage() {
               </span>
             )}
             {michelin && <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium">★ {michelin} Michelin</span>}
-            {cuisines.map((c) => (
+            {cuisines.map((c: string) => (
               <span key={c} className="px-2 py-0.5 rounded-full bg-muted">{c}</span>
             ))}
           </div>
