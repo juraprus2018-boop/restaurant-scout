@@ -5,13 +5,13 @@ function escapeXml(s: string) {
   return s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]!));
 }
 
-export const Route = createFileRoute("/sitemap-restaurants-$page.xml")({
+export const Route = createFileRoute("/sitemap-restaurants[.]xml")({
   server: {
     handlers: {
-      GET: async ({ request, params }) => {
+      GET: async ({ request }) => {
         const url = new URL(request.url);
         const base = `${url.protocol}//${url.host}`;
-        const page = Math.max(1, Number(params.page) || 1);
+        const page = Math.max(1, Number(url.searchParams.get("page") ?? "1") || 1);
         const rows = await getRestaurantSitemapPage({ data: { page, pageSize: 50000 } });
         const urls = rows
           .map(

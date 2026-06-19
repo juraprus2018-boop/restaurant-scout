@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SitemapRestaurantsPageDotxmlRouteImport } from './routes/sitemap-restaurants-$page[.]xml'
+import { Route as SitemapRestaurantsDotxmlRouteImport } from './routes/sitemap-restaurants[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -23,10 +23,10 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapRestaurantsPageDotxmlRoute =
-  SitemapRestaurantsPageDotxmlRouteImport.update({
-    id: '/sitemap-restaurants-$page.xml',
-    path: '/sitemap-restaurants-$page.xml',
+const SitemapRestaurantsDotxmlRoute =
+  SitemapRestaurantsDotxmlRouteImport.update({
+    id: '/sitemap-restaurants.xml',
+    path: '/sitemap-restaurants.xml',
     getParentRoute: () => rootRouteImport,
   } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -63,7 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap-restaurants-$page.xml': typeof SitemapRestaurantsPageDotxmlRoute
+  '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
@@ -72,7 +72,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap-restaurants-$page.xml': typeof SitemapRestaurantsPageDotxmlRoute
+  '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
@@ -83,7 +83,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap-restaurants-$page.xml': typeof SitemapRestaurantsPageDotxmlRoute
+  '/sitemap-restaurants.xml': typeof SitemapRestaurantsDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
@@ -94,7 +94,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/robots.txt'
-    | '/sitemap-restaurants-$page.xml'
+    | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/admin'
     | '/restaurant/$slug'
@@ -103,7 +103,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/robots.txt'
-    | '/sitemap-restaurants-$page.xml'
+    | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/admin'
     | '/restaurant/$slug'
@@ -113,7 +113,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/robots.txt'
-    | '/sitemap-restaurants-$page.xml'
+    | '/sitemap-restaurants.xml'
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/restaurant/$slug'
@@ -124,7 +124,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
-  SitemapRestaurantsPageDotxmlRoute: typeof SitemapRestaurantsPageDotxmlRoute
+  SitemapRestaurantsDotxmlRoute: typeof SitemapRestaurantsDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
 }
@@ -138,11 +138,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sitemap-restaurants-$page.xml': {
-      id: '/sitemap-restaurants-$page.xml'
-      path: '/sitemap-restaurants-$page.xml'
-      fullPath: '/sitemap-restaurants-$page.xml'
-      preLoaderRoute: typeof SitemapRestaurantsPageDotxmlRouteImport
+    '/sitemap-restaurants.xml': {
+      id: '/sitemap-restaurants.xml'
+      path: '/sitemap-restaurants.xml'
+      fullPath: '/sitemap-restaurants.xml'
+      preLoaderRoute: typeof SitemapRestaurantsDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -206,7 +206,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
-  SitemapRestaurantsPageDotxmlRoute: SitemapRestaurantsPageDotxmlRoute,
+  SitemapRestaurantsDotxmlRoute: SitemapRestaurantsDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
 }
