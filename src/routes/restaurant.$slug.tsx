@@ -382,6 +382,16 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
         </nav>
       </header>
 
+      <ActionBar
+        locale={locale}
+        id={restaurant.id}
+        name={restaurant.name}
+        lat={restaurant.lat}
+        lng={restaurant.lng}
+        phone={restaurant.phone}
+        website={restaurant.website}
+      />
+
       <div className="relative w-full h-72 md:h-96 bg-muted overflow-hidden">
         <img
           src={heroImg}
@@ -392,6 +402,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white max-w-5xl mx-auto">
+          <div className="mb-2"><OpenStatusBadge locale={locale} openingHours={restaurant.opening_hours} /></div>
           <h1 className="text-3xl md:text-5xl font-bold drop-shadow">{restaurant.name}</h1>
           <p className="mt-2 text-sm md:text-base opacity-90">
             {[brand, tags.amenity && amenityLabel(tags.amenity), restaurant.city].filter(Boolean).join(" · ")}
