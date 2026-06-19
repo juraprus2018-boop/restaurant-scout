@@ -487,9 +487,16 @@ function RestaurantPage() {
           )}
 
           {osmUrl && (
-            <a href={osmUrl} target="_blank" rel="noopener" className="block text-xs text-muted-foreground hover:text-foreground text-center">
-              Data van OpenStreetMap — bewerk op osm.org ↗
-            </a>
+            <div className="flex flex-col gap-1 text-xs text-center">
+              <a href={osmUrl} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
+                Bekijk op OpenStreetMap ↗
+              </a>
+              {osmEditUrl && (
+                <a href={osmEditUrl} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
+                  Bewerken in iD-editor ↗
+                </a>
+              )}
+            </div>
           )}
         </aside>
       </div>
