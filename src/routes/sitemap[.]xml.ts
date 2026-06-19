@@ -3,7 +3,7 @@ import { countRestaurants } from "@/lib/seo-public.functions";
 
 const PAGE_SIZE = 50000;
 
-export const Route = createFileRoute("/sitemap[.]xml")({
+export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async ({ request }) => {
