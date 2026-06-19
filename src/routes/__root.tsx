@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "EetGids — Ontdek de beste restaurants" },
+      { title: "PlaceResults — Ontdek de beste restaurants" },
       { name: "description", content: "Een eerlijke gids voor restaurants, cafés en bistro's. Ontdek nieuwe plekken op de kaart, lees reviews en deel je favoriete adressen." },
-      { name: "author", content: "EetGids" },
-      { property: "og:title", content: "EetGids — Restaurantgids op de kaart" },
+      { name: "author", content: "PlaceResults" },
+      { property: "og:title", content: "PlaceResults — Restaurantgids op de kaart" },
       { property: "og:description", content: "Ontdek restaurants, cafés en bistro's bij jou in de buurt." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

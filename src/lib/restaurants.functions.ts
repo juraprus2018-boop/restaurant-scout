@@ -58,7 +58,7 @@ out center tags;`;
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "Accept": "application/json",
-          "User-Agent": "eetgids/1.0 (contact: info@eetgids.example)",
+          "User-Agent": "placeresults/1.0 (contact: info@placeresults.com)",
         },
         body: "data=" + encodeURIComponent(query),
       });
