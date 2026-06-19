@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -43,12 +49,14 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
 }
@@ -57,19 +65,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin' | '/restaurant/$slug'
+  fullPaths: '/' | '/auth' | '/robots.txt' | '/admin' | '/restaurant/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/restaurant/$slug'
+  to: '/' | '/auth' | '/robots.txt' | '/admin' | '/restaurant/$slug'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/robots.txt'
     | '/_authenticated/admin'
     | '/restaurant/$slug'
   fileRoutesById: FileRoutesById
@@ -78,11 +88,19 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -136,6 +154,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
 }
 export const routeTree = rootRouteImport
