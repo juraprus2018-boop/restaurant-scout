@@ -172,13 +172,11 @@ function buildFaq(r: any, t: Record<string, string>): Array<{ q: string; a: stri
 }
 
 function RestaurantPage() {
-  return <RestaurantPageBody />;
+  const { slug } = Route.useParams();
+  return <RestaurantPageBody slug={slug} />;
 }
 
-export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug: slugOverride }: { locale?: LocaleCode; slug?: string } = {}) {
-  // When called from the localized route, slug is passed in explicitly.
-  // For the NL route, fall back to Route.useParams().
-  const slug = slugOverride ?? Route.useParams().slug;
+export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?: LocaleCode; slug: string }) {
   const { data, refetch } = useSuspenseQuery(restaurantQuery(slug));
   const restaurant = data.restaurant as any;
   const initialReviews = data.reviews as Review[];

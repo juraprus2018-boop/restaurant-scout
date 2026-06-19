@@ -56,12 +56,12 @@ export const Route = createFileRoute("/keuken/$cuisine")({
 });
 
 function CuisinePage() {
-  return <CuisinePageBody />;
+  const { cuisine } = Route.useParams();
+  return <CuisinePageBody cuisineKey={cuisine} />;
 }
 
-export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { locale?: LocaleCode; cuisineKey?: string } = {}) {
-  const params = Route.useParams();
-  const key = cuisineKey ?? params.cuisine;
+export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { locale?: LocaleCode; cuisineKey: string }) {
+  const key = cuisineKey;
   const { data } = useSuspenseQuery(cuisineQuery(key));
   const { cuisine, total, items } = data;
   const label = cuisineLabel(cuisine);
