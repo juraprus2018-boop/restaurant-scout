@@ -245,6 +245,8 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
   const { data, refetch } = useSuspenseQuery(restaurantQuery(slug));
   const restaurant = data.restaurant as any;
   const initialReviews = data.reviews as Review[];
+  const tr = (k: Parameters<typeof t>[1], vars?: Record<string, string | number>) => t(locale, k, vars);
+
 
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [user, setUser] = useState<any>(null);
