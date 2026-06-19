@@ -340,7 +340,7 @@ function DetailMap({ lat, lng, name }: { lat: number; lng: number; name: string 
   return (
     <MapContainer center={[lat, lng]} zoom={16} style={{ height: "100%", width: "100%" }}>
       <TileLayer url={OSM_TILES} attribution={OSM_ATTRIBUTION} />
-      <Marker position={[lat, lng]} icon={coloredIcon("#e11d48")}><Popup>{name}</Popup></Marker>
+      <Marker position={[lat, lng]} icon={coloredIcon("red")}><Popup>{name}</Popup></Marker>
     </MapContainer>
   );
 }
