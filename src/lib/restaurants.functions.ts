@@ -18,7 +18,11 @@ export type OsmPoi = {
   tags: Record<string, string>;
 };
 
-const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.openstreetmap.ru/api/interpreter",
+];
 
 function buildAddress(t: Record<string, string>) {
   const parts = [t["addr:street"], t["addr:housenumber"]].filter(Boolean).join(" ");
