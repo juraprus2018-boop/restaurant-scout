@@ -237,7 +237,7 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
         hasMore={hasMore}
         loadMore={loadMore}
         loadingMore={loadingMore}
-        total={total}
+        
       />
       <SiteFooter locale={locale} />
     </div>
@@ -567,10 +567,10 @@ function RestaurantMap({ restaurants }: { restaurants: Restaurant[] }) {
 
 
 function AllList({
-  restaurants, loading, hasMore, loadMore, loadingMore, total,
+  restaurants, loading, hasMore, loadMore, loadingMore,
 }: {
   restaurants: Restaurant[]; loading: boolean;
-  hasMore: boolean; loadMore: () => void; loadingMore: boolean; total: number;
+  hasMore: boolean; loadMore: () => void; loadingMore: boolean;
 }) {
   if (loading) {
     return (
