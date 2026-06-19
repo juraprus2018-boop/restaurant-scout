@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { CookieSettingsButton } from "./CookieBanner";
 import { t } from "@/lib/i18n/strings";
 import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
 
