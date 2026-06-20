@@ -6,7 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { importOsmForQuery } from "@/lib/osm-import.functions";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, Navigation, Clock } from "lucide-react";
+// @ts-expect-error - no types
+import OpeningHours from "opening_hours";
 
 const searchSchema = z.object({ q: z.string().optional().default("") });
 
@@ -35,7 +37,30 @@ type Row = {
   address: string | null;
   avg_rating: number | null;
   review_count: number | null;
+  opening_hours: string | null;
 };
+
+function haversineKm(a: [number, number], b: [number, number]) {
+  const R = 6371;
+  const dLat = ((b[0] - a[0]) * Math.PI) / 180;
+  const dLng = ((b[1] - a[1]) * Math.PI) / 180;
+  const la1 = (a[0] * Math.PI) / 180;
+  const la2 = (b[0] * Math.PI) / 180;
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.sin(dLng / 2) ** 2 * Math.cos(la1) * Math.cos(la2);
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+
+function isOpenNow(spec: string | null): boolean | null {
+  if (!spec) return null;
+  try {
+    const oh = new OpeningHours(spec);
+    return oh.getState() as boolean;
+  } catch {
+    return null;
+  }
+}
 
 function SearchPage() {
   const { q } = Route.useSearch();
@@ -44,11 +69,13 @@ function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
   const [geo, setGeo] = useState<{ lat: number; lng: number; label: string } | null>(null);
+  const [userLoc, setUserLoc] = useState<[number, number] | null>(null);
+  const [locError, setLocError] = useState<string | null>(null);
+  const [requestingLoc, setRequestingLoc] = useState(false);
   const runImport = useServerFn(importOsmForQuery);
 
   useEffect(() => setSearch(q), [q]);
 
-  // Fetch results — with OSM fallback when empty
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -67,7 +94,6 @@ function SearchPage() {
         setLoading(false);
         return;
       }
-      // No DB results → fetch from OSM and persist
       setLoading(false);
       setImporting(true);
       try {
@@ -86,7 +112,6 @@ function SearchPage() {
     };
   }, [q, runImport]);
 
-  // Geocode the query (Nominatim) so we can drop a pin at the searched location
   useEffect(() => {
     if (!q.trim()) {
       setGeo(null);
@@ -112,6 +137,39 @@ function SearchPage() {
     };
   }, [q]);
 
+  const requestLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setLocError("Geolocatie niet ondersteund");
+      return;
+    }
+    setRequestingLoc(true);
+    setLocError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLoc([pos.coords.latitude, pos.coords.longitude]);
+        setRequestingLoc(false);
+      },
+      (err) => {
+        setLocError(err.message || "Locatie geweigerd");
+        setRequestingLoc(false);
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
+    );
+  };
+
+  const enriched = useMemo(() => {
+    return rows.map((r) => ({
+      ...r,
+      open: isOpenNow(r.opening_hours),
+      distanceKm: userLoc ? haversineKm(userLoc, [r.lat, r.lng]) : null,
+    }));
+  }, [rows, userLoc]);
+
+  const sorted = useMemo(() => {
+    if (!userLoc) return enriched;
+    return [...enriched].sort((a, b) => (a.distanceKm ?? 1e9) - (b.distanceKm ?? 1e9));
+  }, [enriched, userLoc]);
+
   const center = useMemo<[number, number]>(() => {
     if (geo) return [geo.lat, geo.lng];
     if (rows[0]) return [rows[0].lat, rows[0].lng];
@@ -126,32 +184,49 @@ function SearchPage() {
           <div className="bg-background rounded-2xl border border-border shadow-sm flex gap-2 p-2">
             <SearchAutocomplete value={search} onChange={setSearch} />
           </div>
-          {q && (
-            <p className="text-sm text-muted-foreground mt-3">
-              {loading
-                ? "Zoeken..."
-                : importing
-                ? `Nieuwe restaurants ophalen voor "${q}"...`
-                : `${rows.length} resultaten voor "${q}"`}
-            </p>
-          )}
+          <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
+            {q && (
+              <p className="text-sm text-muted-foreground">
+                {loading
+                  ? "Zoeken..."
+                  : importing
+                  ? `Nieuwe restaurants ophalen voor "${q}"...`
+                  : `${rows.length} resultaten voor "${q}"`}
+              </p>
+            )}
+            {!userLoc ? (
+              <button
+                type="button"
+                onClick={requestLocation}
+                disabled={requestingLoc}
+                className="inline-flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted transition-colors disabled:opacity-60"
+              >
+                <Navigation className="w-4 h-4" />
+                {requestingLoc ? "Locatie ophalen..." : "Deel mijn locatie"}
+              </button>
+            ) : (
+              <span className="inline-flex items-center gap-2 text-sm text-emerald-700">
+                <Navigation className="w-4 h-4" /> Locatie gedeeld — sorteert op afstand
+              </span>
+            )}
+          </div>
+          {locError && <p className="text-xs text-destructive mt-2">{locError}</p>}
         </div>
       </section>
 
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 grid lg:grid-cols-[1fr_1.1fr] gap-6">
-        {/* Results list */}
         <div className="order-2 lg:order-1 space-y-3">
           {loading || importing ? (
             Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-28 rounded-xl bg-muted animate-pulse" />
             ))
-          ) : rows.length === 0 ? (
+          ) : sorted.length === 0 ? (
             <div className="text-center py-16 px-6 rounded-2xl border-2 border-dashed border-border">
               <p className="text-muted-foreground">Geen restaurants gevonden voor "{q}".</p>
               <p className="text-xs text-muted-foreground mt-2">Probeer een stad of land.</p>
             </div>
           ) : (
-            rows.map((r) => (
+            sorted.map((r) => (
               <Link
                 key={r.id}
                 to="/restaurant/$slug"
@@ -159,7 +234,7 @@ function SearchPage() {
                 className="block p-4 rounded-xl border border-border bg-card hover:shadow-md hover:border-primary/40 transition-all"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h3 className="font-bold text-foreground truncate">{r.name}</h3>
                     {r.address && (
                       <p className="text-sm text-muted-foreground truncate flex items-center gap-1 mt-0.5">
@@ -167,6 +242,26 @@ function SearchPage() {
                         {r.city ? `, ${r.city}` : ""}
                       </p>
                     )}
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {r.open === true && (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                          <Clock className="w-3 h-3" /> Open nu
+                        </span>
+                      )}
+                      {r.open === false && (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
+                          <Clock className="w-3 h-3" /> Gesloten
+                        </span>
+                      )}
+                      {r.distanceKm !== null && (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-muted text-foreground">
+                          <Navigation className="w-3 h-3" />
+                          {r.distanceKm < 1
+                            ? `${Math.round(r.distanceKm * 1000)} m`
+                            : `${r.distanceKm.toFixed(1)} km`}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   {typeof r.avg_rating === "number" && r.avg_rating > 0 && (
                     <span className="inline-flex items-center gap-1 text-sm font-bold text-amber-700 shrink-0">
@@ -180,11 +275,10 @@ function SearchPage() {
           )}
         </div>
 
-        {/* Map */}
         <div className="order-1 lg:order-2 lg:sticky lg:top-20 self-start">
           <div className="relative isolate rounded-2xl overflow-hidden border border-border h-[60vh] lg:h-[calc(100vh-9rem)] bg-card">
             <ClientOnly fallback={<div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>}>
-              <ResultsMap center={center} rows={rows} pin={geo} />
+              <ResultsMap center={center} rows={rows} pin={geo} userLoc={userLoc} />
             </ClientOnly>
           </div>
         </div>
@@ -199,10 +293,12 @@ function ResultsMap({
   center,
   rows,
   pin,
+  userLoc,
 }: {
   center: [number, number];
   rows: Row[];
   pin: { lat: number; lng: number; label: string } | null;
+  userLoc: [number, number] | null;
 }) {
   const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
   useEffect(() => {
@@ -220,6 +316,11 @@ function ResultsMap({
             <strong>Gezochte locatie</strong>
             <div style={{ fontSize: 12, color: "#666" }}>{pin.label}</div>
           </Popup>
+        </Marker>
+      )}
+      {userLoc && (
+        <Marker position={userLoc} icon={coloredIcon("blue")}>
+          <Popup>Jouw locatie</Popup>
         </Marker>
       )}
       <ClusterLayer points={rows.map((r) => ({ id: r.id, name: r.name, slug: r.slug, lat: r.lat, lng: r.lng, address: r.address }))} />
