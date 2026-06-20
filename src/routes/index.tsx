@@ -591,7 +591,7 @@ function RestaurantMap() {
   if (!mod) return <div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>;
   const { MapContainer, TileLayer, OSM_ATTRIBUTION, OSM_TILES, ClusterLayer } = mod;
   return (
-    <MapContainer center={[52.3676, 4.9041]} zoom={5} style={{ height: "100%", width: "100%" }}>
+    <MapContainer center={[52.3676, 4.9041]} zoom={5} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
       <TileLayer url={OSM_TILES} attribution={OSM_ATTRIBUTION} />
       <ClusterLayer points={points} />
     </MapContainer>
