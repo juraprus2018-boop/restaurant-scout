@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Suggestion =
   | { kind: "restaurant"; id: string; name: string; slug: string; city: string | null }
-  | { kind: "city"; name: string };
+  | { kind: "place"; name: string; label: string };
 
 export function SearchAutocomplete({
   value,
@@ -30,24 +30,39 @@ export function SearchAutocomplete({
     }
     let cancelled = false;
     const t = setTimeout(async () => {
-      const [{ data: rests }, { data: cities }] = await Promise.all([
+      const [restRes, placeRes] = await Promise.all([
         supabase
-          .rpc("search_restaurants", { _q: q, _limit: 6, _offset: 0, _sort: "popular" })
-          .then((r) => ({ data: (r.data ?? []) as any[] })),
-        supabase
-          .from("restaurants")
-          .select("city")
-          .ilike("city", `${q}%`)
-          .not("city", "is", null)
-          .limit(50),
+          .rpc("search_restaurants", { _q: q, _limit: 5, _offset: 0, _sort: "popular" })
+          .then((r) => (r.data ?? []) as any[]),
+        fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&featuretype=settlement&q=${encodeURIComponent(q)}`,
+          { headers: { Accept: "application/json" } },
+        )
+          .then((r) => r.json())
+          .then((d: any[]) =>
+            (d ?? []).filter((p) =>
+              ["city", "town", "village", "administrative", "country", "state"].includes(p.type) ||
+              ["city", "town", "village", "country", "state", "region"].includes(p.addresstype),
+            ),
+          )
+          .catch(() => [] as any[]),
       ]);
       if (cancelled) return;
-      const cityNames = Array.from(
-        new Set(((cities ?? []) as { city: string }[]).map((r) => r.city).filter(Boolean)),
-      ).slice(0, 4);
+      const seen = new Set<string>();
+      const places: Suggestion[] = [];
+      for (const p of placeRes) {
+        const a = p.address ?? {};
+        const name = a.city || a.town || a.village || a.state || a.country || p.name || p.display_name?.split(",")[0];
+        if (!name) continue;
+        const key = name.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        places.push({ kind: "place", name, label: p.display_name });
+        if (places.length >= 5) break;
+      }
       const sug: Suggestion[] = [
-        ...cityNames.map((c) => ({ kind: "city" as const, name: c })),
-        ...rests.slice(0, 6).map((r) => ({
+        ...places,
+        ...restRes.slice(0, 5).map((r) => ({
           kind: "restaurant" as const,
           id: r.id,
           name: r.name,
@@ -57,7 +72,7 @@ export function SearchAutocomplete({
       ];
       setItems(sug);
       setActive(0);
-    }, 180);
+    }, 220);
     return () => {
       cancelled = true;
       clearTimeout(t);
@@ -117,7 +132,7 @@ export function SearchAutocomplete({
         />
       </div>
       {open && items.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-2 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50">
+        <div className="absolute left-0 right-0 top-full mt-2 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-[9999]">
           <ul role="listbox">
             {items.map((s, i) => (
               <li
@@ -133,7 +148,7 @@ export function SearchAutocomplete({
                   i === active ? "bg-muted" : ""
                 }`}
               >
-                {s.kind === "city" ? (
+                {s.kind === "place" ? (
                   <MapPin className="w-4 h-4 text-primary shrink-0" />
                 ) : (
                   <Utensils className="w-4 h-4 text-primary shrink-0" />
@@ -143,8 +158,8 @@ export function SearchAutocomplete({
                   {s.kind === "restaurant" && s.city && (
                     <div className="text-xs text-muted-foreground truncate">{s.city}</div>
                   )}
-                  {s.kind === "city" && (
-                    <div className="text-xs text-muted-foreground">Stad</div>
+                  {s.kind === "place" && (
+                    <div className="text-xs text-muted-foreground truncate">{s.label}</div>
                   )}
                 </div>
               </li>
