@@ -5,6 +5,8 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { CookieSettingsButton } from "./CookieBanner";
 import { t } from "@/lib/i18n/strings";
 import { DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
+import logoHeader from "@/assets/logo-placeresults.png.asset.json";
+import logoFooter from "@/assets/logo-footer.png.asset.json";
 
 interface ChromeProps {
   locale?: LocaleCode;
