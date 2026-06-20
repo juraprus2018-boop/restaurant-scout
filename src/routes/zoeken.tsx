@@ -42,30 +42,49 @@ function SearchPage() {
   const [search, setSearch] = useState(q);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [geo, setGeo] = useState<{ lat: number; lng: number; label: string } | null>(null);
+  const runImport = useServerFn(importOsmForQuery);
 
   useEffect(() => setSearch(q), [q]);
 
-  // Fetch results
+  // Fetch results — with OSM fallback when empty
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    supabase
-      .rpc("search_restaurants", {
+    setImporting(false);
+    (async () => {
+      const { data } = await supabase.rpc("search_restaurants", {
         _q: q || undefined,
         _limit: 60,
         _offset: 0,
         _sort: "popular",
-      })
-      .then(({ data }) => {
-        if (cancelled) return;
-        setRows(((data ?? []) as Row[]).filter((r) => r.lat && r.lng));
-        setLoading(false);
       });
+      if (cancelled) return;
+      const dbRows = ((data ?? []) as Row[]).filter((r) => r.lat && r.lng);
+      if (dbRows.length > 0 || !q.trim()) {
+        setRows(dbRows);
+        setLoading(false);
+        return;
+      }
+      // No DB results → fetch from OSM and persist
+      setLoading(false);
+      setImporting(true);
+      try {
+        const res = await runImport({ data: { q } });
+        if (cancelled) return;
+        const fresh = ((res?.rows ?? []) as Row[]).filter((r) => r.lat && r.lng);
+        setRows(fresh);
+      } catch {
+        if (!cancelled) setRows([]);
+      } finally {
+        if (!cancelled) setImporting(false);
+      }
+    })();
     return () => {
       cancelled = true;
     };
-  }, [q]);
+  }, [q, runImport]);
 
   // Geocode the query (Nominatim) so we can drop a pin at the searched location
   useEffect(() => {
