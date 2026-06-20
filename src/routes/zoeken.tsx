@@ -128,7 +128,11 @@ function SearchPage() {
           </div>
           {q && (
             <p className="text-sm text-muted-foreground mt-3">
-              {loading ? "Zoeken..." : `${rows.length} resultaten voor "${q}"`}
+              {loading
+                ? "Zoeken..."
+                : importing
+                ? `Nieuwe restaurants ophalen voor "${q}"...`
+                : `${rows.length} resultaten voor "${q}"`}
             </p>
           )}
         </div>
@@ -137,13 +141,14 @@ function SearchPage() {
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 grid lg:grid-cols-[1fr_1.1fr] gap-6">
         {/* Results list */}
         <div className="order-2 lg:order-1 space-y-3">
-          {loading ? (
+          {loading || importing ? (
             Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-28 rounded-xl bg-muted animate-pulse" />
             ))
           ) : rows.length === 0 ? (
             <div className="text-center py-16 px-6 rounded-2xl border-2 border-dashed border-border">
-              <p className="text-muted-foreground">Geen restaurants gevonden.</p>
+              <p className="text-muted-foreground">Geen restaurants gevonden voor "{q}".</p>
+              <p className="text-xs text-muted-foreground mt-2">Probeer een stad of land.</p>
             </div>
           ) : (
             rows.map((r) => (
