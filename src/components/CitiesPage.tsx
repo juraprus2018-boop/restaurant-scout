@@ -19,10 +19,18 @@ type CityRow = { city: string; slug: string; country: string; count: number; lat
 const REGION = new Intl.DisplayNames(undefined, { type: "region" });
 function countryName(code: string, locale: LocaleCode): string {
   if (!code) return "";
+  // Intl.DisplayNames.of() throws RangeError for non-ISO codes (e.g. free-text from OSM).
+  // Only valid ISO 3166-1 alpha-2/3 or UN M49 numeric codes are accepted.
+  const isValidRegion = /^([A-Za-z]{2,3}|[0-9]{3})$/.test(code);
+  if (!isValidRegion) return code;
   try {
     return new Intl.DisplayNames([locale], { type: "region" }).of(code) ?? code;
   } catch {
-    return REGION.of(code) ?? code;
+    try {
+      return REGION.of(code) ?? code;
+    } catch {
+      return code;
+    }
   }
 }
 
