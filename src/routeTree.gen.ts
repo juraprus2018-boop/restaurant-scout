@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ZoekenRouteImport } from './routes/zoeken'
 import { Route as VoorwaardenRouteImport } from './routes/voorwaarden'
 import { Route as StedenRouteImport } from './routes/steden'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -30,6 +31,11 @@ import { Route as LangStadCityRouteImport } from './routes/$lang.stad.$city'
 import { Route as LangRestaurantSlugRouteImport } from './routes/$lang.restaurant.$slug'
 import { Route as LangKeukenCuisineRouteImport } from './routes/$lang.keuken.$cuisine'
 
+const ZoekenRoute = ZoekenRouteImport.update({
+  id: '/zoeken',
+  path: '/zoeken',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoorwaardenRoute = VoorwaardenRouteImport.update({
   id: '/voorwaarden',
   path: '/voorwaarden',
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
   '/voorwaarden': typeof VoorwaardenRoute
+  '/zoeken': typeof ZoekenRoute
   '/$lang/steden': typeof LangStedenRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
   '/voorwaarden': typeof VoorwaardenRoute
+  '/zoeken': typeof ZoekenRoute
   '/$lang/steden': typeof LangStedenRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/steden': typeof StedenRoute
   '/voorwaarden': typeof VoorwaardenRoute
+  '/zoeken': typeof ZoekenRoute
   '/$lang/steden': typeof LangStedenRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/keuken/$cuisine': typeof KeukenCuisineRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/steden'
     | '/voorwaarden'
+    | '/zoeken'
     | '/$lang/steden'
     | '/admin'
     | '/keuken/$cuisine'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/steden'
     | '/voorwaarden'
+    | '/zoeken'
     | '/$lang/steden'
     | '/admin'
     | '/keuken/$cuisine'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/steden'
     | '/voorwaarden'
+    | '/zoeken'
     | '/$lang/steden'
     | '/_authenticated/admin'
     | '/keuken/$cuisine'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StedenRoute: typeof StedenRoute
   VoorwaardenRoute: typeof VoorwaardenRoute
+  ZoekenRoute: typeof ZoekenRoute
   LangStedenRoute: typeof LangStedenRoute
   KeukenCuisineRoute: typeof KeukenCuisineRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
@@ -287,6 +300,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/zoeken': {
+      id: '/zoeken'
+      path: '/zoeken'
+      fullPath: '/zoeken'
+      preLoaderRoute: typeof ZoekenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voorwaarden': {
       id: '/voorwaarden'
       path: '/voorwaarden'
@@ -453,6 +473,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StedenRoute: StedenRoute,
   VoorwaardenRoute: VoorwaardenRoute,
+  ZoekenRoute: ZoekenRoute,
   LangStedenRoute: LangStedenRoute,
   KeukenCuisineRoute: KeukenCuisineRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,

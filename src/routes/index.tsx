@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientOnly } from "@tanstack/react-router";
@@ -9,6 +9,7 @@ import { MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight, Clo
 import heroImage from "@/assets/hero-dinner.jpg";
 import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
 
 
