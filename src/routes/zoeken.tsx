@@ -7,7 +7,7 @@ import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { importOsmForQuery } from "@/lib/osm-import.functions";
 import { MapPin, Star, Navigation, Clock } from "lucide-react";
-// @ts-expect-error - no types
+// @ts-ignore - no types shipped
 import OpeningHours from "opening_hours";
 
 const searchSchema = z.object({ q: z.string().optional().default("") });
