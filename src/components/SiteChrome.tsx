@@ -83,10 +83,7 @@ export function SiteFooter({ locale = DEFAULT_LOCALE }: ChromeProps = {}) {
     <footer className="bg-ink text-white/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid sm:grid-cols-4 gap-8 text-sm">
         <div className="sm:col-span-2">
-          <div className="flex items-center gap-2 text-white">
-            <span className="grid place-items-center w-9 h-9 rounded-full bg-accent text-ink font-extrabold">●</span>
-            <span className="font-display text-xl">PlaceResults.com</span>
-          </div>
+          <img src={logoFooter.url} alt="PlaceResults.com" className="h-9 w-auto" />
           <p className="mt-3 max-w-sm leading-relaxed">{t(locale, "footer.tagline")}</p>
         </div>
         <div>
