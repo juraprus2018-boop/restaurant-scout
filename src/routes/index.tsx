@@ -563,7 +563,7 @@ function MapSection() {
             <p className="text-muted-foreground mt-1">Bekijk alle restaurants — gegroepeerd in clusters</p>
           </div>
         </div>
-        <div className="rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
+        <div className="relative isolate z-0 rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
           <ClientOnly fallback={<div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>}>
             <RestaurantMap />
           </ClientOnly>
