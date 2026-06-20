@@ -186,14 +186,28 @@ out tags center ${data.limit};`;
       const { error, count } = await supabaseAdmin
         .from("restaurants")
         .insert(fresh, { count: "exact" });
-      if (!error) inserted = count ?? fresh.length;
+      if (error) console.error("[osm-import] insert error", error);
+      else inserted = count ?? fresh.length;
     }
 
     // 5) Return ALL matching rows (existing + new) for immediate display
-    const { data: rows } = await supabaseAdmin
+    const { data: rows, error: selErr } = await supabaseAdmin
       .from("restaurants")
       .select("id,name,slug,lat,lng,city,address,avg_rating,review_count")
       .in("osm_id", osmIds);
+    if (selErr) console.error("[osm-import] select error", selErr);
 
-    return { inserted, rows: rows ?? [] };
+    const clean = (rows ?? []).map((r) => ({
+      id: String(r.id),
+      name: String(r.name),
+      slug: String(r.slug),
+      lat: Number(r.lat),
+      lng: Number(r.lng),
+      city: r.city ? String(r.city) : null,
+      address: r.address ? String(r.address) : null,
+      avg_rating: r.avg_rating == null ? null : Number(r.avg_rating),
+      review_count: r.review_count == null ? null : Number(r.review_count),
+    }));
+
+    return { inserted, rows: clean };
   });
