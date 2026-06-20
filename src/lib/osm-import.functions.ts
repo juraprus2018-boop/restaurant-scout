@@ -212,4 +212,8 @@ out tags center ${data.limit};`;
     }));
 
     return { inserted, rows: clean };
+    } catch (e) {
+      console.error("[osm-import] FAIL", e);
+      return { inserted: 0, rows: [] as Array<{ id: string; name: string; slug: string; lat: number; lng: number; city: string | null; address: string | null; avg_rating: number | null; review_count: number | null }> };
+    }
   });
