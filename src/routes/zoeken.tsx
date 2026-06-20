@@ -1,9 +1,11 @@
 import { createFileRoute, Link, ClientOnly } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
+import { importOsmForQuery } from "@/lib/osm-import.functions";
 import { MapPin, Star } from "lucide-react";
 
 const searchSchema = z.object({ q: z.string().optional().default("") });
