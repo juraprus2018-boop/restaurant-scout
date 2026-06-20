@@ -46,18 +46,20 @@ export const importOsmForQuery = createServerFn({ method: "POST" })
     limit: Math.min(Math.max(d.limit ?? 40, 1), 80),
   }))
   .handler(async ({ data }) => {
+    try {
+      console.log("[osm-import] start", data.q);
     if (!data.q) return { inserted: 0, rows: [] };
 
     // 1) Geocode via Nominatim → bbox
     const geoRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(data.q)}`,
+      `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(data.q)}`,
       { headers: { "User-Agent": "PlaceResults/1.0 (contact@placeresults.com)", Accept: "application/json" } },
     );
     if (!geoRes.ok) return { inserted: 0, rows: [] };
     const geo = (await geoRes.json()) as Array<{
-      lat: string; lon: string; display_name: string;
+      lat: string; lon: string; display_name: string; name?: string;
       boundingbox?: [string, string, string, string]; // [south, north, west, east]
-      address?: { country?: string; city?: string; town?: string; village?: string };
+      address?: { country?: string; city?: string; town?: string; village?: string; hamlet?: string; suburb?: string; municipality?: string };
     }>;
     if (!geo[0]) return { inserted: 0, rows: [] };
     const g = geo[0];
@@ -96,7 +98,7 @@ out tags center ${data.limit};`;
     if (!opRes.ok) return { inserted: 0, rows: [] };
     const op = (await opRes.json()) as { elements: OsmEl[] };
 
-    const fallbackCity = g.address?.city || g.address?.town || g.address?.village || null;
+    const fallbackCity = g.address?.city || g.address?.town || g.address?.village || g.address?.hamlet || g.address?.suburb || g.address?.municipality || g.name || (g.display_name?.split(",")[0]?.trim() ?? null);
     const fallbackCountry = g.address?.country || null;
 
     // 3) Build rows
@@ -186,14 +188,32 @@ out tags center ${data.limit};`;
       const { error, count } = await supabaseAdmin
         .from("restaurants")
         .insert(fresh, { count: "exact" });
-      if (!error) inserted = count ?? fresh.length;
+      if (error) console.error("[osm-import] insert error", error);
+      else inserted = count ?? fresh.length;
     }
 
     // 5) Return ALL matching rows (existing + new) for immediate display
-    const { data: rows } = await supabaseAdmin
+    const { data: rows, error: selErr } = await supabaseAdmin
       .from("restaurants")
       .select("id,name,slug,lat,lng,city,address,avg_rating,review_count")
       .in("osm_id", osmIds);
+    if (selErr) console.error("[osm-import] select error", selErr);
 
-    return { inserted, rows: rows ?? [] };
+    const clean = (rows ?? []).map((r) => ({
+      id: String(r.id),
+      name: String(r.name),
+      slug: String(r.slug),
+      lat: Number(r.lat),
+      lng: Number(r.lng),
+      city: r.city ? String(r.city) : null,
+      address: r.address ? String(r.address) : null,
+      avg_rating: r.avg_rating == null ? null : Number(r.avg_rating),
+      review_count: r.review_count == null ? null : Number(r.review_count),
+    }));
+
+    return { inserted, rows: clean };
+    } catch (e) {
+      console.error("[osm-import] FAIL", e);
+      return { inserted: 0, rows: [] as Array<{ id: string; name: string; slug: string; lat: number; lng: number; city: string | null; address: string | null; avg_rating: number | null; review_count: number | null }> };
+    }
   });
