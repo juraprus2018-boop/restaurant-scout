@@ -46,6 +46,8 @@ export const importOsmForQuery = createServerFn({ method: "POST" })
     limit: Math.min(Math.max(d.limit ?? 40, 1), 80),
   }))
   .handler(async ({ data }) => {
+    try {
+      console.log("[osm-import] start", data.q);
     if (!data.q) return { inserted: 0, rows: [] };
 
     // 1) Geocode via Nominatim → bbox
