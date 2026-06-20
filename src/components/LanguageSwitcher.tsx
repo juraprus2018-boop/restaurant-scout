@@ -74,6 +74,7 @@ export function LanguageSwitcher({ current }: Props) {
                 href={href}
                 onClick={(e) => {
                   e.preventDefault();
+                  try { window.localStorage.setItem("pr_lang", l.code); } catch { /* ignore */ }
                   setOpen(false);
                   router.navigate({ to: href });
                 }}
