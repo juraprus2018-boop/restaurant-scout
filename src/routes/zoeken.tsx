@@ -1,9 +1,11 @@
 import { createFileRoute, Link, ClientOnly } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
+import { importOsmForQuery } from "@/lib/osm-import.functions";
 import { MapPin, Star } from "lucide-react";
 
 const searchSchema = z.object({ q: z.string().optional().default("") });
@@ -40,30 +42,49 @@ function SearchPage() {
   const [search, setSearch] = useState(q);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [geo, setGeo] = useState<{ lat: number; lng: number; label: string } | null>(null);
+  const runImport = useServerFn(importOsmForQuery);
 
   useEffect(() => setSearch(q), [q]);
 
-  // Fetch results
+  // Fetch results — with OSM fallback when empty
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    supabase
-      .rpc("search_restaurants", {
+    setImporting(false);
+    (async () => {
+      const { data } = await supabase.rpc("search_restaurants", {
         _q: q || undefined,
         _limit: 60,
         _offset: 0,
         _sort: "popular",
-      })
-      .then(({ data }) => {
-        if (cancelled) return;
-        setRows(((data ?? []) as Row[]).filter((r) => r.lat && r.lng));
-        setLoading(false);
       });
+      if (cancelled) return;
+      const dbRows = ((data ?? []) as Row[]).filter((r) => r.lat && r.lng);
+      if (dbRows.length > 0 || !q.trim()) {
+        setRows(dbRows);
+        setLoading(false);
+        return;
+      }
+      // No DB results → fetch from OSM and persist
+      setLoading(false);
+      setImporting(true);
+      try {
+        const res = await runImport({ data: { q } });
+        if (cancelled) return;
+        const fresh = ((res?.rows ?? []) as Row[]).filter((r) => r.lat && r.lng);
+        setRows(fresh);
+      } catch {
+        if (!cancelled) setRows([]);
+      } finally {
+        if (!cancelled) setImporting(false);
+      }
+    })();
     return () => {
       cancelled = true;
     };
-  }, [q]);
+  }, [q, runImport]);
 
   // Geocode the query (Nominatim) so we can drop a pin at the searched location
   useEffect(() => {
@@ -107,7 +128,11 @@ function SearchPage() {
           </div>
           {q && (
             <p className="text-sm text-muted-foreground mt-3">
-              {loading ? "Zoeken..." : `${rows.length} resultaten voor "${q}"`}
+              {loading
+                ? "Zoeken..."
+                : importing
+                ? `Nieuwe restaurants ophalen voor "${q}"...`
+                : `${rows.length} resultaten voor "${q}"`}
             </p>
           )}
         </div>
@@ -116,13 +141,14 @@ function SearchPage() {
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 grid lg:grid-cols-[1fr_1.1fr] gap-6">
         {/* Results list */}
         <div className="order-2 lg:order-1 space-y-3">
-          {loading ? (
+          {loading || importing ? (
             Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-28 rounded-xl bg-muted animate-pulse" />
             ))
           ) : rows.length === 0 ? (
             <div className="text-center py-16 px-6 rounded-2xl border-2 border-dashed border-border">
-              <p className="text-muted-foreground">Geen restaurants gevonden.</p>
+              <p className="text-muted-foreground">Geen restaurants gevonden voor "{q}".</p>
+              <p className="text-xs text-muted-foreground mt-2">Probeer een stad of land.</p>
             </div>
           ) : (
             rows.map((r) => (
