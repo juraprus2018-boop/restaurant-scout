@@ -131,12 +131,51 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function AutoLocaleRedirect() {
+  // Detects browser language on first visit and redirects to the matching
+  // localized URL. Respects an explicit choice stored in localStorage so
+  // a user who switches language manually is never overridden.
+  useEffect(() => {
+    try {
+      const path = window.location.pathname;
+      const segs = path.split("/").filter(Boolean);
+      // Only auto-redirect from the root URL ("/"). Any deeper page is left as-is.
+      if (segs.length !== 0) return;
+
+      const stored = window.localStorage.getItem("pr_lang");
+      const candidates: string[] = [];
+      if (stored) candidates.push(stored);
+      else {
+        const langs = (navigator.languages && navigator.languages.length
+          ? navigator.languages
+          : [navigator.language || ""]) as string[];
+        for (const l of langs) {
+          const code = (l || "").toLowerCase().split("-")[0];
+          if (code) candidates.push(code);
+        }
+      }
+
+      for (const c of candidates) {
+        if (isLocale(c) && c !== DEFAULT_LOCALE) {
+          window.location.replace(`/${c}${window.location.search}${window.location.hash}`);
+          return;
+        }
+        if (isLocale(c)) return; // matched default — stay
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
       <LocaleProvider>
+        <AutoLocaleRedirect />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <CookieBanner />
