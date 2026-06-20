@@ -25,9 +25,8 @@ export function SiteHeader({ locale = DEFAULT_LOCALE }: ChromeProps = {}) {
   return (
     <header className="sticky top-0 z-[1000] bg-background/95 backdrop-blur border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="grid place-items-center w-9 h-9 rounded-full bg-primary text-primary-foreground font-extrabold text-lg">●</span>
-          <span className="font-display text-xl text-ink">PlaceResults.com</span>
+        <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)} aria-label="PlaceResults.com">
+          <img src={logoHeader.url} alt="PlaceResults.com" className="h-8 w-auto" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-foreground/80">
