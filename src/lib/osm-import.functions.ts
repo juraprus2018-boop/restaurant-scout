@@ -57,9 +57,9 @@ export const importOsmForQuery = createServerFn({ method: "POST" })
     );
     if (!geoRes.ok) return { inserted: 0, rows: [] };
     const geo = (await geoRes.json()) as Array<{
-      lat: string; lon: string; display_name: string;
+      lat: string; lon: string; display_name: string; name?: string;
       boundingbox?: [string, string, string, string]; // [south, north, west, east]
-      address?: { country?: string; city?: string; town?: string; village?: string };
+      address?: { country?: string; city?: string; town?: string; village?: string; hamlet?: string; suburb?: string; municipality?: string };
     }>;
     if (!geo[0]) return { inserted: 0, rows: [] };
     const g = geo[0];
