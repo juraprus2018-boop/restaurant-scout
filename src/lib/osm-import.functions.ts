@@ -52,7 +52,7 @@ export const importOsmForQuery = createServerFn({ method: "POST" })
 
     // 1) Geocode via Nominatim → bbox
     const geoRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(data.q)}`,
+      `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(data.q)}`,
       { headers: { "User-Agent": "PlaceResults/1.0 (contact@placeresults.com)", Accept: "application/json" } },
     );
     if (!geoRes.ok) return { inserted: 0, rows: [] };
