@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientOnly } from "@tanstack/react-router";
@@ -9,6 +9,7 @@ import { MapPin, Search, Utensils, Coffee, Wine, Award, Heart, ChevronRight, Clo
 import heroImage from "@/assets/hero-dinner.jpg";
 import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
 
 
@@ -397,21 +398,28 @@ function Hero({ search, setSearch }: { search: string; setSearch: (s: string) =>
       {/* Floating search bar */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-10 relative z-10">
         <div className="bg-card rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.25)] border border-border p-2 flex flex-col sm:flex-row gap-2">
-          <div className="flex-1 flex items-center gap-3 px-4 py-2">
-            <Search className="w-5 h-5 text-muted-foreground shrink-0" />
-            <Input
-              placeholder="Zoek restaurants, keukens of steden..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border-0 shadow-none focus-visible:ring-0 h-11 px-0 text-base bg-transparent"
-            />
-          </div>
-          <Button size="lg" className="h-12 px-8 rounded-xl font-bold" asChild>
-            <a href="#ontdek">Zoeken</a>
-          </Button>
+          <SearchAutocomplete value={search} onChange={setSearch} />
+          <SearchSubmit q={search} />
         </div>
       </div>
     </section>
+  );
+}
+
+function SearchSubmit({ q }: { q: string }) {
+  const navigate = useNavigate();
+  return (
+    <Button
+      size="lg"
+      className="h-12 px-8 rounded-xl font-bold"
+      onClick={() => {
+        const v = q.trim();
+        if (v) navigate({ to: "/zoeken", search: { q: v } });
+        else document.getElementById("ontdek")?.scrollIntoView({ behavior: "smooth" });
+      }}
+    >
+      Zoeken
+    </Button>
   );
 }
 
@@ -555,7 +563,7 @@ function MapSection() {
             <p className="text-muted-foreground mt-1">Bekijk alle restaurants — gegroepeerd in clusters</p>
           </div>
         </div>
-        <div className="rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
+        <div className="relative isolate z-0 rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
           <ClientOnly fallback={<div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>}>
             <RestaurantMap />
           </ClientOnly>
@@ -583,7 +591,7 @@ function RestaurantMap() {
   if (!mod) return <div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>;
   const { MapContainer, TileLayer, OSM_ATTRIBUTION, OSM_TILES, ClusterLayer } = mod;
   return (
-    <MapContainer center={[52.3676, 4.9041]} zoom={5} style={{ height: "100%", width: "100%" }}>
+    <MapContainer center={[52.3676, 4.9041]} zoom={5} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
       <TileLayer url={OSM_TILES} attribution={OSM_ATTRIBUTION} />
       <ClusterLayer points={points} />
     </MapContainer>
