@@ -98,7 +98,7 @@ out tags center ${data.limit};`;
     if (!opRes.ok) return { inserted: 0, rows: [] };
     const op = (await opRes.json()) as { elements: OsmEl[] };
 
-    const fallbackCity = g.address?.city || g.address?.town || g.address?.village || null;
+    const fallbackCity = g.address?.city || g.address?.town || g.address?.village || g.address?.hamlet || g.address?.suburb || g.address?.municipality || g.name || (g.display_name?.split(",")[0]?.trim() ?? null);
     const fallbackCountry = g.address?.country || null;
 
     // 3) Build rows
