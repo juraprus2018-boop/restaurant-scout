@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Suggestion =
   | { kind: "restaurant"; id: string; name: string; slug: string; city: string | null }
-  | { kind: "city"; name: string };
+  | { kind: "place"; name: string; label: string };
 
 export function SearchAutocomplete({
   value,
