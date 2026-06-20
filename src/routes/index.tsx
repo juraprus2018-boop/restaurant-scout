@@ -396,7 +396,7 @@ function Hero({ search, setSearch }: { search: string; setSearch: (s: string) =>
       </div>
 
       {/* Floating search bar */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-10 relative z-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-10 relative z-50">
         <div className="bg-card rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.25)] border border-border p-2 flex flex-col sm:flex-row gap-2">
           <SearchAutocomplete value={search} onChange={setSearch} />
           <SearchSubmit q={search} />
