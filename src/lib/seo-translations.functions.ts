@@ -76,10 +76,14 @@ Do NOT include markdown, code fences, or any extra text.`;
   const text = data?.choices?.[0]?.message?.content ?? "{}";
   const parsed = JSON.parse(text);
   return {
-    title: String(parsed.title ?? "").slice(0, 70),
-    description: String(parsed.description ?? "").slice(0, 200),
-    intro: String(parsed.intro ?? "").slice(0, 400),
+    title: sanitize(String(parsed.title ?? "")).slice(0, 70),
+    description: sanitize(String(parsed.description ?? "")).slice(0, 200),
+    intro: sanitize(String(parsed.intro ?? "")).slice(0, 400),
   };
+}
+
+function sanitize(s: string): string {
+  return s.replace(/\s—\s/g, ", ").replace(/—/g, ",").replace(/\s–\s/g, ", ").replace(/–/g, "-");
 }
 
 export const getLandingCopy = createServerFn({ method: "GET" })
