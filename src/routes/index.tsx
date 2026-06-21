@@ -11,6 +11,7 @@ import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
+import { t } from "@/lib/i18n/strings";
 
 
 
