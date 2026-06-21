@@ -214,7 +214,7 @@ export function CookieBanner() {
   );
 }
 
-/** Helper button — use in footer to reopen settings later. */
+/** Helper button, use in footer to reopen settings later. */
 export function CookieSettingsButton({ className, label }: { className?: string; label: string }) {
   return (
     <button

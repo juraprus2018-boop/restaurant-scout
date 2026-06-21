@@ -19,7 +19,7 @@ export const Route = createFileRoute("/stad/$city")({
   head: ({ loaderData, params }) => {
     const city = loaderData?.city ?? params.city;
     const total = loaderData?.total ?? 0;
-    const title = `${t(DEFAULT_LOCALE, "city.heading", { city })} — PlaceResults`.slice(0, 70);
+    const title = `${t(DEFAULT_LOCALE, "city.heading", { city })}, PlaceResults`.slice(0, 70);
     const desc = t(DEFAULT_LOCALE, "city.subheading", { count: total.toLocaleString(DEFAULT_LOCALE), city }).slice(0, 158);
     return {
       meta: [

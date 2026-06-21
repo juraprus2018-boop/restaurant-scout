@@ -44,7 +44,7 @@ export function buildCuisineHead(lang: LocaleCode, cuisineSlug: string, loaderDa
   const label = loaderData ? cuisineLabel(loaderData.cuisine) : cuisineSlug;
   const total = loaderData?.total ?? 0;
   const path = lang === DEFAULT_LOCALE ? `/keuken/${cuisineSlug}` : `/${lang}/keuken/${cuisineSlug}`;
-  const title = `${t(lang, "cuisine.heading", { label })} — PlaceResults`.slice(0, 70);
+  const title = `${t(lang, "cuisine.heading", { label })}, PlaceResults`.slice(0, 70);
   const desc = t(lang, "cuisine.subheading", { count: total.toLocaleString(lang), label }).slice(0, 158);
   return {
     meta: [

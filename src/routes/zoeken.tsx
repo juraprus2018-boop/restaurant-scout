@@ -18,7 +18,7 @@ export const Route = createFileRoute("/zoeken")({
     const q = (match.search as { q?: string }).q || "";
     return {
       meta: [
-        { title: q ? `Zoekresultaten voor "${q}" — PlaceResults` : "Zoeken — PlaceResults" },
+        { title: q ? `Zoekresultaten voor "${q}", PlaceResults` : "Zoeken, PlaceResults" },
         { name: "description", content: `Zoekresultaten voor restaurants${q ? ` bij ${q}` : ""}.` },
         { name: "robots", content: "noindex,follow" },
       ],
@@ -206,7 +206,7 @@ function SearchPage() {
               </button>
             ) : (
               <span className="inline-flex items-center gap-2 text-sm text-emerald-700">
-                <Navigation className="w-4 h-4" /> Locatie gedeeld — sorteert op afstand
+                <Navigation className="w-4 h-4" /> Locatie gedeeld, sorteert op afstand
               </span>
             )}
           </div>

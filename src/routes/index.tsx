@@ -11,16 +11,17 @@ import { isOpenNow, cuisineLabel } from "@/lib/osm-labels";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
+import { t } from "@/lib/i18n/strings";
 
 
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PlaceResults — Ontdek de beste restaurants" },
-      { name: "description", content: "Vind restaurants, cafés en bars met echte reviews en ratings. Plan jouw volgende eetafspraak met PlaceResults." },
-      { property: "og:title", content: "PlaceResults — Restaurantgids met reviews" },
-      { property: "og:description", content: "Vind restaurants, cafés en bars met echte reviews." },
+      { title: t("nl", "home.meta.title") },
+      { name: "description", content: t("nl", "home.meta.desc") },
+      { property: "og:title", content: t("nl", "home.meta.titleOg") },
+      { property: "og:description", content: t("nl", "home.meta.descOg") },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
       { property: "og:locale", content: "nl" },
@@ -118,7 +119,7 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
 
   const debouncedSearch = useDebounced(search, 300);
 
-  // (no auto-scroll on filter change — caused jumpy UX on mobile)
+  // (no auto-scroll on filter change, caused jumpy UX on mobile)
 
 
   // Server-side search: re-runs when any filter changes; resets to page 0.
@@ -186,7 +187,7 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
   const useNearby = () => {
     if (typeof window === "undefined") return;
     if (!("geolocation" in navigator) || !window.isSecureContext) {
-      setGeoError("Locatie werkt alleen op een beveiligde (https) site of in een nieuw tabblad.");
+      setGeoError(t(locale, "home.geo.insecure"));
       return;
     }
     setGeoLoading(true);
@@ -199,12 +200,12 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
       (err) => {
         const msg =
           err.code === err.PERMISSION_DENIED
-            ? "Locatietoegang geweigerd. Sta locatie toe in je browserinstellingen."
+            ? t(locale, "home.geo.denied")
             : err.code === err.POSITION_UNAVAILABLE
-            ? "Locatie niet beschikbaar. Probeer het opnieuw."
+            ? t(locale, "home.geo.unavailable")
             : err.code === err.TIMEOUT
-            ? "Het ophalen van je locatie duurde te lang. Probeer opnieuw."
-            : err.message || "Kon je locatie niet ophalen";
+            ? t(locale, "home.geo.timeout")
+            : err.message || t(locale, "home.geo.generic");
         setGeoError(msg);
         setGeoLoading(false);
       },
@@ -228,8 +229,9 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader locale={locale} />
-      <Hero search={search} setSearch={setSearch} />
+      <Hero search={search} setSearch={setSearch} locale={locale} />
       <FilterBar
+        locale={locale}
         openNow={openNow}
         setOpenNow={setOpenNow}
         cuisines={cuisines}
@@ -247,16 +249,16 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
         sort={sort}
         setSort={setSort}
       />
-      <Categories />
-      <TopRated items={restaurants.slice(0, 8)} loading={loading} />
-      <MapSection />
+      <Categories locale={locale} />
+      <TopRated items={restaurants.slice(0, 8)} loading={loading} locale={locale} />
+      <MapSection locale={locale} />
       <AllList
+        locale={locale}
         restaurants={restaurants}
         loading={loading}
         hasMore={hasMore}
         loadMore={loadMore}
         loadingMore={loadingMore}
-        
       />
       <SiteFooter locale={locale} />
     </div>
@@ -264,11 +266,13 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
 }
 
 function FilterBar({
+  locale,
   openNow, setOpenNow, cuisines, toggleCuisine, allCuisines,
   useNearby, userPos, clearNearby, radiusKm, setRadiusKm,
   geoError, geoLoading, activeFilterCount, clearFilters,
   sort, setSort,
 }: {
+  locale: LocaleCode;
   openNow: boolean; setOpenNow: (b: boolean) => void;
   cuisines: string[]; toggleCuisine: (c: string) => void; allCuisines: string[];
   useNearby: () => void; userPos: { lat: number; lng: number } | null; clearNearby: () => void;
@@ -288,7 +292,7 @@ function FilterBar({
             onClick={() => setOpenNow(!openNow)}
             className="rounded-full gap-1.5"
           >
-            <Clock className="w-4 h-4" /> Open nu
+            <Clock className="w-4 h-4" /> {t(locale, "home.filter.openNow")}
           </Button>
           <Button
             variant={userPos ? "default" : "outline"}
@@ -298,14 +302,18 @@ function FilterBar({
             className="rounded-full gap-1.5"
           >
             <Navigation2 className="w-4 h-4" />
-            {geoLoading ? "Zoeken..." : userPos ? `In de buurt (${radiusKm} km)` : "In de buurt"}
+            {geoLoading
+              ? t(locale, "home.filter.nearbySearching")
+              : userPos
+              ? t(locale, "home.filter.nearbyActive", { km: radiusKm })
+              : t(locale, "home.filter.nearby")}
           </Button>
           {userPos && (
             <select
               value={radiusKm}
               onChange={(e) => setRadiusKm(Number(e.target.value))}
               className="h-9 rounded-full border border-input bg-background px-3 text-sm"
-              aria-label="Zoekradius"
+              aria-label={t(locale, "home.filter.radiusAria")}
             >
               {[1, 2, 5, 10, 25, 50].map((k) => (
                 <option key={k} value={k}>{k} km</option>
@@ -320,30 +328,30 @@ function FilterBar({
             aria-expanded={cuisinesOpen}
           >
             <SlidersHorizontal className="w-4 h-4" />
-            Keuken{cuisines.length > 0 ? ` (${cuisines.length})` : ""}
+            {t(locale, "home.filter.cuisineToggle")}{cuisines.length > 0 ? ` (${cuisines.length})` : ""}
             <ChevronDown className={`w-4 h-4 transition-transform ${cuisinesOpen ? "rotate-180" : ""}`} />
           </Button>
           {activeFilterCount > 0 && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-full gap-1 text-muted-foreground">
-              <X className="w-4 h-4" /> Wis ({activeFilterCount})
+              <X className="w-4 h-4" /> {t(locale, "home.filter.clear", { n: activeFilterCount })}
             </Button>
           )}
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
             className="h-9 rounded-full border border-input bg-background px-3 text-sm"
-            aria-label="Sorteren"
+            aria-label={t(locale, "home.filter.sortAria")}
           >
-            <option value="popular">Populair</option>
-            <option value="rating">Hoogste rating</option>
-            <option value="distance" disabled={!userPos}>Dichtstbij</option>
-            <option value="name">Naam (A–Z)</option>
+            <option value="popular">{t(locale, "home.sort.popular")}</option>
+            <option value="rating">{t(locale, "home.sort.rating")}</option>
+            <option value="distance" disabled={!userPos}>{t(locale, "home.sort.distance")}</option>
+            <option value="name">{t(locale, "home.sort.name")}</option>
           </select>
         </div>
 
         {allCuisines.length > 0 && (
           <div className={`${cuisinesOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-1.5`}>
-            <span className="text-xs font-semibold text-muted-foreground mr-1">Keuken:</span>
+            <span className="text-xs font-semibold text-muted-foreground mr-1">{t(locale, "home.filter.cuisineHead")}</span>
             {allCuisines.map((c) => {
               const active = cuisines.includes(c);
               return (
@@ -371,13 +379,13 @@ function FilterBar({
 
 
 
-function Hero({ search, setSearch }: { search: string; setSearch: (s: string) => void }) {
+function Hero({ search, setSearch, locale }: { search: string; setSearch: (s: string) => void; locale: LocaleCode }) {
   return (
     <section className="relative">
       <div className="relative h-[480px] sm:h-[560px] overflow-hidden">
         <img
           src={heroImage}
-          alt="Vrienden genieten van een diner op een zonnig terras"
+          alt={t(locale, "home.hero.alt")}
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
           height={1080}
@@ -386,10 +394,10 @@ function Hero({ search, setSearch }: { search: string; setSearch: (s: string) =>
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
             <h1 className="font-display text-white text-4xl sm:text-6xl lg:text-7xl leading-[1.05] max-w-3xl drop-shadow-lg">
-              Waar wil je vandaag<br />gaan eten?
+              {t(locale, "home.hero.h1")}
             </h1>
             <p className="mt-4 text-white/90 text-base sm:text-lg max-w-xl drop-shadow">
-              Ontdek restaurants, cafés en bars met echte reviews van bezoekers.
+              {t(locale, "home.hero.sub")}
             </p>
           </div>
         </div>
@@ -399,14 +407,14 @@ function Hero({ search, setSearch }: { search: string; setSearch: (s: string) =>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-10 relative z-50">
         <div className="bg-card rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.25)] border border-border p-2 flex flex-col sm:flex-row gap-2">
           <SearchAutocomplete value={search} onChange={setSearch} />
-          <SearchSubmit q={search} />
+          <SearchSubmit q={search} locale={locale} />
         </div>
       </div>
     </section>
   );
 }
 
-function SearchSubmit({ q }: { q: string }) {
+function SearchSubmit({ q, locale }: { q: string; locale: LocaleCode }) {
   const navigate = useNavigate();
   return (
     <Button
@@ -418,21 +426,21 @@ function SearchSubmit({ q }: { q: string }) {
         else document.getElementById("ontdek")?.scrollIntoView({ behavior: "smooth" });
       }}
     >
-      Zoeken
+      {t(locale, "home.search.button")}
     </Button>
   );
 }
 
-function Categories() {
+function Categories({ locale }: { locale: LocaleCode }) {
   const cats = [
-    { icon: Utensils, label: "Restaurants", tint: "bg-emerald-50 text-emerald-700" },
-    { icon: Coffee, label: "Cafés", tint: "bg-amber-50 text-amber-700" },
-    { icon: Wine, label: "Bars", tint: "bg-rose-50 text-rose-700" },
-    { icon: Award, label: "Top beoordeeld", tint: "bg-sky-50 text-sky-700" },
+    { icon: Utensils, label: t(locale, "home.cat.restaurants"), tint: "bg-emerald-50 text-emerald-700" },
+    { icon: Coffee, label: t(locale, "home.cat.cafes"), tint: "bg-amber-50 text-amber-700" },
+    { icon: Wine, label: t(locale, "home.cat.bars"), tint: "bg-rose-50 text-rose-700" },
+    { icon: Award, label: t(locale, "home.cat.topRated"), tint: "bg-sky-50 text-sky-700" },
   ];
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-4">
-      <h2 className="font-display text-2xl sm:text-3xl text-ink mb-6">Verken op categorie</h2>
+      <h2 className="font-display text-2xl sm:text-3xl text-ink mb-6">{t(locale, "home.cat.title")}</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {cats.map((c) => (
           <a
@@ -454,7 +462,7 @@ function Categories() {
 function RatingDots({ value }: { value: number }) {
   const v = Math.max(0, Math.min(5, value));
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`${v} van 5`}>
+    <span className="inline-flex items-center gap-0.5" aria-label={`${v} / 5`}>
       {[0, 1, 2, 3, 4].map((i) => (
         <span
           key={i}
@@ -465,16 +473,16 @@ function RatingDots({ value }: { value: number }) {
   );
 }
 
-function TopRated({ items, loading }: { items: Restaurant[]; loading: boolean }) {
+function TopRated({ items, loading, locale }: { items: Restaurant[]; loading: boolean; locale: LocaleCode }) {
   return (
     <section id="top" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
       <div className="flex items-end justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <h2 className="font-display text-3xl sm:text-4xl text-ink">Aanbevolen voor jou</h2>
-          <p className="text-muted-foreground mt-1">Populaire plekken op basis van reviews</p>
+          <h2 className="font-display text-3xl sm:text-4xl text-ink">{t(locale, "home.top.title")}</h2>
+          <p className="text-muted-foreground mt-1">{t(locale, "home.top.sub")}</p>
         </div>
         <a href="#kaart" className="hidden sm:inline-flex items-center gap-1 font-semibold text-primary hover:underline">
-          Bekijk alles <ChevronRight className="w-4 h-4" />
+          {t(locale, "home.top.viewAll")} <ChevronRight className="w-4 h-4" />
         </a>
       </div>
 
@@ -485,11 +493,11 @@ function TopRated({ items, loading }: { items: Restaurant[]; loading: boolean })
           ))}
         </div>
       ) : items.length === 0 ? (
-        <EmptyState />
+        <EmptyState locale={locale} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {items.slice(0, 8).map((r, i) => (
-            <RestaurantCard key={r.id} r={r} colorIdx={i} />
+            <RestaurantCard key={r.id} r={r} colorIdx={i} locale={locale} />
           ))}
         </div>
       )}
@@ -497,7 +505,7 @@ function TopRated({ items, loading }: { items: Restaurant[]; loading: boolean })
   );
 }
 
-function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number }) {
+function RestaurantCard({ r, colorIdx = 0, locale }: { r: Restaurant; colorIdx?: number; locale: LocaleCode }) {
   const initial = r.name.charAt(0).toUpperCase();
   const color = CARD_COLORS[colorIdx % CARD_COLORS.length];
   const rating = Number(r.avg_rating ?? 0);
@@ -520,7 +528,7 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
         <button
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 grid place-items-center hover:scale-110 transition-transform"
           onClick={(e) => { e.preventDefault(); }}
-          aria-label="Opslaan"
+          aria-label={t(locale, "home.card.save")}
         >
           <Heart className="w-4 h-4 text-foreground" />
         </button>
@@ -532,12 +540,14 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
         <div className="flex items-center gap-2 mt-1.5 text-sm">
           <RatingDots value={rating} />
           <span className="text-muted-foreground text-xs">
-            {rating > 0 ? `${rating.toFixed(1)} · ${r.review_count} reviews` : "Nog geen reviews"}
+            {rating > 0
+              ? `${rating.toFixed(1)} · ${r.review_count} ${t(locale, "home.card.reviewsLabel")}`
+              : t(locale, "home.card.noReviews")}
           </span>
         </div>
         <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1.5 line-clamp-1">
           <MapPin className="w-3.5 h-3.5 shrink-0" />
-          {r.address || r.city || "Adres onbekend"}
+          {r.address || r.city || t(locale, "home.card.addressUnknown")}
         </p>
         {r.cuisine && r.cuisine.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 mt-3">
@@ -553,19 +563,19 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
   );
 }
 
-function MapSection() {
+function MapSection({ locale }: { locale: LocaleCode }) {
   return (
     <section id="kaart" className="bg-secondary/40 border-y border-border py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
           <div>
-            <h2 className="font-display text-3xl sm:text-4xl text-ink">Op de kaart</h2>
-            <p className="text-muted-foreground mt-1">Bekijk alle restaurants — gegroepeerd in clusters</p>
+            <h2 className="font-display text-3xl sm:text-4xl text-ink">{t(locale, "home.map.title")}</h2>
+            <p className="text-muted-foreground mt-1">{t(locale, "home.map.sub")}</p>
           </div>
         </div>
         <div className="relative isolate z-0 rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
-          <ClientOnly fallback={<div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>}>
-            <RestaurantMap />
+          <ClientOnly fallback={<div className="h-full grid place-items-center text-muted-foreground">{t(locale, "home.map.loading")}</div>}>
+            <RestaurantMap locale={locale} />
           </ClientOnly>
         </div>
       </div>
@@ -573,7 +583,7 @@ function MapSection() {
   );
 }
 
-function RestaurantMap() {
+function RestaurantMap({ locale }: { locale: LocaleCode }) {
   const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
   const [points, setPoints] = useState<import("@/components/MapView").ClusterPoint[]>([]);
   useEffect(() => {
@@ -588,7 +598,7 @@ function RestaurantMap() {
         if (data) setPoints(data as any);
       });
   }, []);
-  if (!mod) return <div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>;
+  if (!mod) return <div className="h-full grid place-items-center text-muted-foreground">{t(locale, "home.map.loading")}</div>;
   const { MapContainer, TileLayer, OSM_ATTRIBUTION, OSM_TILES, ClusterLayer } = mod;
   return (
     <MapContainer center={[52.3676, 4.9041]} zoom={5} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
@@ -601,15 +611,16 @@ function RestaurantMap() {
 
 
 function AllList({
-  restaurants, loading, hasMore, loadMore, loadingMore,
+  locale, restaurants, loading, hasMore, loadMore, loadingMore,
 }: {
+  locale: LocaleCode;
   restaurants: Restaurant[]; loading: boolean;
   hasMore: boolean; loadMore: () => void; loadingMore: boolean;
 }) {
   if (loading) {
     return (
       <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">{t(locale, "home.all.title")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="h-80 rounded-2xl bg-muted animate-pulse" />
@@ -621,23 +632,23 @@ function AllList({
   if (restaurants.length === 0) {
     return (
       <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
-        <EmptyState />
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">{t(locale, "home.all.title")}</h2>
+        <EmptyState locale={locale} />
       </section>
     );
   }
   return (
     <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">{t(locale, "home.all.title")}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {restaurants.map((r, i) => (
-          <RestaurantCard key={r.id} r={r} colorIdx={i + 2} />
+          <RestaurantCard key={r.id} r={r} colorIdx={i + 2} locale={locale} />
         ))}
       </div>
       {hasMore && (
         <div className="mt-10 grid place-items-center">
           <Button size="lg" onClick={loadMore} disabled={loadingMore} className="rounded-full px-8">
-            {loadingMore ? "Laden..." : "Meer laden"}
+            {loadingMore ? t(locale, "home.all.loading") : t(locale, "home.all.loadMore")}
           </Button>
         </div>
       )}
@@ -645,18 +656,19 @@ function AllList({
   );
 }
 
-function EmptyState() {
+function EmptyState({ locale }: { locale: LocaleCode }) {
   return (
     <div className="text-center py-16 px-6 rounded-2xl border-2 border-dashed border-border bg-secondary/30">
       <Utensils className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-      <h3 className="font-display text-2xl text-ink">Nog geen restaurants</h3>
+      <h3 className="font-display text-2xl text-ink">{t(locale, "home.empty.title")}</h3>
       <p className="text-muted-foreground mt-2 max-w-md mx-auto">
-        Log in als admin en importeer restaurants vanuit OpenStreetMap met één klik op de kaart.
+        {t(locale, "home.empty.body")}
       </p>
       <Button asChild className="mt-6">
-        <Link to="/auth">Naar admin</Link>
+        <Link to="/auth">{t(locale, "home.empty.cta")}</Link>
       </Button>
     </div>
   );
 }
+
 

@@ -5,7 +5,7 @@ import { DEFAULT_LOCALE, isLocale, type LocaleCode } from "./locales";
 /**
  * LocaleContext: derives the active locale from the current URL pathname.
  *
- * Every page automatically gets the right locale — no prop drilling needed.
+ * Every page automatically gets the right locale, no prop drilling needed.
  * Components call `useLocale()` to read it.
  */
 const LocaleContext = createContext<LocaleCode>(DEFAULT_LOCALE);
@@ -24,7 +24,7 @@ export function useLocale(): LocaleCode {
 }
 
 /**
- * LLink — locale-aware <Link>.
+ * LLink, locale-aware <Link>.
  *
  * Usage is identical to <Link to="/restaurant/$slug" params={{ slug }} />.
  * If the current locale is non-default, LLink rewrites the route to its

@@ -24,7 +24,7 @@ function rewritePath(pathname: string, target: LocaleCode): string {
   const LOCALIZABLE = new Set(["stad", "keuken", "restaurant"]);
   const isLocalizable = segs.length === 0 || (segs[0] && LOCALIZABLE.has(segs[0]));
   if (!isLocalizable) {
-    // Unknown / non-localized path — go to localized home.
+    // Unknown / non-localized path, go to localized home.
     return target === DEFAULT_LOCALE ? "/" : `/${target}`;
   }
   if (segs.length === 0) {

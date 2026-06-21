@@ -28,7 +28,7 @@ async function generateWithAI(args: {
     // Fallback so the page still works if AI is unavailable
     const { displayName } = args.context;
     return {
-      title: `${displayName} — PlaceResults`,
+      title: `${displayName}, PlaceResults`,
       description: `Find restaurants, cafés and bars in ${displayName}. Sorted by visitor ratings.`,
       intro: `Discover the best places to eat in ${displayName}. Sorted by visitor ratings.`,
     };
@@ -40,12 +40,17 @@ async function generateWithAI(args: {
     : `${args.context.displayName} cuisine`;
 
   const prompt = `You write SEO landing-page copy for a restaurant directory.
-Write in ${locale.englishName} (locale code "${args.lang}"). Use natural, native phrasing — not a translation of English.
+Write in ${locale.englishName} (locale code "${args.lang}"). Use natural, native phrasing, not a translation of English.
 Subject: restaurants, cafés and bars in ${subject}.
+
+STYLE RULES (strict):
+- NEVER use em-dashes (—) or en-dashes (–). Use commas, periods, or colons instead.
+- Write like a human local, not an AI. Short sentences. No filler like "discover", "unleash", "elevate".
+- No emojis. No marketing fluff.
 
 Return STRICT JSON with three fields and NOTHING else:
 {
-  "title": "<55-60 char SEO title incl. the place name and "PlaceResults">",
+  "title": "<55-60 char SEO title incl. the place name and PlaceResults>",
   "description": "<150-160 char meta description, action-oriented>",
   "intro": "<2-3 sentence on-page intro (max 280 chars), friendly, no venue counts, sorted by rating>"
 }
@@ -71,10 +76,14 @@ Do NOT include markdown, code fences, or any extra text.`;
   const text = data?.choices?.[0]?.message?.content ?? "{}";
   const parsed = JSON.parse(text);
   return {
-    title: String(parsed.title ?? "").slice(0, 70),
-    description: String(parsed.description ?? "").slice(0, 200),
-    intro: String(parsed.intro ?? "").slice(0, 400),
+    title: sanitize(String(parsed.title ?? "")).slice(0, 70),
+    description: sanitize(String(parsed.description ?? "")).slice(0, 200),
+    intro: sanitize(String(parsed.intro ?? "")).slice(0, 400),
   };
+}
+
+function sanitize(s: string): string {
+  return s.replace(/\s—\s/g, ", ").replace(/—/g, ",").replace(/\s–\s/g, ", ").replace(/–/g, "-");
 }
 
 export const getLandingCopy = createServerFn({ method: "GET" })
@@ -97,7 +106,11 @@ export const getLandingCopy = createServerFn({ method: "GET" })
       .eq("key", data.key)
       .eq("lang", lang)
       .maybeSingle();
-    if (cached) return cached as LandingCopy;
+    if (cached) {
+      const c = cached as LandingCopy;
+      // If cache contains AI-style dashes, ignore it and regenerate fresh copy.
+      if (!/[—–]/.test(c.title + c.description + c.intro)) return c;
+    }
 
     // 2. Generate
     let copy: LandingCopy;
@@ -107,9 +120,9 @@ export const getLandingCopy = createServerFn({ method: "GET" })
         context: { displayName: data.displayName, total: data.total },
       });
     } catch (e) {
-      // Don't break the page on AI failure — return a sensible fallback
+      // Don't break the page on AI failure, return a sensible fallback
       copy = {
-        title: `${data.displayName} — PlaceResults`,
+        title: `${data.displayName}, PlaceResults`,
         description: `Restaurants, cafés and bars in ${data.displayName}.`,
         intro: `Discover the best places to eat in ${data.displayName}. Sorted by visitor ratings.`,
       };

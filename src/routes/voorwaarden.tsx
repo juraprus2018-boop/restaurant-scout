@@ -5,13 +5,13 @@ import { useLocale } from "@/lib/i18n/context";
 export const Route = createFileRoute("/voorwaarden")({
   head: () => ({
     meta: [
-      { title: "Algemene voorwaarden — PlaceResults.com" },
+      { title: "Algemene voorwaarden, PlaceResults.com" },
       {
         name: "description",
         content:
           "Algemene voorwaarden voor het gebruik van PlaceResults.com: gebruiksregels, reviews, aansprakelijkheid en intellectueel eigendom.",
       },
-      { property: "og:title", content: "Algemene voorwaarden — PlaceResults.com" },
+      { property: "og:title", content: "Algemene voorwaarden, PlaceResults.com" },
       { property: "og:description", content: "Lees de algemene voorwaarden van PlaceResults.com." },
     ],
     links: [{ rel: "canonical", href: "/voorwaarden" }],
@@ -45,7 +45,7 @@ function TermsPage() {
           <p>
             PlaceResults is een gratis restaurantgids gebaseerd op open data (OpenStreetMap) en
             bezoekerservaringen. We doen ons best gegevens correct te tonen, maar geven geen garantie
-            op juistheid, volledigheid of openingstijden — controleer altijd bij het restaurant zelf.
+            op juistheid, volledigheid of openingstijden, controleer altijd bij het restaurant zelf.
           </p>
 
           <h2>4. Account en reviews</h2>
