@@ -106,7 +106,11 @@ export const getLandingCopy = createServerFn({ method: "GET" })
       .eq("key", data.key)
       .eq("lang", lang)
       .maybeSingle();
-    if (cached) return cached as LandingCopy;
+    if (cached) {
+      const c = cached as LandingCopy;
+      // If cache contains AI-style dashes, ignore it and regenerate fresh copy.
+      if (!/[—–]/.test(c.title + c.description + c.intro)) return c;
+    }
 
     // 2. Generate
     let copy: LandingCopy;
