@@ -63,7 +63,22 @@ export type StringKey =
   | "status.openNow" | "status.closed"
   | "status.closesAt" | "status.opensAt"
   // nearby
-  | "nearby.title";
+  | "nearby.title"
+  // home page
+  | "home.meta.title" | "home.meta.titleOg" | "home.meta.desc" | "home.meta.descOg"
+  | "home.hero.h1" | "home.hero.sub" | "home.hero.alt" | "home.hero.placeholder"
+  | "home.search.button"
+  | "home.filter.openNow" | "home.filter.nearby" | "home.filter.nearbyActive" | "home.filter.nearbySearching"
+  | "home.filter.radiusAria" | "home.filter.cuisineToggle" | "home.filter.clear" | "home.filter.sortAria"
+  | "home.filter.cuisineHead"
+  | "home.sort.popular" | "home.sort.rating" | "home.sort.distance" | "home.sort.name"
+  | "home.cat.title" | "home.cat.restaurants" | "home.cat.cafes" | "home.cat.bars" | "home.cat.topRated"
+  | "home.card.noReviews" | "home.card.reviewsLabel" | "home.card.addressUnknown" | "home.card.save"
+  | "home.top.title" | "home.top.sub" | "home.top.viewAll"
+  | "home.map.title" | "home.map.sub" | "home.map.loading"
+  | "home.all.title" | "home.all.loadMore" | "home.all.loading"
+  | "home.empty.title" | "home.empty.body" | "home.empty.cta"
+  | "home.geo.insecure" | "home.geo.denied" | "home.geo.unavailable" | "home.geo.timeout" | "home.geo.generic";
 
 type Dict = Partial<Record<StringKey, string>>;
 
