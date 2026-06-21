@@ -266,11 +266,13 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
 }
 
 function FilterBar({
+  locale,
   openNow, setOpenNow, cuisines, toggleCuisine, allCuisines,
   useNearby, userPos, clearNearby, radiusKm, setRadiusKm,
   geoError, geoLoading, activeFilterCount, clearFilters,
   sort, setSort,
 }: {
+  locale: LocaleCode;
   openNow: boolean; setOpenNow: (b: boolean) => void;
   cuisines: string[]; toggleCuisine: (c: string) => void; allCuisines: string[];
   useNearby: () => void; userPos: { lat: number; lng: number } | null; clearNearby: () => void;
@@ -290,7 +292,7 @@ function FilterBar({
             onClick={() => setOpenNow(!openNow)}
             className="rounded-full gap-1.5"
           >
-            <Clock className="w-4 h-4" /> Open nu
+            <Clock className="w-4 h-4" /> {t(locale, "home.filter.openNow")}
           </Button>
           <Button
             variant={userPos ? "default" : "outline"}
@@ -300,14 +302,18 @@ function FilterBar({
             className="rounded-full gap-1.5"
           >
             <Navigation2 className="w-4 h-4" />
-            {geoLoading ? "Zoeken..." : userPos ? `In de buurt (${radiusKm} km)` : "In de buurt"}
+            {geoLoading
+              ? t(locale, "home.filter.nearbySearching")
+              : userPos
+              ? t(locale, "home.filter.nearbyActive", { km: radiusKm })
+              : t(locale, "home.filter.nearby")}
           </Button>
           {userPos && (
             <select
               value={radiusKm}
               onChange={(e) => setRadiusKm(Number(e.target.value))}
               className="h-9 rounded-full border border-input bg-background px-3 text-sm"
-              aria-label="Zoekradius"
+              aria-label={t(locale, "home.filter.radiusAria")}
             >
               {[1, 2, 5, 10, 25, 50].map((k) => (
                 <option key={k} value={k}>{k} km</option>
@@ -322,30 +328,30 @@ function FilterBar({
             aria-expanded={cuisinesOpen}
           >
             <SlidersHorizontal className="w-4 h-4" />
-            Keuken{cuisines.length > 0 ? ` (${cuisines.length})` : ""}
+            {t(locale, "home.filter.cuisineToggle")}{cuisines.length > 0 ? ` (${cuisines.length})` : ""}
             <ChevronDown className={`w-4 h-4 transition-transform ${cuisinesOpen ? "rotate-180" : ""}`} />
           </Button>
           {activeFilterCount > 0 && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="rounded-full gap-1 text-muted-foreground">
-              <X className="w-4 h-4" /> Wis ({activeFilterCount})
+              <X className="w-4 h-4" /> {t(locale, "home.filter.clear", { n: activeFilterCount })}
             </Button>
           )}
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
             className="h-9 rounded-full border border-input bg-background px-3 text-sm"
-            aria-label="Sorteren"
+            aria-label={t(locale, "home.filter.sortAria")}
           >
-            <option value="popular">Populair</option>
-            <option value="rating">Hoogste rating</option>
-            <option value="distance" disabled={!userPos}>Dichtstbij</option>
-            <option value="name">Naam (A-Z)</option>
+            <option value="popular">{t(locale, "home.sort.popular")}</option>
+            <option value="rating">{t(locale, "home.sort.rating")}</option>
+            <option value="distance" disabled={!userPos}>{t(locale, "home.sort.distance")}</option>
+            <option value="name">{t(locale, "home.sort.name")}</option>
           </select>
         </div>
 
         {allCuisines.length > 0 && (
           <div className={`${cuisinesOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-1.5`}>
-            <span className="text-xs font-semibold text-muted-foreground mr-1">Keuken:</span>
+            <span className="text-xs font-semibold text-muted-foreground mr-1">{t(locale, "home.filter.cuisineHead")}</span>
             {allCuisines.map((c) => {
               const active = cuisines.includes(c);
               return (
@@ -373,13 +379,13 @@ function FilterBar({
 
 
 
-function Hero({ search, setSearch }: { search: string; setSearch: (s: string) => void }) {
+function Hero({ search, setSearch, locale }: { search: string; setSearch: (s: string) => void; locale: LocaleCode }) {
   return (
     <section className="relative">
       <div className="relative h-[480px] sm:h-[560px] overflow-hidden">
         <img
           src={heroImage}
-          alt="Vrienden genieten van een diner op een zonnig terras"
+          alt={t(locale, "home.hero.alt")}
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
           height={1080}
@@ -388,10 +394,10 @@ function Hero({ search, setSearch }: { search: string; setSearch: (s: string) =>
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
             <h1 className="font-display text-white text-4xl sm:text-6xl lg:text-7xl leading-[1.05] max-w-3xl drop-shadow-lg">
-              Waar wil je vandaag<br />gaan eten?
+              {t(locale, "home.hero.h1")}
             </h1>
             <p className="mt-4 text-white/90 text-base sm:text-lg max-w-xl drop-shadow">
-              Ontdek restaurants, cafés en bars met echte reviews van bezoekers.
+              {t(locale, "home.hero.sub")}
             </p>
           </div>
         </div>
@@ -401,14 +407,14 @@ function Hero({ search, setSearch }: { search: string; setSearch: (s: string) =>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-10 relative z-50">
         <div className="bg-card rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.25)] border border-border p-2 flex flex-col sm:flex-row gap-2">
           <SearchAutocomplete value={search} onChange={setSearch} />
-          <SearchSubmit q={search} />
+          <SearchSubmit q={search} locale={locale} />
         </div>
       </div>
     </section>
   );
 }
 
-function SearchSubmit({ q }: { q: string }) {
+function SearchSubmit({ q, locale }: { q: string; locale: LocaleCode }) {
   const navigate = useNavigate();
   return (
     <Button
@@ -420,21 +426,21 @@ function SearchSubmit({ q }: { q: string }) {
         else document.getElementById("ontdek")?.scrollIntoView({ behavior: "smooth" });
       }}
     >
-      Zoeken
+      {t(locale, "home.search.button")}
     </Button>
   );
 }
 
-function Categories() {
+function Categories({ locale }: { locale: LocaleCode }) {
   const cats = [
-    { icon: Utensils, label: "Restaurants", tint: "bg-emerald-50 text-emerald-700" },
-    { icon: Coffee, label: "Cafés", tint: "bg-amber-50 text-amber-700" },
-    { icon: Wine, label: "Bars", tint: "bg-rose-50 text-rose-700" },
-    { icon: Award, label: "Top beoordeeld", tint: "bg-sky-50 text-sky-700" },
+    { icon: Utensils, label: t(locale, "home.cat.restaurants"), tint: "bg-emerald-50 text-emerald-700" },
+    { icon: Coffee, label: t(locale, "home.cat.cafes"), tint: "bg-amber-50 text-amber-700" },
+    { icon: Wine, label: t(locale, "home.cat.bars"), tint: "bg-rose-50 text-rose-700" },
+    { icon: Award, label: t(locale, "home.cat.topRated"), tint: "bg-sky-50 text-sky-700" },
   ];
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-4">
-      <h2 className="font-display text-2xl sm:text-3xl text-ink mb-6">Verken op categorie</h2>
+      <h2 className="font-display text-2xl sm:text-3xl text-ink mb-6">{t(locale, "home.cat.title")}</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {cats.map((c) => (
           <a
@@ -456,7 +462,7 @@ function Categories() {
 function RatingDots({ value }: { value: number }) {
   const v = Math.max(0, Math.min(5, value));
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`${v} van 5`}>
+    <span className="inline-flex items-center gap-0.5" aria-label={`${v} / 5`}>
       {[0, 1, 2, 3, 4].map((i) => (
         <span
           key={i}
