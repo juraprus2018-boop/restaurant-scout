@@ -18,10 +18,10 @@ import { t } from "@/lib/i18n/strings";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PlaceResults, Ontdek de beste restaurants" },
-      { name: "description", content: "Vind restaurants, cafés en bars met echte reviews en ratings. Plan jouw volgende eetafspraak met PlaceResults." },
-      { property: "og:title", content: "PlaceResults, Restaurantgids met reviews" },
-      { property: "og:description", content: "Vind restaurants, cafés en bars met echte reviews." },
+      { title: t("nl", "home.meta.title") },
+      { name: "description", content: t("nl", "home.meta.desc") },
+      { property: "og:title", content: t("nl", "home.meta.titleOg") },
+      { property: "og:description", content: t("nl", "home.meta.descOg") },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
       { property: "og:locale", content: "nl" },
