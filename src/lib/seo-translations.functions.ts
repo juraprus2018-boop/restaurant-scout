@@ -43,9 +43,14 @@ async function generateWithAI(args: {
 Write in ${locale.englishName} (locale code "${args.lang}"). Use natural, native phrasing, not a translation of English.
 Subject: restaurants, cafés and bars in ${subject}.
 
+STYLE RULES (strict):
+- NEVER use em-dashes (—) or en-dashes (–). Use commas, periods, or colons instead.
+- Write like a human local, not an AI. Short sentences. No filler like "discover", "unleash", "elevate".
+- No emojis. No marketing fluff.
+
 Return STRICT JSON with three fields and NOTHING else:
 {
-  "title": "<55-60 char SEO title incl. the place name and "PlaceResults">",
+  "title": "<55-60 char SEO title incl. the place name and PlaceResults>",
   "description": "<150-160 char meta description, action-oriented>",
   "intro": "<2-3 sentence on-page intro (max 280 chars), friendly, no venue counts, sorted by rating>"
 }
