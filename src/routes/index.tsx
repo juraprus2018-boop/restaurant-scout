@@ -473,16 +473,16 @@ function RatingDots({ value }: { value: number }) {
   );
 }
 
-function TopRated({ items, loading }: { items: Restaurant[]; loading: boolean }) {
+function TopRated({ items, loading, locale }: { items: Restaurant[]; loading: boolean; locale: LocaleCode }) {
   return (
     <section id="top" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
       <div className="flex items-end justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <h2 className="font-display text-3xl sm:text-4xl text-ink">Aanbevolen voor jou</h2>
-          <p className="text-muted-foreground mt-1">Populaire plekken op basis van reviews</p>
+          <h2 className="font-display text-3xl sm:text-4xl text-ink">{t(locale, "home.top.title")}</h2>
+          <p className="text-muted-foreground mt-1">{t(locale, "home.top.sub")}</p>
         </div>
         <a href="#kaart" className="hidden sm:inline-flex items-center gap-1 font-semibold text-primary hover:underline">
-          Bekijk alles <ChevronRight className="w-4 h-4" />
+          {t(locale, "home.top.viewAll")} <ChevronRight className="w-4 h-4" />
         </a>
       </div>
 
@@ -493,11 +493,11 @@ function TopRated({ items, loading }: { items: Restaurant[]; loading: boolean })
           ))}
         </div>
       ) : items.length === 0 ? (
-        <EmptyState />
+        <EmptyState locale={locale} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {items.slice(0, 8).map((r, i) => (
-            <RestaurantCard key={r.id} r={r} colorIdx={i} />
+            <RestaurantCard key={r.id} r={r} colorIdx={i} locale={locale} />
           ))}
         </div>
       )}
@@ -505,7 +505,7 @@ function TopRated({ items, loading }: { items: Restaurant[]; loading: boolean })
   );
 }
 
-function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number }) {
+function RestaurantCard({ r, colorIdx = 0, locale }: { r: Restaurant; colorIdx?: number; locale: LocaleCode }) {
   const initial = r.name.charAt(0).toUpperCase();
   const color = CARD_COLORS[colorIdx % CARD_COLORS.length];
   const rating = Number(r.avg_rating ?? 0);
@@ -528,7 +528,7 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
         <button
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 grid place-items-center hover:scale-110 transition-transform"
           onClick={(e) => { e.preventDefault(); }}
-          aria-label="Opslaan"
+          aria-label={t(locale, "home.card.save")}
         >
           <Heart className="w-4 h-4 text-foreground" />
         </button>
@@ -540,12 +540,14 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
         <div className="flex items-center gap-2 mt-1.5 text-sm">
           <RatingDots value={rating} />
           <span className="text-muted-foreground text-xs">
-            {rating > 0 ? `${rating.toFixed(1)} · ${r.review_count} reviews` : "Nog geen reviews"}
+            {rating > 0
+              ? `${rating.toFixed(1)} · ${r.review_count} ${t(locale, "home.card.reviewsLabel")}`
+              : t(locale, "home.card.noReviews")}
           </span>
         </div>
         <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1.5 line-clamp-1">
           <MapPin className="w-3.5 h-3.5 shrink-0" />
-          {r.address || r.city || "Adres onbekend"}
+          {r.address || r.city || t(locale, "home.card.addressUnknown")}
         </p>
         {r.cuisine && r.cuisine.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 mt-3">
@@ -561,19 +563,19 @@ function RestaurantCard({ r, colorIdx = 0 }: { r: Restaurant; colorIdx?: number 
   );
 }
 
-function MapSection() {
+function MapSection({ locale }: { locale: LocaleCode }) {
   return (
     <section id="kaart" className="bg-secondary/40 border-y border-border py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
           <div>
-            <h2 className="font-display text-3xl sm:text-4xl text-ink">Op de kaart</h2>
-            <p className="text-muted-foreground mt-1">Bekijk alle restaurants, gegroepeerd in clusters</p>
+            <h2 className="font-display text-3xl sm:text-4xl text-ink">{t(locale, "home.map.title")}</h2>
+            <p className="text-muted-foreground mt-1">{t(locale, "home.map.sub")}</p>
           </div>
         </div>
         <div className="relative isolate z-0 rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
-          <ClientOnly fallback={<div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>}>
-            <RestaurantMap />
+          <ClientOnly fallback={<div className="h-full grid place-items-center text-muted-foreground">{t(locale, "home.map.loading")}</div>}>
+            <RestaurantMap locale={locale} />
           </ClientOnly>
         </div>
       </div>
@@ -581,7 +583,7 @@ function MapSection() {
   );
 }
 
-function RestaurantMap() {
+function RestaurantMap({ locale }: { locale: LocaleCode }) {
   const [mod, setMod] = useState<typeof import("@/components/MapView") | null>(null);
   const [points, setPoints] = useState<import("@/components/MapView").ClusterPoint[]>([]);
   useEffect(() => {
@@ -596,7 +598,7 @@ function RestaurantMap() {
         if (data) setPoints(data as any);
       });
   }, []);
-  if (!mod) return <div className="h-full grid place-items-center text-muted-foreground">Kaart laden...</div>;
+  if (!mod) return <div className="h-full grid place-items-center text-muted-foreground">{t(locale, "home.map.loading")}</div>;
   const { MapContainer, TileLayer, OSM_ATTRIBUTION, OSM_TILES, ClusterLayer } = mod;
   return (
     <MapContainer center={[52.3676, 4.9041]} zoom={5} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
@@ -609,15 +611,16 @@ function RestaurantMap() {
 
 
 function AllList({
-  restaurants, loading, hasMore, loadMore, loadingMore,
+  locale, restaurants, loading, hasMore, loadMore, loadingMore,
 }: {
+  locale: LocaleCode;
   restaurants: Restaurant[]; loading: boolean;
   hasMore: boolean; loadMore: () => void; loadingMore: boolean;
 }) {
   if (loading) {
     return (
       <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">{t(locale, "home.all.title")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="h-80 rounded-2xl bg-muted animate-pulse" />
@@ -629,23 +632,23 @@ function AllList({
   if (restaurants.length === 0) {
     return (
       <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
-        <EmptyState />
+        <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">{t(locale, "home.all.title")}</h2>
+        <EmptyState locale={locale} />
       </section>
     );
   }
   return (
     <section id="ontdek" className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">Alle restaurants</h2>
+      <h2 className="font-display text-3xl sm:text-4xl text-ink mb-8">{t(locale, "home.all.title")}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {restaurants.map((r, i) => (
-          <RestaurantCard key={r.id} r={r} colorIdx={i + 2} />
+          <RestaurantCard key={r.id} r={r} colorIdx={i + 2} locale={locale} />
         ))}
       </div>
       {hasMore && (
         <div className="mt-10 grid place-items-center">
           <Button size="lg" onClick={loadMore} disabled={loadingMore} className="rounded-full px-8">
-            {loadingMore ? "Laden..." : "Meer laden"}
+            {loadingMore ? t(locale, "home.all.loading") : t(locale, "home.all.loadMore")}
           </Button>
         </div>
       )}
@@ -653,18 +656,19 @@ function AllList({
   );
 }
 
-function EmptyState() {
+function EmptyState({ locale }: { locale: LocaleCode }) {
   return (
     <div className="text-center py-16 px-6 rounded-2xl border-2 border-dashed border-border bg-secondary/30">
       <Utensils className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-      <h3 className="font-display text-2xl text-ink">Nog geen restaurants</h3>
+      <h3 className="font-display text-2xl text-ink">{t(locale, "home.empty.title")}</h3>
       <p className="text-muted-foreground mt-2 max-w-md mx-auto">
-        Log in als admin en importeer restaurants vanuit OpenStreetMap met één klik op de kaart.
+        {t(locale, "home.empty.body")}
       </p>
       <Button asChild className="mt-6">
-        <Link to="/auth">Naar admin</Link>
+        <Link to="/auth">{t(locale, "home.empty.cta")}</Link>
       </Button>
     </div>
   );
 }
+
 
