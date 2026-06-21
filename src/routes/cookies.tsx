@@ -6,13 +6,13 @@ import { useLocale } from "@/lib/i18n/context";
 export const Route = createFileRoute("/cookies")({
   head: () => ({
     meta: [
-      { title: "Cookiebeleid — PlaceResults.com" },
+      { title: "Cookiebeleid, PlaceResults.com" },
       {
         name: "description",
         content:
           "Welke cookies PlaceResults.com gebruikt, waarom, en hoe je jouw voorkeuren wijzigt.",
       },
-      { property: "og:title", content: "Cookiebeleid — PlaceResults.com" },
+      { property: "og:title", content: "Cookiebeleid, PlaceResults.com" },
       { property: "og:description", content: "Cookies & tracking-overzicht van PlaceResults.com." },
     ],
     links: [{ rel: "canonical", href: "/cookies" }],

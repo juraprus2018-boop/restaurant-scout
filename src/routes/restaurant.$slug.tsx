@@ -77,7 +77,7 @@ export function buildRestaurantHead(
   const cuisines = (r.cuisine ?? []).map(cuisineLabel).join(", ");
   const cityPart = r.city ? ` · ${r.city}` : "";
   const ratingPart = (r.avg_rating ?? 0) > 0 ? ` · ${Number(r.avg_rating).toFixed(1)}★ (${r.review_count})` : "";
-  const titleBase = `${r.name}${cityPart} — ${t(lang, "restaurant.titleSuffix")}`;
+  const titleBase = `${r.name}${cityPart}, ${t(lang, "restaurant.titleSuffix")}`;
   const title = `${titleBase} | PlaceResults`.slice(0, 70);
   const description = `${r.name}${cityPart}${cuisines ? ` · ${cuisines}` : ""}${ratingPart}. ${
     tags[`description:${lang}`] ?? tags.description ?? t(lang, "restaurant.descFallback")
@@ -479,7 +479,7 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
                 <tbody>
                   {openingRows.map((row, i) => (
                     <tr key={i} className="border-b last:border-0">
-                      <td className="py-1.5 pr-4 text-muted-foreground">{row.days || "—"}</td>
+                      <td className="py-1.5 pr-4 text-muted-foreground">{row.days || ","}</td>
                       <td className="py-1.5 font-medium">{row.hours}</td>
                     </tr>
                   ))}

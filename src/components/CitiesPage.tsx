@@ -155,7 +155,7 @@ export function CitiesPageBody({ locale = DEFAULT_LOCALE }: { locale?: LocaleCod
                   </div>
                   <p className="mt-1.5 text-sm text-muted-foreground flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    {countryName(c.country, locale) || "—"}
+                    {countryName(c.country, locale) || ","}
                   </p>
                 </Link>
               </li>

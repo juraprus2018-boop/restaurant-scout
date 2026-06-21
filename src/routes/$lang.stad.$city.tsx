@@ -36,7 +36,7 @@ export const Route = createFileRoute("/$lang/stad/$city")({
   head: ({ loaderData, params }) => {
     const lang = params.lang as LocaleCode;
     const city = loaderData?.city ?? params.city;
-    const title = loaderData?.copy.title ?? `${city} — PlaceResults`;
+    const title = loaderData?.copy.title ?? `${city}, PlaceResults`;
     const desc = loaderData?.copy.description ?? "";
     const path = `/${lang}/stad/${params.city}`;
 

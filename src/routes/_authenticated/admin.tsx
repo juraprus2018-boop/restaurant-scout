@@ -12,7 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Trash2, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin — PlaceResults" }] }),
+  head: () => ({ meta: [{ title: "Admin, PlaceResults" }] }),
   component: AdminPage,
 });
 

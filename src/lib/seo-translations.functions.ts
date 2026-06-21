@@ -28,7 +28,7 @@ async function generateWithAI(args: {
     // Fallback so the page still works if AI is unavailable
     const { displayName } = args.context;
     return {
-      title: `${displayName} — PlaceResults`,
+      title: `${displayName}, PlaceResults`,
       description: `Find restaurants, cafés and bars in ${displayName}. Sorted by visitor ratings.`,
       intro: `Discover the best places to eat in ${displayName}. Sorted by visitor ratings.`,
     };
@@ -40,7 +40,7 @@ async function generateWithAI(args: {
     : `${args.context.displayName} cuisine`;
 
   const prompt = `You write SEO landing-page copy for a restaurant directory.
-Write in ${locale.englishName} (locale code "${args.lang}"). Use natural, native phrasing — not a translation of English.
+Write in ${locale.englishName} (locale code "${args.lang}"). Use natural, native phrasing, not a translation of English.
 Subject: restaurants, cafés and bars in ${subject}.
 
 Return STRICT JSON with three fields and NOTHING else:
@@ -107,9 +107,9 @@ export const getLandingCopy = createServerFn({ method: "GET" })
         context: { displayName: data.displayName, total: data.total },
       });
     } catch (e) {
-      // Don't break the page on AI failure — return a sensible fallback
+      // Don't break the page on AI failure, return a sensible fallback
       copy = {
-        title: `${data.displayName} — PlaceResults`,
+        title: `${data.displayName}, PlaceResults`,
         description: `Restaurants, cafés and bars in ${data.displayName}.`,
         intro: `Discover the best places to eat in ${data.displayName}. Sorted by visitor ratings.`,
       };

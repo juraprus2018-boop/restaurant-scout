@@ -15,7 +15,7 @@ export const Route = createFileRoute("/$lang/")({
     }));
     return {
       meta: [
-        { title: "PlaceResults — Discover the best restaurants" },
+        { title: "PlaceResults, Discover the best restaurants" },
         { name: "description", content: "Find restaurants, cafés and bars with real reviews and ratings." },
         { property: "og:locale", content: lang },
       ],

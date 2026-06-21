@@ -5,13 +5,13 @@ import { useLocale } from "@/lib/i18n/context";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacybeleid — PlaceResults.com" },
+      { title: "Privacybeleid, PlaceResults.com" },
       {
         name: "description",
         content:
           "Hoe PlaceResults.com persoonsgegevens verwerkt: doelen, grondslagen, bewaartermijnen en jouw AVG-rechten.",
       },
-      { property: "og:title", content: "Privacybeleid — PlaceResults.com" },
+      { property: "og:title", content: "Privacybeleid, PlaceResults.com" },
       { property: "og:description", content: "AVG-conform privacybeleid van PlaceResults.com." },
     ],
     links: [{ rel: "canonical", href: "/privacy" }],
@@ -47,9 +47,9 @@ function PrivacyPage() {
 
           <h2>3. Grondslagen (AVG art. 6)</h2>
           <ul>
-            <li><em>Toestemming</em> — voor analytics en optionele cookies.</li>
-            <li><em>Uitvoering overeenkomst</em> — voor accountbeheer en het tonen van jouw reviews.</li>
-            <li><em>Gerechtvaardigd belang</em> — voor beveiliging en het tegengaan van misbruik.</li>
+            <li><em>Toestemming</em>, voor analytics en optionele cookies.</li>
+            <li><em>Uitvoering overeenkomst</em>, voor accountbeheer en het tonen van jouw reviews.</li>
+            <li><em>Gerechtvaardigd belang</em>, voor beveiliging en het tegengaan van misbruik.</li>
           </ul>
 
           <h2>4. Bewaartermijnen</h2>
@@ -63,9 +63,9 @@ function PrivacyPage() {
             We verkopen <strong>geen</strong> gegevens. We werken met de volgende verwerkers:
           </p>
           <ul>
-            <li><strong>Lovable Cloud / Supabase</strong> — database en authenticatie (EU-regio).</li>
-            <li><strong>Cloudflare</strong> — hosting en DDoS-bescherming.</li>
-            <li><strong>OpenStreetMap</strong> — kaartdata (tegels worden geladen vanaf OSM-servers).</li>
+            <li><strong>Lovable Cloud / Supabase</strong>, database en authenticatie (EU-regio).</li>
+            <li><strong>Cloudflare</strong>, hosting en DDoS-bescherming.</li>
+            <li><strong>OpenStreetMap</strong>, kaartdata (tegels worden geladen vanaf OSM-servers).</li>
           </ul>
 
           <h2>6. Cookies</h2>

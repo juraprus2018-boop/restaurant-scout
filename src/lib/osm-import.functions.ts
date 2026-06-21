@@ -38,7 +38,7 @@ function buildAddress(t: Record<string, string>): string | null {
 /**
  * Search OSM Overpass for restaurants near a query string, insert any new ones
  * into the database, and return the inserted/matching rows.
- * Public endpoint — rate-limited implicitly by Overpass + Nominatim.
+ * Public endpoint, rate-limited implicitly by Overpass + Nominatim.
  */
 export const importOsmForQuery = createServerFn({ method: "POST" })
   .inputValidator((d: { q: string; limit?: number }) => ({

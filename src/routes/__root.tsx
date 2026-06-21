@@ -164,7 +164,7 @@ function AutoLocaleRedirect() {
           window.location.replace(`/${c}${window.location.search}${window.location.hash}`);
           return;
         }
-        if (isLocale(c)) return; // matched default — stay
+        if (isLocale(c)) return; // matched default, stay
       }
     } catch {
       /* ignore */

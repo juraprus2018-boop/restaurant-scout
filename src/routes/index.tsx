@@ -17,9 +17,9 @@ import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PlaceResults — Ontdek de beste restaurants" },
+      { title: "PlaceResults, Ontdek de beste restaurants" },
       { name: "description", content: "Vind restaurants, cafés en bars met echte reviews en ratings. Plan jouw volgende eetafspraak met PlaceResults." },
-      { property: "og:title", content: "PlaceResults — Restaurantgids met reviews" },
+      { property: "og:title", content: "PlaceResults, Restaurantgids met reviews" },
       { property: "og:description", content: "Vind restaurants, cafés en bars met echte reviews." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
@@ -118,7 +118,7 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
 
   const debouncedSearch = useDebounced(search, 300);
 
-  // (no auto-scroll on filter change — caused jumpy UX on mobile)
+  // (no auto-scroll on filter change, caused jumpy UX on mobile)
 
 
   // Server-side search: re-runs when any filter changes; resets to page 0.
@@ -337,7 +337,7 @@ function FilterBar({
             <option value="popular">Populair</option>
             <option value="rating">Hoogste rating</option>
             <option value="distance" disabled={!userPos}>Dichtstbij</option>
-            <option value="name">Naam (A–Z)</option>
+            <option value="name">Naam (A-Z)</option>
           </select>
         </div>
 
@@ -560,7 +560,7 @@ function MapSection() {
         <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
           <div>
             <h2 className="font-display text-3xl sm:text-4xl text-ink">Op de kaart</h2>
-            <p className="text-muted-foreground mt-1">Bekijk alle restaurants — gegroepeerd in clusters</p>
+            <p className="text-muted-foreground mt-1">Bekijk alle restaurants, gegroepeerd in clusters</p>
           </div>
         </div>
         <div className="relative isolate z-0 rounded-2xl overflow-hidden border border-border h-[500px] sm:h-[600px] shadow-sm bg-card">
