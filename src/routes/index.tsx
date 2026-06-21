@@ -187,7 +187,7 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
   const useNearby = () => {
     if (typeof window === "undefined") return;
     if (!("geolocation" in navigator) || !window.isSecureContext) {
-      setGeoError("Locatie werkt alleen op een beveiligde (https) site of in een nieuw tabblad.");
+      setGeoError(t(locale, "home.geo.insecure"));
       return;
     }
     setGeoLoading(true);
@@ -200,12 +200,12 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
       (err) => {
         const msg =
           err.code === err.PERMISSION_DENIED
-            ? "Locatietoegang geweigerd. Sta locatie toe in je browserinstellingen."
+            ? t(locale, "home.geo.denied")
             : err.code === err.POSITION_UNAVAILABLE
-            ? "Locatie niet beschikbaar. Probeer het opnieuw."
+            ? t(locale, "home.geo.unavailable")
             : err.code === err.TIMEOUT
-            ? "Het ophalen van je locatie duurde te lang. Probeer opnieuw."
-            : err.message || "Kon je locatie niet ophalen";
+            ? t(locale, "home.geo.timeout")
+            : err.message || t(locale, "home.geo.generic");
         setGeoError(msg);
         setGeoLoading(false);
       },
@@ -229,8 +229,9 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader locale={locale} />
-      <Hero search={search} setSearch={setSearch} />
+      <Hero search={search} setSearch={setSearch} locale={locale} />
       <FilterBar
+        locale={locale}
         openNow={openNow}
         setOpenNow={setOpenNow}
         cuisines={cuisines}
@@ -248,16 +249,16 @@ export function Home({ locale = DEFAULT_LOCALE }: { locale?: LocaleCode } = {}) 
         sort={sort}
         setSort={setSort}
       />
-      <Categories />
-      <TopRated items={restaurants.slice(0, 8)} loading={loading} />
-      <MapSection />
+      <Categories locale={locale} />
+      <TopRated items={restaurants.slice(0, 8)} loading={loading} locale={locale} />
+      <MapSection locale={locale} />
       <AllList
+        locale={locale}
         restaurants={restaurants}
         loading={loading}
         hasMore={hasMore}
         loadMore={loadMore}
         loadingMore={loadingMore}
-        
       />
       <SiteFooter locale={locale} />
     </div>
