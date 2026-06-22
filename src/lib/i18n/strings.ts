@@ -317,6 +317,10 @@ const nl: Dict = {
   "home.geo.unavailable": "Locatie niet beschikbaar. Probeer het opnieuw.",
   "home.geo.timeout": "Het ophalen van je locatie duurde te lang. Probeer opnieuw.",
   "home.geo.generic": "Kon je locatie niet ophalen.",
+  "faqLanding.title": "Veelgestelde vragen",
+  "internal.exploreMore": "Verder verkennen",
+  "internal.cuisinesInCity": "Keukens in {city}",
+  "internal.alsoIn": "Meer in {city}",
 };
 
 const de: Dict = {
