@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { listByCity } from "@/lib/seo-public.functions";
+import { getLandingFaq } from "@/lib/seo-faq.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import { FaqSection } from "@/components/seo/FaqSection";
+import { breadcrumbListJsonLd, aggregateRatingJsonLd } from "@/lib/seo-jsonld";
 import { MapPin, Star } from "lucide-react";
 import { cuisineLabel } from "@/lib/osm-labels";
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/i18n/locales";
@@ -9,9 +12,21 @@ import { t } from "@/lib/i18n/strings";
 
 const cityQuery = (slug: string) =>
   queryOptions({
-    queryKey: ["city", slug],
-    queryFn: () => listByCity({ data: { citySlug: slug, limit: 48 } }),
-    staleTime: 5 * 60_000,
+    queryKey: ["city-with-faq", slug],
+    queryFn: async () => {
+      const base = await listByCity({ data: { citySlug: slug, limit: 48 } });
+      const faq = await getLandingFaq({
+        data: {
+          scope: "city",
+          key: slug,
+          lang: DEFAULT_LOCALE,
+          displayName: base.city,
+          sampleNames: base.items.slice(0, 8).map((r: any) => r.name),
+        },
+      }).catch(() => ({ items: [] }));
+      return { ...base, faq: faq.items };
+    },
+    staleTime: 60 * 60_000,
   });
 
 export const Route = createFileRoute("/stad/$city")({
@@ -67,9 +82,21 @@ export const Route = createFileRoute("/stad/$city")({
 function CityPage() {
   const { city: slug } = Route.useParams();
   const { data } = useSuspenseQuery(cityQuery(slug));
-  const { city, total, items } = data;
+  const { city, total, items, faq } = data;
 
-  const jsonLd = {
+  // Top cuisines from current results for internal linking
+  const cuisineCounts = new Map<string, number>();
+  for (const r of items) {
+    for (const c of (r.cuisine ?? []) as string[]) {
+      cuisineCounts.set(c, (cuisineCounts.get(c) ?? 0) + 1);
+    }
+  }
+  const topCuisines = Array.from(cuisineCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12)
+    .map(([c]) => c);
+
+  const itemListLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: `Restaurants in ${city}`,
@@ -81,12 +108,20 @@ function CityPage() {
       name: r.name,
     })),
   };
+  const breadcrumbsLd = breadcrumbListJsonLd([
+    { name: t(DEFAULT_LOCALE, "city.breadcrumb.home"), item: "/" },
+    { name: t(DEFAULT_LOCALE, "city.breadcrumb.cities"), item: "/steden" },
+    { name: city, item: `/stad/${slug}` },
+  ]);
+  const aggLd = aggregateRatingJsonLd(`Restaurants in ${city}`, DEFAULT_LOCALE, items);
 
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
+      {aggLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aggLd) }} />}
 
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
@@ -138,6 +173,28 @@ function CityPage() {
           ))}
         </div>
       </section>
+
+      {topCuisines.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+          <h2 className="font-display text-xl text-ink mb-4">
+            {t(DEFAULT_LOCALE, "internal.cuisinesInCity", { city })}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {topCuisines.map((c) => (
+              <Link
+                key={c}
+                to="/keuken/$cuisine"
+                params={{ cuisine: c }}
+                className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
+                {cuisineLabel(c)}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <FaqSection locale={DEFAULT_LOCALE} items={faq} />
 
       <SiteFooter />
     </div>

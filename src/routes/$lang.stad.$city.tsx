@@ -2,7 +2,10 @@ import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-rout
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { listByCity } from "@/lib/seo-public.functions";
 import { getLandingCopy } from "@/lib/seo-translations.functions";
+import { getLandingFaq } from "@/lib/seo-faq.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import { FaqSection } from "@/components/seo/FaqSection";
+import { breadcrumbListJsonLd, aggregateRatingJsonLd } from "@/lib/seo-jsonld";
 import { MapPin, Star } from "lucide-react";
 import { cuisineLabel } from "@/lib/osm-labels";
 import { isLocale, LOCALES, DEFAULT_LOCALE, type LocaleCode } from "@/lib/i18n/locales";
@@ -10,21 +13,26 @@ import { t } from "@/lib/i18n/strings";
 
 const localizedCityQuery = (lang: LocaleCode, slug: string) =>
   queryOptions({
-    queryKey: ["city-localized", lang, slug],
+    queryKey: ["city-localized-faq", lang, slug],
     queryFn: async () => {
       const base = await listByCity({ data: { citySlug: slug, limit: 48 } });
-      const copy = await getLandingCopy({
-        data: {
-          scope: "city",
-          key: slug,
-          lang,
-          displayName: base.city,
-          total: base.total,
-        },
-      });
-      return { ...base, copy };
+      const [copy, faq] = await Promise.all([
+        getLandingCopy({
+          data: { scope: "city", key: slug, lang, displayName: base.city, total: base.total },
+        }),
+        getLandingFaq({
+          data: {
+            scope: "city",
+            key: slug,
+            lang,
+            displayName: base.city,
+            sampleNames: base.items.slice(0, 8).map((r: any) => r.name),
+          },
+        }).catch(() => ({ items: [] })),
+      ]);
+      return { ...base, copy, faq: faq.items };
     },
-    staleTime: 60 * 60_000, // 1 hour
+    staleTime: 60 * 60_000,
   });
 
 export const Route = createFileRoute("/$lang/stad/$city")({
@@ -40,7 +48,6 @@ export const Route = createFileRoute("/$lang/stad/$city")({
     const desc = loaderData?.copy.description ?? "";
     const path = `/${lang}/stad/${params.city}`;
 
-    // hreflang alternates: one per locale + x-default to NL root
     const alternates = LOCALES.map((l) => ({
       rel: "alternate",
       hreflang: l.code,
@@ -92,9 +99,21 @@ function LocalizedCityPage() {
   const params = Route.useParams();
   const lang = params.lang as LocaleCode;
   const { data } = useSuspenseQuery(localizedCityQuery(lang, params.city));
-  const { city, total, items, copy } = data;
+  const { city, total, items, copy, faq } = data;
 
-  const jsonLd = {
+  const cuisineCounts = new Map<string, number>();
+  for (const r of items) {
+    for (const c of (r.cuisine ?? []) as string[]) {
+      cuisineCounts.set(c, (cuisineCounts.get(c) ?? 0) + 1);
+    }
+  }
+  const topCuisines = Array.from(cuisineCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12)
+    .map(([c]) => c);
+
+  const langPrefix = lang === DEFAULT_LOCALE ? "" : `/${lang}`;
+  const itemListLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: copy.title,
@@ -103,15 +122,23 @@ function LocalizedCityPage() {
     itemListElement: items.slice(0, 20).map((r: any, i: number) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `/restaurant/${r.slug}`,
+      url: `${langPrefix}/restaurant/${r.slug}`,
       name: r.name,
     })),
   };
+  const breadcrumbsLd = breadcrumbListJsonLd([
+    { name: t(lang, "city.breadcrumb.home"), item: lang === DEFAULT_LOCALE ? "/" : `/${lang}` },
+    { name: t(lang, "city.breadcrumb.cities"), item: `${langPrefix}/steden` },
+    { name: city, item: `${langPrefix}/stad/${params.city}` },
+  ]);
+  const aggLd = aggregateRatingJsonLd(copy.title, lang, items);
 
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader locale={lang} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
+      {aggLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aggLd) }} />}
 
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
@@ -167,6 +194,39 @@ function LocalizedCityPage() {
           ))}
         </div>
       </section>
+
+      {topCuisines.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+          <h2 className="font-display text-xl text-ink mb-4">
+            {t(lang, "internal.cuisinesInCity", { city })}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {topCuisines.map((c) =>
+              lang === DEFAULT_LOCALE ? (
+                <Link
+                  key={c}
+                  to="/keuken/$cuisine"
+                  params={{ cuisine: c }}
+                  className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {cuisineLabel(c)}
+                </Link>
+              ) : (
+                <Link
+                  key={c}
+                  to="/$lang/keuken/$cuisine"
+                  params={{ lang, cuisine: c }}
+                  className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {cuisineLabel(c)}
+                </Link>
+              ),
+            )}
+          </div>
+        </section>
+      )}
+
+      <FaqSection locale={lang} items={faq} />
 
       <SiteFooter locale={lang} />
     </div>
