@@ -61,6 +61,8 @@ export function NearbyRestaurants({
         {rows.map((r) => {
           const img = tagImage(r.raw_osm_tags) ?? defaultBanner;
           const cuis = (r.cuisine ?? []).slice(0, 2).map(cuisineLabel).join(", ");
+          const cuisineForAlt = (r.cuisine ?? [])[0] ? `${cuisineLabel((r.cuisine ?? [])[0]!)} ` : "";
+          const altText = `${r.name}, ${cuisineForAlt}restaurant in ${r.city ?? city}`;
           const linkProps = locale === DEFAULT_LOCALE
             ? { to: "/restaurant/$slug" as const, params: { slug: r.slug } }
             : { to: "/$lang/restaurant/$slug" as const, params: { lang: locale, slug: r.slug } };
@@ -71,7 +73,7 @@ export function NearbyRestaurants({
               className="group rounded-lg overflow-hidden border bg-background hover:shadow-md transition-shadow"
             >
               <div className="aspect-[4/3] bg-muted overflow-hidden">
-                <img src={img} alt={r.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+                <img src={img} alt={altText} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
               </div>
               <div className="p-2.5">
                 <h3 className="font-semibold text-sm leading-tight line-clamp-2">{r.name}</h3>

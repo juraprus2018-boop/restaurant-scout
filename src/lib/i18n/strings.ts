@@ -78,7 +78,10 @@ export type StringKey =
   | "home.map.title" | "home.map.sub" | "home.map.loading"
   | "home.all.title" | "home.all.loadMore" | "home.all.loading"
   | "home.empty.title" | "home.empty.body" | "home.empty.cta"
-  | "home.geo.insecure" | "home.geo.denied" | "home.geo.unavailable" | "home.geo.timeout" | "home.geo.generic";
+  | "home.geo.insecure" | "home.geo.denied" | "home.geo.unavailable" | "home.geo.timeout" | "home.geo.generic"
+  // landing-page FAQ + internal linking
+  | "faqLanding.title"
+  | "internal.exploreMore" | "internal.cuisinesInCity" | "internal.alsoIn";
 
 type Dict = Partial<Record<StringKey, string>>;
 
@@ -199,6 +202,10 @@ const en: Required<Pick<Dict, StringKey>> = {
   "home.geo.unavailable": "Location unavailable. Please try again.",
   "home.geo.timeout": "Getting your location took too long. Try again.",
   "home.geo.generic": "Could not get your location.",
+  "faqLanding.title": "Frequently asked questions",
+  "internal.exploreMore": "Explore more",
+  "internal.cuisinesInCity": "Cuisines in {city}",
+  "internal.alsoIn": "Also in {city}",
 };
 
 const nl: Dict = {
@@ -310,6 +317,10 @@ const nl: Dict = {
   "home.geo.unavailable": "Locatie niet beschikbaar. Probeer het opnieuw.",
   "home.geo.timeout": "Het ophalen van je locatie duurde te lang. Probeer opnieuw.",
   "home.geo.generic": "Kon je locatie niet ophalen.",
+  "faqLanding.title": "Veelgestelde vragen",
+  "internal.exploreMore": "Verder verkennen",
+  "internal.cuisinesInCity": "Keukens in {city}",
+  "internal.alsoIn": "Meer in {city}",
 };
 
 const de: Dict = {

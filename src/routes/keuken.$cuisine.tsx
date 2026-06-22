@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
 import { listByCuisine } from "@/lib/seo-public.functions";
+import { getLandingFaq } from "@/lib/seo-faq.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import { FaqSection } from "@/components/seo/FaqSection";
+import { breadcrumbListJsonLd, aggregateRatingJsonLd } from "@/lib/seo-jsonld";
 import { MapPin, Star } from "lucide-react";
 import { cuisineLabel } from "@/lib/osm-labels";
 import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "@/lib/i18n/locales";
@@ -79,7 +82,34 @@ export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { local
   const { cuisine, total, items } = data;
   const label = cuisineLabel(cuisine);
 
-  const jsonLd = {
+  // FAQ loaded client-side (non-blocking)
+  const { data: faqData } = useQuery({
+    queryKey: ["cuisine-faq", locale, cuisineKey],
+    queryFn: () =>
+      getLandingFaq({
+        data: {
+          scope: "cuisine",
+          key: cuisineKey,
+          lang: locale,
+          displayName: label,
+          sampleNames: items.slice(0, 8).map((r: any) => r.name),
+        },
+      }).catch(() => ({ items: [] })),
+    staleTime: 60 * 60_000,
+  });
+
+  // Top cities offering this cuisine, for internal linking
+  const cityCounts = new Map<string, number>();
+  for (const r of items as any[]) {
+    if (r.city) cityCounts.set(r.city, (cityCounts.get(r.city) ?? 0) + 1);
+  }
+  const topCities = Array.from(cityCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([c]) => c);
+
+  const langPrefix = locale === DEFAULT_LOCALE ? "" : `/${locale}`;
+  const itemListLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: t(locale, "cuisine.heading", { label }),
@@ -88,15 +118,27 @@ export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { local
     itemListElement: items.slice(0, 20).map((r: any, i: number) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `/restaurant/${r.slug}`,
+      url: `${langPrefix}/restaurant/${r.slug}`,
       name: r.name,
     })),
   };
+  const breadcrumbsLd = breadcrumbListJsonLd([
+    { name: t(locale, "city.breadcrumb.home"), item: locale === DEFAULT_LOCALE ? "/" : `/${locale}` },
+    { name: t(locale, "cuisine.breadcrumb.cuisine"), item: `${langPrefix}/keuken/${cuisineKey}` },
+    { name: label, item: `${langPrefix}/keuken/${cuisineKey}` },
+  ]);
+  const aggLd = aggregateRatingJsonLd(t(locale, "cuisine.heading", { label }), locale, items);
+
+  function slugifyCity(c: string): string {
+    return c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader locale={locale} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
+      {aggLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aggLd) }} />}
 
       <section className="bg-gradient-to-b from-primary/10 to-transparent border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
@@ -136,8 +178,38 @@ export function CuisinePageBody({ locale = DEFAULT_LOCALE, cuisineKey }: { local
         </div>
       </section>
 
+      {topCities.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+          <h2 className="font-display text-xl text-ink mb-4">{t(locale, "internal.exploreMore")}</h2>
+          <div className="flex flex-wrap gap-2">
+            {topCities.map((c) =>
+              locale === DEFAULT_LOCALE ? (
+                <Link
+                  key={c}
+                  to="/stad/$city"
+                  params={{ city: slugifyCity(c) }}
+                  className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {label} in {c}
+                </Link>
+              ) : (
+                <Link
+                  key={c}
+                  to="/$lang/stad/$city"
+                  params={{ lang: locale, city: slugifyCity(c) }}
+                  className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {label} in {c}
+                </Link>
+              ),
+            )}
+          </div>
+        </section>
+      )}
+
+      <FaqSection locale={locale} items={faqData?.items ?? []} />
+
       <SiteFooter locale={locale} />
     </div>
   );
 }
-

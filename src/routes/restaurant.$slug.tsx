@@ -581,6 +581,54 @@ export function RestaurantPageBody({ locale = DEFAULT_LOCALE, slug }: { locale?:
             )}
           </Card>
 
+          {(restaurant.city || (restaurant.cuisine ?? []).length > 0) && (
+            <Card className="p-4">
+              <h2 className="font-semibold mb-3">{tr("internal.exploreMore")}</h2>
+              <div className="flex flex-wrap gap-2">
+                {restaurant.city && (
+                  locale === DEFAULT_LOCALE ? (
+                    <Link
+                      to="/stad/$city"
+                      params={{ city: slugifyCity(restaurant.city) }}
+                      className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      {tr("internal.alsoIn", { city: restaurant.city })}
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/$lang/stad/$city"
+                      params={{ lang: locale, city: slugifyCity(restaurant.city) }}
+                      className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      {tr("internal.alsoIn", { city: restaurant.city })}
+                    </Link>
+                  )
+                )}
+                {(restaurant.cuisine ?? []).map((c: string) =>
+                  locale === DEFAULT_LOCALE ? (
+                    <Link
+                      key={c}
+                      to="/keuken/$cuisine"
+                      params={{ cuisine: c }}
+                      className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      {cuisineLabel(c)}
+                    </Link>
+                  ) : (
+                    <Link
+                      key={c}
+                      to="/$lang/keuken/$cuisine"
+                      params={{ lang: locale, cuisine: c }}
+                      className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      {cuisineLabel(c)}
+                    </Link>
+                  ),
+                )}
+              </div>
+            </Card>
+          )}
+
           <NearbyRestaurants locale={locale} currentId={restaurant.id} city={restaurant.city} />
         </div>
 
