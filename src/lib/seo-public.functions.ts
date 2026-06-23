@@ -100,6 +100,48 @@ export const listByCuisine = createServerFn({ method: "GET" })
     };
   });
 
+export const listByCityAndCuisine = createServerFn({ method: "GET" })
+  .inputValidator((d: { citySlug: string; cuisine: string; limit?: number; offset?: number }) => d)
+  .handler(async ({ data }) => {
+    const sb = publicClient();
+    const { data: cities } = await sb.rpc("list_cities", { _min_count: 1, _limit: 5000 });
+    const match = (cities ?? []).find((c: any) => citySlug(c.city) === data.citySlug);
+    if (!match) throw notFound();
+    const { data: rows, error } = await sb.rpc("search_restaurants", {
+      _city: match.city,
+      _cuisines: [data.cuisine],
+      _limit: data.limit ?? 48,
+      _offset: data.offset ?? 0,
+      _sort: "rating",
+    });
+    if (error) throw new Error(error.message);
+    const items = (rows ?? []) as any[];
+    if (items.length === 0) throw notFound();
+    return {
+      city: match.city as string,
+      cuisine: data.cuisine,
+      total: Number((items[0] as any)?.total_count ?? 0),
+      items,
+    };
+  });
+
+export const listCityCuisineCombos = createServerFn({ method: "GET" })
+  .inputValidator((d: { minCount?: number; limit?: number }) => d)
+  .handler(async ({ data }) => {
+    const sb = publicClient();
+    const { data: rows, error } = await (sb as any).rpc("list_city_cuisine_combos", {
+      _min_count: data.minCount ?? 1,
+      _limit: data.limit ?? 5000,
+    });
+    if (error) throw new Error(error.message);
+    return ((rows ?? []) as any[]).map((r) => ({
+      city: r.city as string,
+      citySlug: citySlug(r.city),
+      cuisine: r.cuisine as string,
+      count: Number(r.count),
+    }));
+  });
+
 export const getRestaurantSitemapPage = createServerFn({ method: "GET" })
   .inputValidator((d: { page: number; pageSize?: number }) => d)
   .handler(async ({ data }) => {

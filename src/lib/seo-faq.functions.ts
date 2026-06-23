@@ -10,6 +10,7 @@ export interface FaqItem {
 
 const FAQ_SCOPE_CITY = "faq_city";
 const FAQ_SCOPE_CUISINE = "faq_cuisine";
+const FAQ_SCOPE_CITY_CUISINE = "faq_city_cuisine";
 
 function publicClient() {
   return createClient<Database>(
