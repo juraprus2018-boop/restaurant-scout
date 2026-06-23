@@ -187,7 +187,7 @@ export const getLandingFaq = createServerFn({ method: "GET" })
         sampleNames: data.sampleNames ?? [],
       });
     } catch {
-      items = data.scope === "city" ? fallbackCityFaq(data.displayName) : fallbackCuisineFaq(data.displayName);
+      items = data.scope === "cuisine" ? fallbackCuisineFaq(data.displayName) : fallbackCityFaq(data.displayName);
       return { items };
     }
 
