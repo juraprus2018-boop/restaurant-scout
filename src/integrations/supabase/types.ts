@@ -222,6 +222,14 @@ export type Database = {
           lng: number
         }[]
       }
+      list_city_cuisine_combos: {
+        Args: { _limit?: number; _min_count?: number }
+        Returns: {
+          city: string
+          count: number
+          cuisine: string
+        }[]
+      }
       list_cuisines: {
         Args: { _limit?: number; _min_count?: number }
         Returns: {
