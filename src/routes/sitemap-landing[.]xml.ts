@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { listCitiesPublic, listCuisinesPublic } from "@/lib/seo-public.functions";
+import { listCitiesPublic, listCuisinesPublic, listCityCuisineCombos } from "@/lib/seo-public.functions";
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 
 function escapeXml(s: string) {
@@ -16,9 +16,10 @@ export const Route = createFileRoute("/sitemap-landing.xml")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const base = `${url.protocol}//${url.host}`;
-        const [cities, cuisines] = await Promise.all([
+        const [cities, cuisines, combos] = await Promise.all([
           listCitiesPublic({ data: { minCount: 1, limit: 5000 } }),
           listCuisinesPublic({ data: { minCount: 1, limit: 500 } }),
+          listCityCuisineCombos({ data: { minCount: 1, limit: 5000 } }),
         ]);
         const now = new Date().toISOString();
         const urls: string[] = [
@@ -59,6 +60,23 @@ export const Route = createFileRoute("/sitemap-landing.xml")({
           urls.push(
             `<url><loc>${base}/keuken/${escapeXml(c.cuisine)}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`,
           );
+        }
+
+        // City × Cuisine combo pages (Fase 2.1): one <url> per locale per combo with hreflang alternates.
+        for (const combo of combos) {
+          const path = (code: string) =>
+            code === DEFAULT_LOCALE
+              ? `/stad/${escapeXml(combo.citySlug)}/keuken/${escapeXml(combo.cuisine)}`
+              : `/${code}/stad/${escapeXml(combo.citySlug)}/keuken/${escapeXml(combo.cuisine)}`;
+          for (const l of LOCALES) {
+            const alts = LOCALES.map(
+              (a) => `<xhtml:link rel="alternate" hreflang="${a.code}" href="${base}${path(a.code)}"/>`,
+            ).join("");
+            const xdefault = `<xhtml:link rel="alternate" hreflang="x-default" href="${base}${path(DEFAULT_LOCALE)}"/>`;
+            urls.push(
+              `<url><loc>${base}${path(l.code)}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority>${alts}${xdefault}</url>`,
+            );
+          }
         }
 
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
