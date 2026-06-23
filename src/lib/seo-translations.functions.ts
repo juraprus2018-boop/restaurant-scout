@@ -18,7 +18,7 @@ interface LandingCopy {
 }
 
 async function generateWithAI(args: {
-  scope: "city" | "cuisine";
+  scope: "city" | "cuisine" | "city_cuisine";
   key: string;
   lang: LocaleCode;
   context: { displayName: string; total: number };
@@ -37,7 +37,9 @@ async function generateWithAI(args: {
   const locale = getLocale(args.lang);
   const subject = args.scope === "city"
     ? `the city of ${args.context.displayName}`
-    : `${args.context.displayName} cuisine`;
+    : args.scope === "cuisine"
+      ? `${args.context.displayName} cuisine`
+      : `${args.context.displayName}`; // city_cuisine — displayName already formatted as "Chinese restaurants in Amsterdam"
 
   const prompt = `You write SEO landing-page copy for a restaurant directory.
 Write in ${locale.englishName} (locale code "${args.lang}"). Use natural, native phrasing, not a translation of English.
@@ -88,7 +90,7 @@ function sanitize(s: string): string {
 
 export const getLandingCopy = createServerFn({ method: "GET" })
   .inputValidator((d: {
-    scope: "city" | "cuisine";
+    scope: "city" | "cuisine" | "city_cuisine";
     key: string;
     lang: string;
     displayName: string;
