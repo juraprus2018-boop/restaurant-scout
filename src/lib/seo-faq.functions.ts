@@ -72,20 +72,24 @@ function fallbackCuisineFaq(displayName: string): FaqItem[] {
 }
 
 async function generateFaqWithAI(args: {
-  scope: "city" | "cuisine";
+  scope: "city" | "cuisine" | "city_cuisine";
   lang: LocaleCode;
   displayName: string;
   sampleNames: string[];
 }): Promise<FaqItem[]> {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) {
-    return args.scope === "city" ? fallbackCityFaq(args.displayName) : fallbackCuisineFaq(args.displayName);
+    if (args.scope === "city") return fallbackCityFaq(args.displayName);
+    if (args.scope === "cuisine") return fallbackCuisineFaq(args.displayName);
+    return fallbackCityFaq(args.displayName);
   }
   const locale = getLocale(args.lang);
   const subject =
     args.scope === "city"
       ? `the city of ${args.displayName}`
-      : `${args.displayName} cuisine restaurants`;
+      : args.scope === "cuisine"
+        ? `${args.displayName} cuisine restaurants`
+        : `${args.displayName}`; // city_cuisine: displayName is the full phrase
   const samples = args.sampleNames.slice(0, 8).join(", ");
   const prompt = `You write SEO FAQ content for a restaurant directory page.
 Write in ${locale.englishName} (locale code "${args.lang}"). Use natural, native phrasing.
@@ -138,7 +142,7 @@ Return STRICT JSON in this exact shape (and NOTHING else, no markdown or code fe
 
 export const getLandingFaq = createServerFn({ method: "GET" })
   .inputValidator((d: {
-    scope: "city" | "cuisine";
+    scope: "city" | "cuisine" | "city_cuisine";
     key: string;
     lang: string;
     displayName: string;
@@ -146,7 +150,12 @@ export const getLandingFaq = createServerFn({ method: "GET" })
   }) => d)
   .handler(async ({ data }): Promise<{ items: FaqItem[] }> => {
     const lang = isLocale(data.lang) ? data.lang : "en";
-    const scopeName = data.scope === "city" ? FAQ_SCOPE_CITY : FAQ_SCOPE_CUISINE;
+    const scopeName =
+      data.scope === "city"
+        ? FAQ_SCOPE_CITY
+        : data.scope === "cuisine"
+          ? FAQ_SCOPE_CUISINE
+          : FAQ_SCOPE_CITY_CUISINE;
     const sb = publicClient();
 
     // 1. Cache lookup (we store the JSON array in `intro`)
