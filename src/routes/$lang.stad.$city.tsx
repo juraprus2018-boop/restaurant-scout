@@ -205,8 +205,8 @@ function LocalizedCityPage() {
               lang === DEFAULT_LOCALE ? (
                 <Link
                   key={c}
-                  to="/keuken/$cuisine"
-                  params={{ cuisine: c }}
+                  to="/stad/$city/keuken/$cuisine"
+                  params={{ city: params.city, cuisine: c }}
                   className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
                 >
                   {cuisineLabel(c)}
@@ -214,8 +214,8 @@ function LocalizedCityPage() {
               ) : (
                 <Link
                   key={c}
-                  to="/$lang/keuken/$cuisine"
-                  params={{ lang, cuisine: c }}
+                  to="/$lang/stad/$city/keuken/$cuisine"
+                  params={{ lang, city: params.city, cuisine: c }}
                   className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
                 >
                   {cuisineLabel(c)}
