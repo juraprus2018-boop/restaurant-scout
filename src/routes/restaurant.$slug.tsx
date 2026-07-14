@@ -55,15 +55,15 @@ export function buildRestaurantHead(
   r: any | undefined,
   withAlternates: boolean,
 ) {
-  const basePath = lang === DEFAULT_LOCALE ? `/restaurant/${slug}` : `/${lang}/restaurant/${slug}`;
+  const basePath = lang === DEFAULT_LOCALE ? `https://placeresults.com/restaurant/${slug}` : `https://placeresults.com/${lang}/restaurant/${slug}`;
   const alternates = withAlternates
     ? [
         ...LOCALES.map((l) => ({
           rel: "alternate",
           hreflang: l.code,
-          href: l.code === DEFAULT_LOCALE ? `/restaurant/${slug}` : `/${l.code}/restaurant/${slug}`,
+          href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/restaurant/${slug}` : `https://placeresults.com/${l.code}/restaurant/${slug}`,
         })),
-        { rel: "alternate", hreflang: "x-default", href: `/restaurant/${slug}` },
+        { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/restaurant/${slug}` },
       ]
     : [];
   if (!r) {
@@ -73,7 +73,8 @@ export function buildRestaurantHead(
     };
   }
   const tags = (r.raw_osm_tags ?? {}) as Record<string, string>;
-  const img = tagImage(tags) ?? defaultBanner;
+  const rawImg = tagImage(tags) ?? defaultBanner;
+  const img = rawImg.startsWith("http") ? rawImg : `https://placeresults.com${rawImg.startsWith("/") ? rawImg : `/${rawImg}`}`;
   const cuisines = (r.cuisine ?? []).map(cuisineLabel).join(", ");
   const cityPart = r.city ? ` · ${r.city}` : "";
   const ratingPart = (r.avg_rating ?? 0) > 0 ? ` · ${Number(r.avg_rating).toFixed(1)}★ (${r.review_count})` : "";
@@ -117,14 +118,14 @@ export function buildRestaurantHead(
   };
 
   const langPrefix = lang === DEFAULT_LOCALE ? "" : `/${lang}`;
-  const citiesPath = `${langPrefix}/steden`;
+  const citiesPath = `https://placeresults.com${langPrefix}/steden`;
   const ldBreadcrumbs = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: t(lang, "city.breadcrumb.home"), item: lang === DEFAULT_LOCALE ? "/" : `/${lang}` },
+      { "@type": "ListItem", position: 1, name: t(lang, "city.breadcrumb.home"), item: lang === DEFAULT_LOCALE ? "https://placeresults.com/" : `https://placeresults.com/${lang}` },
       { "@type": "ListItem", position: 2, name: t(lang, "city.breadcrumb.cities"), item: citiesPath },
-      ...(r.city ? [{ "@type": "ListItem", position: 3, name: r.city, item: `${langPrefix}/stad/${slugifyCity(r.city)}` }] : []),
+      ...(r.city ? [{ "@type": "ListItem", position: 3, name: r.city, item: `https://placeresults.com${langPrefix}/stad/${slugifyCity(r.city)}` }] : []),
       { "@type": "ListItem", position: r.city ? 4 : 3, name: r.name, item: basePath },
     ],
   };

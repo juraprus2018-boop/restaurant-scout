@@ -43,16 +43,18 @@ export const Route = createFileRoute("/stad/$city")({
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: `https://placeresults.com/stad/${params.city}` },
+        { property: "og:locale", content: DEFAULT_LOCALE },
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [
-        { rel: "canonical", href: `/stad/${params.city}` },
+        { rel: "canonical", href: `https://placeresults.com/stad/${params.city}` },
         ...LOCALES.map((l) => ({
           rel: "alternate",
           hreflang: l.code,
-          href: l.code === DEFAULT_LOCALE ? `/stad/${params.city}` : `/${l.code}/stad/${params.city}`,
+          href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/stad/${params.city}` : `https://placeresults.com/${l.code}/stad/${params.city}`,
         })),
-        { rel: "alternate", hreflang: "x-default", href: `/stad/${params.city}` },
+        { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/stad/${params.city}` },
       ],
     };
   },

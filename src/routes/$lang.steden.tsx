@@ -10,7 +10,7 @@ export const Route = createFileRoute("/$lang/steden")({
     const lang = params.lang as LocaleCode;
     const title = t(lang, "cities.title");
     const desc = t(lang, "cities.intro");
-    const path = `/${lang}/steden`;
+    const path = `https://placeresults.com/${lang}/steden`;
     return {
       meta: [
         { title },
@@ -27,9 +27,9 @@ export const Route = createFileRoute("/$lang/steden")({
         ...LOCALES.map((l) => ({
           rel: "alternate",
           hreflang: l.code,
-          href: l.code === DEFAULT_LOCALE ? "/steden" : `/${l.code}/steden`,
+          href: l.code === DEFAULT_LOCALE ? "https://placeresults.com/steden" : `https://placeresults.com/${l.code}/steden`,
         })),
-        { rel: "alternate", hreflang: "x-default", href: "/steden" },
+        { rel: "alternate", hreflang: "x-default", href: "https://placeresults.com/steden" },
       ],
     };
   },

@@ -46,12 +46,12 @@ export const Route = createFileRoute("/$lang/stad/$city")({
     const city = loaderData?.city ?? params.city;
     const title = loaderData?.copy.title ?? `${city}, PlaceResults`;
     const desc = loaderData?.copy.description ?? "";
-    const path = `/${lang}/stad/${params.city}`;
+    const path = `https://placeresults.com/${lang}/stad/${params.city}`;
 
     const alternates = LOCALES.map((l) => ({
       rel: "alternate",
       hreflang: l.code,
-      href: l.code === DEFAULT_LOCALE ? `/stad/${params.city}` : `/${l.code}/stad/${params.city}`,
+      href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/stad/${params.city}` : `https://placeresults.com/${l.code}/stad/${params.city}`,
     }));
 
     return {
@@ -68,7 +68,7 @@ export const Route = createFileRoute("/$lang/stad/$city")({
       links: [
         { rel: "canonical", href: path },
         ...alternates,
-        { rel: "alternate", hreflang: "x-default", href: `/stad/${params.city}` },
+        { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/stad/${params.city}` },
       ],
     };
   },

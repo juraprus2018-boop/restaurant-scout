@@ -14,7 +14,7 @@ export const Route = createFileRoute("/voorwaarden")({
       { property: "og:title", content: "Algemene voorwaarden, PlaceResults.com" },
       { property: "og:description", content: "Lees de algemene voorwaarden van PlaceResults.com." },
     ],
-    links: [{ rel: "canonical", href: "/voorwaarden" }],
+    links: [{ rel: "canonical", href: "https://placeresults.com/voorwaarden" }],
   }),
   component: TermsPage,
 });

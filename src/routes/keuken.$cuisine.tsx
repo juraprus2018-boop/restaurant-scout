@@ -46,7 +46,7 @@ export const Route = createFileRoute("/keuken/$cuisine")({
 export function buildCuisineHead(lang: LocaleCode, cuisineSlug: string, loaderData: any) {
   const label = loaderData ? cuisineLabel(loaderData.cuisine) : cuisineSlug;
   const total = loaderData?.total ?? 0;
-  const path = lang === DEFAULT_LOCALE ? `/keuken/${cuisineSlug}` : `/${lang}/keuken/${cuisineSlug}`;
+  const path = lang === DEFAULT_LOCALE ? `https://placeresults.com/keuken/${cuisineSlug}` : `https://placeresults.com/${lang}/keuken/${cuisineSlug}`;
   const title = `${t(lang, "cuisine.heading", { label })}, PlaceResults`.slice(0, 70);
   const desc = t(lang, "cuisine.subheading", { count: total.toLocaleString(lang), label }).slice(0, 158);
   return {
@@ -65,9 +65,9 @@ export function buildCuisineHead(lang: LocaleCode, cuisineSlug: string, loaderDa
       ...LOCALES.map((l) => ({
         rel: "alternate",
         hreflang: l.code,
-        href: l.code === DEFAULT_LOCALE ? `/keuken/${cuisineSlug}` : `/${l.code}/keuken/${cuisineSlug}`,
+        href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/keuken/${cuisineSlug}` : `https://placeresults.com/${l.code}/keuken/${cuisineSlug}`,
       })),
-      { rel: "alternate", hreflang: "x-default", href: `/keuken/${cuisineSlug}` },
+      { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/keuken/${cuisineSlug}` },
     ],
   };
 }
