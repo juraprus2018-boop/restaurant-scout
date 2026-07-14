@@ -10,7 +10,7 @@ export const Route = createFileRoute("/$lang/steden")({
     const lang = params.lang as LocaleCode;
     const title = t(lang, "cities.title");
     const desc = t(lang, "cities.intro");
-    const path = `/${lang}/steden`;
+    const path = `https://placeresults.com/${lang}/steden`;
     return {
       meta: [
         { title },

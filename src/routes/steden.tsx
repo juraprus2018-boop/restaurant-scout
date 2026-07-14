@@ -15,18 +15,18 @@ export const Route = createFileRoute("/steden")({
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: "/steden" },
+        { property: "og:url", content: "https://placeresults.com/steden" },
         { property: "og:locale", content: DEFAULT_LOCALE },
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [
-        { rel: "canonical", href: "/steden" },
+        { rel: "canonical", href: "https://placeresults.com/steden" },
         ...LOCALES.map((l) => ({
           rel: "alternate",
           hreflang: l.code,
           href: l.code === DEFAULT_LOCALE ? "/steden" : `/${l.code}/steden`,
         })),
-        { rel: "alternate", hreflang: "x-default", href: "/steden" },
+        { rel: "alternate", hreflang: "x-default", href: "https://placeresults.com/steden" },
       ],
     };
   },

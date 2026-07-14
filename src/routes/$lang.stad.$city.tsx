@@ -46,7 +46,7 @@ export const Route = createFileRoute("/$lang/stad/$city")({
     const city = loaderData?.city ?? params.city;
     const title = loaderData?.copy.title ?? `${city}, PlaceResults`;
     const desc = loaderData?.copy.description ?? "";
-    const path = `/${lang}/stad/${params.city}`;
+    const path = `https://placeresults.com/${lang}/stad/${params.city}`;
 
     const alternates = LOCALES.map((l) => ({
       rel: "alternate",

@@ -46,13 +46,13 @@ export const Route = createFileRoute("/stad/$city")({
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [
-        { rel: "canonical", href: `/stad/${params.city}` },
+        { rel: "canonical", href: `https://placeresults.com/stad/${params.city}` },
         ...LOCALES.map((l) => ({
           rel: "alternate",
           hreflang: l.code,
-          href: l.code === DEFAULT_LOCALE ? `/stad/${params.city}` : `/${l.code}/stad/${params.city}`,
+          href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/stad/${params.city}` : `/${l.code}/stad/${params.city}`,
         })),
-        { rel: "alternate", hreflang: "x-default", href: `/stad/${params.city}` },
+        { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/stad/${params.city}` },
       ],
     };
   },

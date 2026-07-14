@@ -21,11 +21,11 @@ export const Route = createFileRoute("/$lang/")({
         { property: "og:title", content: t(lang, "home.meta.titleOg") },
         { property: "og:description", content: t(lang, "home.meta.descOg") },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: `/${lang}` },
+        { property: "og:url", content: `https://placeresults.com/${lang}` },
         { property: "og:locale", content: lang },
       ],
       links: [
-        { rel: "canonical", href: `/${lang}` },
+        { rel: "canonical", href: `https://placeresults.com/${lang}` },
         ...alternates,
         { rel: "alternate", hreflang: "x-default", href: "/" },
       ],

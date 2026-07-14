@@ -15,7 +15,7 @@ export const Route = createFileRoute("/cookies")({
       { property: "og:title", content: "Cookiebeleid, PlaceResults.com" },
       { property: "og:description", content: "Cookies & tracking-overzicht van PlaceResults.com." },
     ],
-    links: [{ rel: "canonical", href: "/cookies" }],
+    links: [{ rel: "canonical", href: "https://placeresults.com/cookies" }],
   }),
   component: CookiesPage,
 });

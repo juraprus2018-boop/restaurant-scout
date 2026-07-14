@@ -14,7 +14,7 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:title", content: "Privacybeleid, PlaceResults.com" },
       { property: "og:description", content: "AVG-conform privacybeleid van PlaceResults.com." },
     ],
-    links: [{ rel: "canonical", href: "/privacy" }],
+    links: [{ rel: "canonical", href: "https://placeresults.com/privacy" }],
   }),
   component: PrivacyPage,
 });

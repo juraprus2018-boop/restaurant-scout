@@ -46,7 +46,7 @@ export const Route = createFileRoute("/keuken/$cuisine")({
 export function buildCuisineHead(lang: LocaleCode, cuisineSlug: string, loaderData: any) {
   const label = loaderData ? cuisineLabel(loaderData.cuisine) : cuisineSlug;
   const total = loaderData?.total ?? 0;
-  const path = lang === DEFAULT_LOCALE ? `/keuken/${cuisineSlug}` : `/${lang}/keuken/${cuisineSlug}`;
+  const path = lang === DEFAULT_LOCALE ? `https://placeresults.com/keuken/${cuisineSlug}` : `https://placeresults.com/${lang}/keuken/${cuisineSlug}`;
   const title = `${t(lang, "cuisine.heading", { label })}, PlaceResults`.slice(0, 70);
   const desc = t(lang, "cuisine.subheading", { count: total.toLocaleString(lang), label }).slice(0, 158);
   return {
