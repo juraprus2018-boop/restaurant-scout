@@ -68,7 +68,7 @@ export const Route = createFileRoute("/$lang/stad/$city")({
       links: [
         { rel: "canonical", href: path },
         ...alternates,
-        { rel: "alternate", hreflang: "x-default", href: `/stad/${params.city}` },
+        { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/stad/${params.city}` },
       ],
     };
   },
