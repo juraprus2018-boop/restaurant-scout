@@ -65,9 +65,9 @@ export function buildCuisineHead(lang: LocaleCode, cuisineSlug: string, loaderDa
       ...LOCALES.map((l) => ({
         rel: "alternate",
         hreflang: l.code,
-        href: l.code === DEFAULT_LOCALE ? `/keuken/${cuisineSlug}` : `/${l.code}/keuken/${cuisineSlug}`,
+        href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/keuken/${cuisineSlug}` : `https://placeresults.com/${l.code}/keuken/${cuisineSlug}`,
       })),
-      { rel: "alternate", hreflang: "x-default", href: `/keuken/${cuisineSlug}` },
+      { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/keuken/${cuisineSlug}` },
     ],
   };
 }
