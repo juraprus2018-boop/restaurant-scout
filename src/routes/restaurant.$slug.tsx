@@ -55,15 +55,15 @@ export function buildRestaurantHead(
   r: any | undefined,
   withAlternates: boolean,
 ) {
-  const basePath = lang === DEFAULT_LOCALE ? `/restaurant/${slug}` : `/${lang}/restaurant/${slug}`;
+  const basePath = lang === DEFAULT_LOCALE ? `https://placeresults.com/restaurant/${slug}` : `https://placeresults.com/${lang}/restaurant/${slug}`;
   const alternates = withAlternates
     ? [
         ...LOCALES.map((l) => ({
           rel: "alternate",
           hreflang: l.code,
-          href: l.code === DEFAULT_LOCALE ? `/restaurant/${slug}` : `/${l.code}/restaurant/${slug}`,
+          href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/restaurant/${slug}` : `https://placeresults.com/${l.code}/restaurant/${slug}`,
         })),
-        { rel: "alternate", hreflang: "x-default", href: `/restaurant/${slug}` },
+        { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/restaurant/${slug}` },
       ]
     : [];
   if (!r) {
