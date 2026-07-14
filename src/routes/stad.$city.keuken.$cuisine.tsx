@@ -92,10 +92,10 @@ export function buildComboHead(lang: LocaleCode, citySlug: string, cuisineKey: s
         hreflang: l.code,
         href:
           l.code === DEFAULT_LOCALE
-            ? `/stad/${citySlug}/keuken/${cuisineKey}`
-            : `/${l.code}/stad/${citySlug}/keuken/${cuisineKey}`,
+            ? `https://placeresults.com/stad/${citySlug}/keuken/${cuisineKey}`
+            : `https://placeresults.com/${l.code}/stad/${citySlug}/keuken/${cuisineKey}`,
       })),
-      { rel: "alternate", hreflang: "x-default", href: `/stad/${citySlug}/keuken/${cuisineKey}` },
+      { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/stad/${citySlug}/keuken/${cuisineKey}` },
     ],
   };
 }
