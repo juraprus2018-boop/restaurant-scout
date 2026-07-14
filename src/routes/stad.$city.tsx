@@ -50,7 +50,7 @@ export const Route = createFileRoute("/stad/$city")({
         ...LOCALES.map((l) => ({
           rel: "alternate",
           hreflang: l.code,
-          href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/stad/${params.city}` : `/${l.code}/stad/${params.city}`,
+          href: l.code === DEFAULT_LOCALE ? `https://placeresults.com/stad/${params.city}` : `https://placeresults.com/${l.code}/stad/${params.city}`,
         })),
         { rel: "alternate", hreflang: "x-default", href: `https://placeresults.com/stad/${params.city}` },
       ],
