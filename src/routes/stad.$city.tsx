@@ -43,6 +43,8 @@ export const Route = createFileRoute("/stad/$city")({
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: `https://placeresults.com/stad/${params.city}` },
+        { property: "og:locale", content: DEFAULT_LOCALE },
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [
