@@ -70,7 +70,7 @@ export const Route = createFileRoute("/stad/$city/keuken/$cuisine")({
 
 export function buildComboHead(lang: LocaleCode, citySlug: string, cuisineKey: string, loaderData: any) {
   const path = lang === DEFAULT_LOCALE
-    ? `/stad/${citySlug}/keuken/${cuisineKey}`
+    ? `https://placeresults.com/stad/${citySlug}/keuken/${cuisineKey}`
     : `https://placeresults.com/${lang}/stad/${citySlug}/keuken/${cuisineKey}`;
   const title = loaderData?.copy?.title ?? `${cuisineLabel(cuisineKey)} restaurants, PlaceResults`;
   const desc = loaderData?.copy?.description ?? "";
