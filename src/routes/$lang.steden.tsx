@@ -27,9 +27,9 @@ export const Route = createFileRoute("/$lang/steden")({
         ...LOCALES.map((l) => ({
           rel: "alternate",
           hreflang: l.code,
-          href: l.code === DEFAULT_LOCALE ? "/steden" : `/${l.code}/steden`,
+          href: l.code === DEFAULT_LOCALE ? "https://placeresults.com/steden" : `https://placeresults.com/${l.code}/steden`,
         })),
-        { rel: "alternate", hreflang: "x-default", href: "/steden" },
+        { rel: "alternate", hreflang: "x-default", href: "https://placeresults.com/steden" },
       ],
     };
   },
