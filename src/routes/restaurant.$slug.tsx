@@ -73,7 +73,8 @@ export function buildRestaurantHead(
     };
   }
   const tags = (r.raw_osm_tags ?? {}) as Record<string, string>;
-  const img = tagImage(tags) ?? defaultBanner;
+  const rawImg = tagImage(tags) ?? defaultBanner;
+  const img = rawImg.startsWith("http") ? rawImg : `https://placeresults.com${rawImg.startsWith("/") ? rawImg : `/${rawImg}`}`;
   const cuisines = (r.cuisine ?? []).map(cuisineLabel).join(", ");
   const cityPart = r.city ? ` · ${r.city}` : "";
   const ratingPart = (r.avg_rating ?? 0) > 0 ? ` · ${Number(r.avg_rating).toFixed(1)}★ (${r.review_count})` : "";
