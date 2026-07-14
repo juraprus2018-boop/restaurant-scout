@@ -118,14 +118,14 @@ export function buildRestaurantHead(
   };
 
   const langPrefix = lang === DEFAULT_LOCALE ? "" : `/${lang}`;
-  const citiesPath = `${langPrefix}/steden`;
+  const citiesPath = `https://placeresults.com${langPrefix}/steden`;
   const ldBreadcrumbs = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: t(lang, "city.breadcrumb.home"), item: lang === DEFAULT_LOCALE ? "/" : `/${lang}` },
+      { "@type": "ListItem", position: 1, name: t(lang, "city.breadcrumb.home"), item: lang === DEFAULT_LOCALE ? "https://placeresults.com/" : `https://placeresults.com/${lang}` },
       { "@type": "ListItem", position: 2, name: t(lang, "city.breadcrumb.cities"), item: citiesPath },
-      ...(r.city ? [{ "@type": "ListItem", position: 3, name: r.city, item: `${langPrefix}/stad/${slugifyCity(r.city)}` }] : []),
+      ...(r.city ? [{ "@type": "ListItem", position: 3, name: r.city, item: `https://placeresults.com${langPrefix}/stad/${slugifyCity(r.city)}` }] : []),
       { "@type": "ListItem", position: r.city ? 4 : 3, name: r.name, item: basePath },
     ],
   };
